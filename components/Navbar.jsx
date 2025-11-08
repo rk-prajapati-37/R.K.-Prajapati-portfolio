@@ -1,0 +1,77 @@
+"use client";
+import React, { useState } from "react";
+import Link from "next/link";
+import AnimatedLogo from "./AnimatedLogo";
+
+export default function Navbar() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <nav className="fixed top-0 left-0 w-full bg-gray-900 text-white shadow-md z-50">
+      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+        <Link href="/" className="flex items-center gap-3">
+          <AnimatedLogo size={72} />
+          <span className="hidden sm:inline-block text-lg font-semibold">R.K Prajapati<br /><p className="text-gray-400 text-sm">Web Designer & Developer</p></span>
+        </Link>
+        <div className="hidden md:flex space-x-6 items-center">
+          <Link href="/">Home</Link>
+
+          {/* About dropdown (hover) */}
+          <div className="relative group">
+            <Link href="/about" className="px-3 py-1 rounded-md hover:bg-gray-800 focus:outline-none cursor-pointer">About</Link>
+            <div className="absolute right-0 mt-2 w-48 bg-white text-gray-900 rounded-md shadow-lg hidden group-hover:block">
+              <div className="py-2">
+                <Link href="/about#experience" className="block px-4 py-2 hover:bg-gray-100">Experience</Link>
+                <Link href="/about#skills" className="block px-4 py-2 hover:bg-gray-100">Skills</Link>
+                <Link href="/about#education" className="block px-4 py-2 hover:bg-gray-100">Education</Link>
+                <Link href="/about#certificates" className="block px-4 py-2 hover:bg-gray-100">Certificates</Link>
+              </div>
+            </div>
+          </div>
+
+          <Link href="/projects">Projects</Link>
+          <Link href="/blog">Blog</Link>
+          <Link href="/testimonials">Testimonials</Link>
+          <Link href="/contact">Contact</Link>
+        </div>
+
+        <button
+          aria-label="Toggle menu"
+          className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      <div className={`${open ? "block" : "hidden"} md:hidden bg-gray-900 border-t border-gray-800`}>
+        <div className="px-6 py-4 space-y-3">
+          <Link href="/" onClick={() => setOpen(false)} className="block">Home</Link>
+
+          {/* mobile About submenu */}
+          <div className="pt-2">
+            <div className="font-medium text-white">About</div>
+            <Link href="/about" onClick={() => setOpen(false)} className="block pl-3 py-1">About (overview)</Link>
+            <Link href="/about#experience" onClick={() => setOpen(false)} className="block pl-3 py-1">Experience</Link>
+            <Link href="/about#skills" onClick={() => setOpen(false)} className="block pl-3 py-1">Skills</Link>
+            <Link href="/about#education" onClick={() => setOpen(false)} className="block pl-3 py-1">Education</Link>
+            <Link href="/about#certificates" onClick={() => setOpen(false)} className="block pl-3 py-1">Certificates</Link>
+          </div>
+
+          <Link href="/projects" onClick={() => setOpen(false)} className="block">Projects</Link>
+          <Link href="/blog" onClick={() => setOpen(false)} className="block">Blog</Link>
+          <Link href="/testimonials" onClick={() => setOpen(false)} className="block">Testimonials</Link>
+          <Link href="/contact" onClick={() => setOpen(false)} className="block">Contact</Link>
+        </div>
+      </div>
+    </nav>
+  );
+}
