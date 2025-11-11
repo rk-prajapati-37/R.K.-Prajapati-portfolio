@@ -31,6 +31,7 @@ type Project = {
 export default function Projects() {
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     client
@@ -50,7 +51,10 @@ export default function Projects() {
         console.log('Fetched projects:', data);
         setProjects(data);
       })
-      .catch(console.error);
+      .catch((err: any) => {
+        console.error('Failed to fetch projects from Sanity:', err);
+        setFetchError(err?.message || String(err));
+      });
   }, []);
 
   return (
@@ -64,7 +68,14 @@ export default function Projects() {
         🚀 My Projects
       </motion.h1>
 
-      {projects.length === 0 ? (
+      {fetchError ? (
+        <div className="text-center text-red-600 text-lg">
+          <p>Failed to load projects:&nbsp;<strong>{fetchError}</strong></p>
+          <p className="text-sm text-gray-600 mt-2">
+            Check that <code>NEXT_PUBLIC_SANITY_PROJECT_ID</code> and <code>NEXT_PUBLIC_SANITY_DATASET</code> are configured in Vercel and that your content is published in Sanity.
+          </p>
+        </div>
+      ) : projects.length === 0 ? (
 
         <div className="text-center text-gray-600 text-lg">
           Loading projects...
