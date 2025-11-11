@@ -32,7 +32,7 @@ export default function AboutPage() {
 
   useEffect(() => {
     client.fetch(`*[_type == "skill"]{ _id, name, level }`)
-      .then((data) => setSkills(data))
+      .then((data: any) => setSkills(data))
       .catch(console.error);
   }, []);
 
