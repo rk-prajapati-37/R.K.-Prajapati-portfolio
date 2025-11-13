@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { client } from "../../lib/sanityClient";
@@ -91,3 +91,4 @@ const Projects = () => {
 };
 
 export default Projects;
+
