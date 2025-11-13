@@ -1,27 +1,46 @@
-import BlogContent from "@/components/BlogContent";
+import { client } from "../../../lib/sanityClient";
+import BlogContentClient from "@/components/BlogContentClient";
 import { notFound } from "next/navigation";
+
+type Blog = {
+  title: string;
+  content: any;
+  date: string;
+  coverImage?: string;
+};
 
 export default async function SingleBlogPage({
   params,
 }: {
-  // `params` may be a promise in Next 16 dev/RSC mode — await it below.
-  params: { slug?: string } | Promise<{ slug?: string }>;
+  params: Promise<{ slug?: string }>;
 }) {
-  // Resolve params in case Next provided them as a Promise. See:
-  // https://nextjs.org/docs/messages/sync-dynamic-apis
   const resolvedParams = await params;
   const slug = resolvedParams?.slug;
 
-  // Avoid logging a console error during Next's server-side checks.
-  // Use Next's `notFound()` helper so the route resolves to a 404 when
-  // no slug was provided.
   if (!slug) {
     notFound();
   }
 
-  return (
-    <div>
-      <BlogContent slug={slug} />
-    </div>
-  );
+  let blog: Blog | null = null;
+  let error: string | null = null;
+
+  try {
+    blog = await client.fetch(
+      `*[_type == "blog" && slug.current == $slug][0]{
+        title,
+        content,
+        date,
+        "coverImage": coverImage.asset->url
+      }`,
+      { slug }
+    );
+  } catch (err) {
+    error = err instanceof Error ? err.message : "Failed to load blog";
+  }
+
+  if (!blog && !error) {
+    notFound();
+  }
+
+  return <BlogContentClient blog={blog} error={error} />;
 }
