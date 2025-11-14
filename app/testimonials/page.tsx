@@ -4,7 +4,7 @@ import TestimonialsSliderClient from "@/components/TestimonialsSliderClient";
 type Testimonial = {
   _id: string;
   name: string;
-  message: string;
+  text?: string;
   position: string;
   image?: string;
 };
@@ -17,9 +17,9 @@ export default async function Testimonials() {
     testimonials = await client.fetch(`*[_type == "testimonial"]{
       _id,
       name,
-      message,
       position,
-      "image": image.asset->url
+      "image": image.asset->url,
+      "text": feedback
     }`);
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load testimonials";

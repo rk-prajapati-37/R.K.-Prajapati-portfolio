@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 type Testimonial = {
   _id: string;
   name: string;
-  message: string;
+  text?: string;
   position: string;
   image?: string;
 };
@@ -86,7 +86,7 @@ export default function TestimonialsSliderClient({
 
           {/* Message */}
           <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic">
-            "{currentTestimonial.message}"
+            "{currentTestimonial.text || ''}"
           </p>
 
           {/* Profile Section */}
