@@ -25,7 +25,16 @@ const Skills = () => {
 
       <div className="max-w-3xl mx-auto space-y-4">
         {skills.map((skill) => (
-          <div key={skill._id} className="bg-white rounded-lg shadow-md p-4">
+          <div key={skill._id} className="group relative bg-white rounded-lg shadow-md p-4">
+            {/* Hover icon */}
+            <div className="absolute top-3 right-3 opacity-0 transform scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all">
+              <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+
             <div className="flex justify-between mb-2">
               <span className="font-semibold text-gray-800">{skill.name}</span>
               <span className="text-gray-600">{skill.level}%</span>
