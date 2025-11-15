@@ -54,7 +54,8 @@ export default function ProjectsGrid({
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              whileHover={{ y: -12, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)" }}
+              className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 h-full"
             >
               <ProjectCardClient project={project} />
             </motion.div>
