@@ -1,5 +1,5 @@
 ﻿import { client } from "../../lib/sanityClient";
-import ProjectsGrid from "@/components/ProjectsGrid";
+import ProjectsGridClient from "@/components/ProjectsGridClient";
 
 type Project = {
   _id: string;
@@ -8,11 +8,19 @@ type Project = {
   github?: string;
   demo?: string;
   techStack?: string[];
+  category?: string[];
   imageUrl?: string;
   slug?: string;
 };
 
-export default async function Projects() {
+export default async function Projects({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const params = await searchParams;
+  const selectedCategory = params.category ? decodeURIComponent(params.category) : null;
+
   let projects: Project[] = [];
   let error: string | null = null;
 
@@ -22,6 +30,7 @@ export default async function Projects() {
       title,
       description,
       techStack,
+      category,
       github,
       demo,
       "slug": slug.current,
@@ -31,5 +40,30 @@ export default async function Projects() {
     error = err instanceof Error ? err.message : "Failed to load projects";
   }
 
-  return <ProjectsGrid projects={projects} error={error} />;
+  // Filter by category if provided
+  const filteredProjects = selectedCategory
+    ? projects.filter((p) =>
+        Array.isArray(p.category)
+          ? p.category.includes(selectedCategory)
+          : p.category === selectedCategory
+      )
+    : projects;
+
+  // Get unique categories from all projects
+  const allCategories = Array.from(
+    new Set(
+      projects.flatMap((p) =>
+        Array.isArray(p.category) ? p.category : p.category ? [p.category] : []
+      )
+    )
+  ).sort();
+
+  return (
+    <ProjectsGridClient
+      projects={filteredProjects}
+      error={error}
+      allCategories={allCategories}
+      selectedCategory={selectedCategory}
+    />
+  );
 }
