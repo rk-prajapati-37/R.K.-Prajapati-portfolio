@@ -55,12 +55,20 @@ const Skills = () => {
             </div>
 
             <div className="w-full bg-gray-200 rounded-full h-3">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${skill.level}%` }}
-                transition={{ duration: 1 }}
-                className="bg-indigo-600 h-3 rounded-full"
-              />
+              {(() => {
+                const levelStr = skill.level;
+                const numeric = typeof skill.percent === 'number' ? skill.percent : Number(levelStr);
+                const map: Record<string, number> = { Beginner: 25, Intermediate: 60, Advanced: 80, Expert: 95 };
+                const pct = Number.isFinite(numeric) && numeric > 0 ? numeric : (map[levelStr] ?? 60);
+                return (
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 1 }}
+                    className="bg-indigo-600 h-3 rounded-full"
+                  />
+                );
+              })()}
             </div>
           </motion.div>
         ))}
