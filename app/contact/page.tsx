@@ -11,9 +11,32 @@ export default function ContactPage() {
     e.preventDefault();
     setStatus(null);
 
-    // Basic client-side validation
+    // Validation
     if (!form.name || !form.email || !form.message) {
-      setStatus({ ok: false, msg: "Please fill name, email and message." });
+      setStatus({ ok: false, msg: "Name, email and message are required." });
+      return;
+    }
+
+    if (form.name.trim().length < 2) {
+      setStatus({ ok: false, msg: "Name must be at least 2 characters." });
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setStatus({ ok: false, msg: "Please enter a valid email address." });
+      return;
+    }
+
+    if (form.message.trim().length < 10) {
+      setStatus({ ok: false, msg: "Message must be at least 10 characters." });
+      return;
+    }
+
+    // Phone validation (optional but if provided, must be valid)
+    if (form.mobile && !/^\d{7,15}$/.test(form.mobile.replace(/\s|-/g, ""))) {
+      setStatus({ ok: false, msg: "Please enter a valid phone number." });
       return;
     }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 type Message = {
@@ -13,26 +14,48 @@ type Message = {
 };
 
 export default function AdminMessages() {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+    setAuthenticated(true);
     fetchMessages();
-  }, []);
+  }, [router]);
 
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      const res = await fetch(`${backendUrl}/api/contact`);
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      setMessages(data);
       setError(null);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+      
+      const res = await fetch(`${backendUrl}/api/contact`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+
+      const data = await res.json();
+      setMessages(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      setError(err.message || "Failed to load messages");
+      console.error("Fetch error:", err);
+      setError(
+        err.message || "Failed to load messages. Is the backend running?"
+      );
     } finally {
       setLoading(false);
     }
@@ -56,12 +79,17 @@ export default function AdminMessages() {
     }
   };
 
-  if (loading) {
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    router.push("/admin/login");
+  };
+
+  if (!authenticated || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-10 px-6 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin inline-block w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full"></div>
-          <p className="mt-4 text-gray-600">Loading messages...</p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -70,21 +98,36 @@ export default function AdminMessages() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* Header with logout */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
+          className="mb-10 flex items-center justify-between"
         >
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">📬 Contact Messages</h1>
-          <p className="text-gray-600">
-            {messages.length} {messages.length === 1 ? "message" : "messages"} received
-          </p>
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">📬 Contact Messages</h1>
+            <p className="text-gray-600">
+              {messages.length} {messages.length === 1 ? "message" : "messages"} received
+            </p>
+          </div>
+          <motion.button
+            onClick={handleLogout}
+            whileHover={{ scale: 1.05 }}
+            className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition"
+          >
+            Logout
+          </motion.button>
         </motion.div>
 
         {error && (
           <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 border border-red-200">
             ⚠️ {error}
+            <button
+              onClick={fetchMessages}
+              className="ml-4 underline font-semibold hover:no-underline"
+            >
+              Retry
+            </button>
           </div>
         )}
 
