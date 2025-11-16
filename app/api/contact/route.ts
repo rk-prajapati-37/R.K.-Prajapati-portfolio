@@ -23,9 +23,24 @@ export async function POST(req: NextRequest) {
     const pass = process.env.SMTP_PASS;
 
     if (!host || !user || !pass) {
-      // If SMTP not configured, still save or forward to backend if available.
-      console.warn('SMTP not configured. Received contact form:', body);
-      return new Response(JSON.stringify({ message: 'Message received (SMTP not configured on server).' }), { status: 200 });
+      // If SMTP not configured, save to backend MongoDB
+      console.warn('SMTP not configured. Attempting to save to backend...');
+      try {
+        const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+        const backendRes = await fetch(`${backendUrl}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const backendData = await backendRes.json();
+        if (backendRes.ok) {
+          return new Response(JSON.stringify({ message: 'Message saved successfully!' }), { status: 200 });
+        }
+      } catch (backendErr) {
+        console.error('Backend save failed:', backendErr);
+      }
+      // Fallback: just acknowledge receipt
+      return new Response(JSON.stringify({ message: 'Message received. We will contact you soon!' }), { status: 200 });
     }
 
     const transporter = nodemailer.createTransport({
