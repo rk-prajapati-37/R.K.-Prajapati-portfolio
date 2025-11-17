@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import PortableTextClient from "./PortableTextClient";
 
 type Education = {
   _id: string;
@@ -31,7 +33,12 @@ const item = {
 };
 
 export default function EducationClient({ educations }: { educations: Education[] }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const sortedEducations = [...educations].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+
+  const toggleExpanded = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
 
   const formatDate = (date: string) => {
     if (!date) return "";
@@ -50,40 +57,96 @@ export default function EducationClient({ educations }: { educations: Education[
       viewport={{ once: true, amount: 0.2 }}
       className="space-y-4"
     >
-      {sortedEducations.map((edu) => (
-        <motion.div key={edu._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600 hover:shadow-lg transition">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-800">{edu.degree}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-gray-700 font-medium">{edu.institution}</p>
-                {edu.logo && (
-                  <div className="relative group inline-block">
-                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center cursor-help">
+      {sortedEducations.map((edu) => {
+        const isExpanded = expandedId === edu._id;
+        const institutionUrl = (edu as any).institutionUrl;
+        const descValue = (edu as any).description ?? (edu as any).desc ?? (edu as any).content;
+        const extractPlain = (val: any) => {
+          if (!val) return "";
+          if (typeof val === "string") return val;
+          try {
+            if (Array.isArray(val)) {
+              return val
+                .map((block) => {
+                  if (typeof block === "string") return block;
+                  if (block?.children && Array.isArray(block.children)) {
+                    return block.children.map((c: any) => c.text || "").join("");
+                  }
+                  return "";
+                })
+                .join("\n\n");
+            }
+            return String(val);
+          } catch {
+            return "";
+          }
+        };
+        const plainText = extractPlain(descValue);
+        return (
+          <motion.div key={edu._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600 hover:shadow-lg transition">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-800">{edu.degree}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  {edu.logo ? (
+                    <img src={edu.logo} alt={`${edu.institution} logo`} className="w-8 h-8 object-contain rounded-full bg-white p-1 border" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                       <span className="text-xs text-gray-600">🎓</span>
                     </div>
-                    <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-30">
-                      <div className="bg-white p-2 rounded-lg shadow-lg border">
-                        <Image
-                          src={edu.logo}
-                          alt={`${edu.institution} logo`}
-                          width={80}
-                          height={80}
-                          className="object-contain rounded"
-                        />
+                  )}
+                  {institutionUrl ? (
+                    <a href={institutionUrl} target="_blank" rel="noopener noreferrer" className="text-gray-700 font-medium hover:underline">
+                      {edu.institution}
+                    </a>
+                  ) : (
+                    <p className="text-gray-700 font-medium">{edu.institution}</p>
+                  )}
+
+                  {edu.logo && (
+                    <div className="relative group inline-block">
+                      <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-30">
+                        <div className="bg-white p-2 rounded-lg shadow-lg border">
+                          <img src={edu.logo} alt={`${edu.institution} logo`} width={80} height={80} className="object-contain rounded" />
+                        </div>
                       </div>
                     </div>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">{edu.location}</p>
+                <p className="text-sm text-gray-500">
+                  {formatDate(edu.startDate)} - {formatDate(edu.endDate || "")}
+                </p>
+                {descValue && (
+                  <div className="mt-3 text-gray-700">
+                    <div
+                      className="max-w-none"
+                      style={
+                        isExpanded
+                          ? undefined
+                          : {
+                              overflow: "hidden",
+                              display: "-webkit-box",
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: "vertical",
+                            } as any
+                      }
+                    >
+                      <PortableTextClient value={descValue} />
+                    </div>
+
+                    <button onClick={() => toggleExpanded(edu._id)} className="text-sm text-blue-700 mt-2">
+                      {isExpanded ? "Show less" : "Show more"}
+                    </button>
+
+                    {isExpanded && plainText && <div className="mt-2 text-gray-700 whitespace-pre-wrap">{plainText}</div>}
                   </div>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-1">{edu.location}</p>
-              <p className="text-sm text-gray-500">
-                {formatDate(edu.startDate)} - {formatDate(edu.endDate || "")}
-              </p>
             </div>
-          </div>
-        </motion.div>
-      ))}
+          </motion.div>
+        );
+      })}
     </motion.div>
   );
 }

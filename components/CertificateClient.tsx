@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import PortableTextClient from "./PortableTextClient";
 
 type Certificate = {
   _id: string;
@@ -30,7 +32,12 @@ const item = {
 };
 
 export default function CertificateClient({ certificates }: { certificates: Certificate[] }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const sortedCerts = [...certificates].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+
+  const toggleExpanded = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
 
   const formatDate = (date: string) => {
     if (!date) return "";
@@ -49,33 +56,83 @@ export default function CertificateClient({ certificates }: { certificates: Cert
       viewport={{ once: true, amount: 0.2 }}
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
     >
-      {sortedCerts.map((cert) => (
-        <motion.div key={cert._id} variants={item}>
-          <a
-            href={cert.url || "#"}
-            target={cert.url ? "_blank" : "_self"}
-            rel="noopener noreferrer"
-            className="bg-white rounded-lg shadow-md p-4 border border-gray-200 hover:shadow-lg transition h-full flex flex-col"
-          >
-            {cert.certificateImage && (
-              <div className="mb-4 h-40 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
-                <Image
-                  src={cert.certificateImage}
-                  alt={cert.title}
-                  width={200}
-                  height={160}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            )}
-            <h4 className="font-semibold text-gray-800">{cert.title}</h4>
-            <p className="text-sm text-gray-600 mt-1">{cert.issuer}</p>
-            <p className="text-xs text-gray-500 mt-2">{formatDate(cert.date)}</p>
-            {cert.description && <p className="text-sm text-gray-700 mt-3">{cert.description}</p>}
-            {cert.url && <p className="text-xs text-blue-600 mt-auto pt-2">View Certificate →</p>}
-          </a>
-        </motion.div>
-      ))}
+      {sortedCerts.map((cert) => {
+        const isExpanded = expandedId === cert._id;
+        const descValue = (cert as any).description ?? (cert as any).desc ?? (cert as any).content;
+        const extractPlain = (val: any) => {
+          if (!val) return "";
+          if (typeof val === "string") return val;
+          try {
+            if (Array.isArray(val)) {
+              return val
+                .map((block) => {
+                  if (typeof block === "string") return block;
+                  if (block?.children && Array.isArray(block.children)) {
+                    return block.children.map((c: any) => c.text || "").join("");
+                  }
+                  return "";
+                })
+                .join("\n\n");
+            }
+            return String(val);
+          } catch {
+            return "";
+          }
+        };
+        const plainText = extractPlain(descValue);
+        return (
+          <motion.div key={cert._id} variants={item}>
+            <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 hover:shadow-lg transition h-full flex flex-col">
+              {cert.certificateImage && (
+                <div className="mb-4 h-40 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+                    <img
+                      src={cert.certificateImage}
+                      alt={cert.title}
+                      width={200}
+                      height={160}
+                      className="object-cover w-full h-full"
+                    />
+                </div>
+              )}
+              <h4 className="font-semibold text-gray-800">{cert.title}</h4>
+              <p className="text-sm text-gray-600 mt-1">{cert.issuer}</p>
+              <p className="text-xs text-gray-500 mt-2">{formatDate(cert.date)}</p>
+              {descValue && (
+                <div className="mt-3 text-gray-700">
+                  <div
+                    className="max-w-none"
+                    style={
+                      isExpanded
+                        ? undefined
+                        : {
+                            overflow: "hidden",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                          } as any
+                    }
+                  >
+                      <PortableTextClient value={descValue} />
+                  </div>
+                    <button onClick={() => toggleExpanded(cert._id)} className="text-sm text-blue-700 mt-2">
+                      {isExpanded ? "Show less" : "Show more"}
+                    </button>
+
+                    {isExpanded && plainText && (
+                      <div className="mt-2 text-gray-700 whitespace-pre-wrap">{plainText}</div>
+                    )}
+                </div>
+              )}
+
+              {cert.url && (
+                <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 mt-auto pt-2">
+                  View Certificate →
+                </a>
+              )}
+            </div>
+          </motion.div>
+        );
+      })}
     </motion.div>
   );
 }

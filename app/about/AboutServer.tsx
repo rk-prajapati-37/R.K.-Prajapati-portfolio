@@ -14,13 +14,13 @@ export default async function AboutPage() {
   }
 
   try {
-    experiences = await client.fetch(`*[_type == "experience"] | order(order asc){ _id, position, company, location, startDate, endDate, isCurrent, "logo": logo.asset->url, description, order }`);
+    experiences = await client.fetch(`*[_type == "experience"] | order(order asc){ _id, position, company, location, startDate, endDate, isCurrent, "logo": logo.asset->url, description, companyUrl, order }`);
   } catch (err) {
     console.error("Failed to fetch experiences:", err);
   }
 
   try {
-    educations = await client.fetch(`*[_type == "education"] | order(order asc){ _id, degree, institution, location, startDate, endDate, "logo": logo.asset->url, description, order }`);
+    educations = await client.fetch(`*[_type == "education"] | order(order asc){ _id, degree, institution, location, startDate, endDate, "logo": logo.asset->url, description, institutionUrl, order }`);
   } catch (err) {
     console.error("Failed to fetch educations:", err);
   }
