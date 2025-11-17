@@ -6,8 +6,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, email, mobile, message } = body;
 
-    if (!name || !email || !message) {
-      return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 });
+    // Require name and message, and at least one contact: email or mobile
+    if (!name || !message) {
+      return new Response(JSON.stringify({ error: 'Missing required fields: name and message' }), { status: 400 });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const mobileClean = mobile ? String(mobile).replace(/\s|-/g, "") : "";
+    const mobileValid = mobileClean && /^\d{7,15}$/.test(mobileClean);
+    const emailValid = email && emailRegex.test(String(email));
+
+    if (!emailValid && !mobileValid) {
+      return new Response(JSON.stringify({ error: 'Provide a valid email or mobile number' }), { status: 400 });
     }
 
     // Prepare email

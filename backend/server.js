@@ -27,18 +27,42 @@ app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 const uri = process.env.MONGODB_URI;
+if (!uri) {
+  console.error("❌ MONGODB_URI not set in .env");
+  process.exit(1);
+}
+
 mongoose
   .connect(uri)
-  .then(() => console.log("✅ MongoDB connected successfully!"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+  .then(() => {
+    console.log("✅ MongoDB connected successfully!");
+    startServer();
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
 
-app.get("/", (req, res) => res.send("Server is running successfully!"));
+function startServer() {
+  app.get("/", (req, res) => res.send("Server is running successfully!"));
 
-app.use("/api/projects", projectsRouter);
-app.use("/api/skills", skillsRouter);
-app.use("/api/testimonials", testimonialsRouter);
-app.use("/api/contact", contactRouter);
-app.use("/api/seed", seedRouter);
+  app.use("/api/projects", projectsRouter);
+  app.use("/api/skills", skillsRouter);
+  app.use("/api/testimonials", testimonialsRouter);
+  app.use("/api/contact", contactRouter);
+  app.use("/api/seed", seedRouter);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  }).on("error", (err) => {
+    console.error("❌ Server error:", err);
+    process.exit(1);
+  });
+}
+
+// Handle uncaught errors
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught exception:", err);
+  process.exit(1);
+});

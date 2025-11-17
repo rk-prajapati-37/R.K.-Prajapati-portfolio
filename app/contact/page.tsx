@@ -12,10 +12,11 @@ export default function ContactPage() {
     setStatus(null);
 
     // Validation
-    if (!form.name || !form.email || !form.message) {
-      setStatus({ ok: false, msg: "Name, email and message are required." });
-      return;
-    }
+      // Validation: name and message required; either valid email OR valid mobile required
+      if (!form.name || !form.message) {
+        setStatus({ ok: false, msg: "Name and message are required." });
+        return;
+      }
 
     if (form.name.trim().length < 2) {
       setStatus({ ok: false, msg: "Name must be at least 2 characters." });
@@ -23,11 +24,16 @@ export default function ContactPage() {
     }
 
     // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) {
-      setStatus({ ok: false, msg: "Please enter a valid email address." });
-      return;
-    }
+      // At least one contact: valid email OR valid mobile
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const mobileClean = form.mobile ? form.mobile.replace(/\s|-/g, "") : "";
+      const mobileValid = mobileClean && /^\d{7,15}$/.test(mobileClean);
+      const emailValid = form.email && emailRegex.test(form.email);
+
+      if (!emailValid && !mobileValid) {
+        setStatus({ ok: false, msg: "Please provide a valid email address or mobile number." });
+        return;
+      }
 
     if (form.message.trim().length < 10) {
       setStatus({ ok: false, msg: "Message must be at least 10 characters." });
@@ -35,10 +41,11 @@ export default function ContactPage() {
     }
 
     // Phone validation (optional but if provided, must be valid)
-    if (form.mobile && !/^\d{7,15}$/.test(form.mobile.replace(/\s|-/g, ""))) {
-      setStatus({ ok: false, msg: "Please enter a valid phone number." });
-      return;
-    }
+      // Phone validation (if provided)
+      if (form.mobile && !/^\d{7,15}$/.test(mobileClean)) {
+        setStatus({ ok: false, msg: "Please enter a valid phone number." });
+        return;
+      }
 
     setLoading(true);
     try {
@@ -119,7 +126,6 @@ export default function ContactPage() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="w-full p-4 rounded-full border border-gray-100 shadow-inner"
-                  required
                 />
                 <input
                   type="text"

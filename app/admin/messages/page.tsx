@@ -36,9 +36,7 @@ export default function AdminMessages() {
     try {
       setLoading(true);
       setError(null);
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      
-      const res = await fetch(`${backendUrl}/api/contact`, {
+      const res = await fetch(`/api/admin/messages`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -66,8 +64,7 @@ export default function AdminMessages() {
 
     try {
       setDeleting(id);
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      const res = await fetch(`${backendUrl}/api/contact/${id}`, {
+      const res = await fetch(`/api/admin/messages/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete");

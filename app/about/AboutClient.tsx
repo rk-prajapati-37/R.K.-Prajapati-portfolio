@@ -2,35 +2,19 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import Experience from "./components/Experience";
-import Education from "./components/Education";
-import Certificates from "./components/Certificates";
 import SkillsGridClient from "@/components/SkillsGridClient";
+import ExperienceClient from "@/components/ExperienceClient";
+import EducationClient from "@/components/EducationClient";
+import CertificateClient from "@/components/CertificateClient";
 
 interface AboutClientProps {
   skills: Array<{ _id: string; name: string; level: string; percent?: number; icon?: string }>;
+  experiences: any[];
+  educations: any[];
+  certificates: any[];
 }
 
-interface ExperienceType {
-  id: number;
-  position: string;
-  company: string;
-  location: string;
-  date: string;
-  description: string;
-  companyLogo?: string;
-  websiteUrl?: string;
-}
-
-interface EducationType {
-  id: number;
-  degree: string;
-  institute: string;
-  year: string;
-  details: string;
-}
-
-export default function AboutClient({ skills }: AboutClientProps) {
+export default function AboutClient({ skills, experiences, educations, certificates }: AboutClientProps) {
   const [activeTab, setActiveTab] = useState<"experience" | "skills" | "education" | "certificates">("experience");
 
   useEffect(() => {
@@ -50,76 +34,6 @@ export default function AboutClient({ skills }: AboutClientProps) {
     return () => window.removeEventListener("hashchange", setFromHash);
   }, []);
 
-  const experiences: ExperienceType[] = [
-    {
-      id: 1,
-      position: "Frontend Developer | WordPress Developer",
-      company: "Freelancer",
-      location: "Mumbai, India",
-      date: "Jan 2023 – Present",
-      description: "Working as a freelance frontend developer & WordPress specialist handling multiple projects worldwide.",
-      companyLogo: "/images/companies/freelancer.png"
-    },
-    {
-      id: 2,
-      position: "Frontend Developer | WordPress Developer",
-      company: "Ping Digital Broadcast Pvt. Ltd",
-      location: "Mumbai, India",
-      date: "Apr 2022 – Present",
-      description: "Currently employed as a Frontend and WordPress Developer at Ping Digital Broadcast Private Limited. Working on BoomLive, TheCore, IndiaSpend platforms and other major projects.",
-      companyLogo: "/images/companies/ping.png",
-      websiteUrl: "https://www.pingnetwork.in"
-    },
-    {
-      id: 3,
-      position: "Frontend Developer | WordPress Developer",
-      company: "DLC (Della Leaders Club)",
-      location: "Mumbai, India",
-      date: "May 2021 – Apr 2022",
-      description: "Developed responsive websites and managed Elementor-based WordPress pages.",
-    },
-    {
-      id: 4,
-      position: "Frontend Developer | WordPress Developer",
-      company: "Magnetrix Web Solutions",
-      location: "Mumbai, India",
-      date: "Jun 2020 – Jun 2021",
-      description: "Worked on WordPress CMS customization and UI/UX improvement for multiple clients.",
-    },
-    {
-      id: 5,
-      position: "Web Designer | Web Developer | WordPress Developer",
-      company: "Beyondd Digital Marketing Agency",
-      location: "Mumbai, India",
-      date: "Jul 2018 – Jun 2020",
-      description: "Handled design-to-development workflow, WordPress themes, and website optimization.",
-    },
-    {
-      id: 6,
-      position: "MIS Executive Manager",
-      company: "Grofers International Pvt. Ltd",
-      location: "Mumbai, India",
-      date: "Aug 2017 – Sep 2018",
-      description: "Worked in data analytics and operational reporting.",
-    },
-  ];
-
-  const education: EducationType[] = [
-    {
-      id: 1,
-      degree: "Bachelor of Science (IT)",
-      institute: "Mumbai University",
-      year: "2017 – 2020",
-      details: "Graduated with a focus on web development and software engineering.",
-    },
-    {
-      id: 2,
-      degree: "HSC (Science)",
-      institute: "Maharashtra State Board",
-      year: "2015 – 2017",
-      details: "Completed higher secondary education with a science background.",
-    },
-  ];
 
   return (
     <div className="bg-[#f8f8f8] min-h-screen text-gray-800 pt-24 pb-20 px-4 md:px-10">
@@ -197,9 +111,9 @@ export default function AboutClient({ skills }: AboutClientProps) {
           ))}
         </div>
 
-        {activeTab === "experience" && (
+        {activeTab === "experience" && experiences.length > 0 && (
           <motion.div id="experience" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Experience />
+            <ExperienceClient experiences={experiences} />
           </motion.div>
         )}
 
@@ -209,15 +123,15 @@ export default function AboutClient({ skills }: AboutClientProps) {
           </motion.div>
         )}
 
-        {activeTab === "education" && (
+        {activeTab === "education" && educations.length > 0 && (
           <motion.div id="education" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Education />
+            <EducationClient educations={educations} />
           </motion.div>
         )}
 
-        {activeTab === "certificates" && (
+        {activeTab === "certificates" && certificates.length > 0 && (
           <motion.div id="certificates" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Certificates />
+            <CertificateClient certificates={certificates} />
           </motion.div>
         )}
       </div>
