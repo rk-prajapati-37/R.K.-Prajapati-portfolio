@@ -26,6 +26,15 @@
   }
 }
 
+/* Theme toggle via attribute: set `data-theme="light"` on <html> to force light theme */
+html[data-theme="light"]{
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --muted: #6b7280;
+  --text: #0f1724;
+  --accent: #dc2626;
+}
+
 /* Base element styles */
 html,body{height:100%;}
 body{
@@ -36,6 +45,9 @@ body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
+
+/* Prevent content from being hidden beneath the fixed navbar (navbar height = 6rem) */
+body{padding-top:6rem}
 
 /* Utility: container for consistent page padding */
 .site-container{
@@ -68,3 +80,7 @@ a:hover{text-decoration:underline}
   .site-container{padding:1rem}
   h1{font-size:1.6rem}
 }
+
+/* helper to hide scrollbars for horizontal tab scroller */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

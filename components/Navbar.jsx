@@ -2,16 +2,20 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import AnimatedLogo from "./AnimatedLogo";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav style={{ background: 'var(--surface)', color: 'var(--text)' }} className="fixed top-0 left-0 w-full shadow-md z-50">
-      <div className="site-container flex justify-between items-center">
+    <nav style={{ background: 'var(--surface)', color: 'var(--text)' }} className="fixed top-0 left-0 w-full h-24 shadow-md z-50">
+      <div className="site-container flex justify-between items-center h-24">
         <Link href="/" className="flex items-center gap-3">
-          <AnimatedLogo size={72} />
-          <span className="hidden sm:inline-block text-lg font-semibold">R.K Prajapati<br /><p className="text-[var(--muted)] text-sm">Web Designer & Developer</p></span>
+          <AnimatedLogo size={56} />
+          <div className="hidden sm:flex flex-col text-lg font-semibold">
+            <span>R.K Prajapati</span>
+            <span className="text-[var(--muted)] text-sm">Web Designer &amp; Developer</span>
+          </div>
         </Link>
         <div className="hidden md:flex space-x-6 items-center">
           <Link href="/" className="hover:underline">Home</Link>
@@ -33,6 +37,7 @@ export default function Navbar() {
           <Link href="/blog">Blog</Link>
           <Link href="/testimonials">Testimonials</Link>
           <Link href="/contact">Contact</Link>
+          <ThemeToggle />
         </div>
 
         <button
@@ -53,7 +58,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      <div className={`${open ? "block" : "hidden"} md:hidden"`}>
+      <div className={`${open ? "block" : "hidden"} md:hidden`}>
         <div className="px-4 py-4 space-y-3" style={{ background: 'var(--surface)', color: 'var(--text)' }}>
           <Link href="/" onClick={() => setOpen(false)} className="block">Home</Link>
 

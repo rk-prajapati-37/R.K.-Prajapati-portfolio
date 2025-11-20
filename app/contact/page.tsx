@@ -77,8 +77,9 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center text-center">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h1.28a2 2 0 011.948 1.515l.3 1.2A2 2 0 0010.48 7H12a2 2 0 012 2v1.5a2 2 0 01-.586 1.414l-1.5 1.5a8 8 0 004.586 4.586l1.5-1.5A2 2 0 0120.5 16H22a2 2 0 012 2v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
+              {/* Phone icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5.75A2.75 2.75 0 015.75 3h1.5A2.75 2.75 0 0010 5.75v1.5A2.75 2.75 0 017.25 10H6a.75.75 0 00-.75.75v1.5c0 1.24.5 2.42 1.38 3.29L9.5 18.5a3 3 0 003.54.44l1.2-.8A3 3 0 0016.5 17l.75-.75A2.75 2.75 0 0020 13.5V12a.75.75 0 00-.75-.75H18a2.75 2.75 0 01-2.75-2.75V6.25A2.75 2.75 0 0016.25 3h1.5A2.75 2.75 0 0020.5 6.25v1.5" />
               </svg>
             </div>
             <h4 className="font-semibold text-gray-700 mb-1">Phone</h4>
@@ -87,19 +88,22 @@ export default function ContactPage() {
 
           <div className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center text-center">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12H8m0 0l4-4m-4 4l4 4" />
+              {/* Mail icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8.25v7.5A2.25 2.25 0 005.25 18h13.5A2.25 2.25 0 0021 15.75v-7.5A2.25 2.25 0 0018.75 6H5.25A2.25 2.25 0 003 8.25z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 8.25l-9 6-9-6" />
               </svg>
             </div>
             <h4 className="font-semibold text-gray-700 mb-1">Email</h4>
             <p className="text-sm text-gray-500">r.k.prajapati0307@gmail.com</p>
-            <p className="text-sm text-gray-500">prajapatirohit0307@gmail.com</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center text-center">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 12.414A5 5 0 1012 13l4.243 4.243a6 6 0 108.485-8.485L21.121 8.879" />
+              {/* Location icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21s8-4.5 8-10.5A8 8 0 004 10.5C4 16.5 12 21 12 21z" />
               </svg>
             </div>
             <h4 className="font-semibold text-gray-700 mb-1">Address</h4>

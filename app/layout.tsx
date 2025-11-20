@@ -1,7 +1,7 @@
 import React from "react";
-import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import LayoutMotion from "../components/LayoutMotion";
 import "./globals.css";
 
 export const metadata = {
@@ -20,15 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <Navbar />
-        <motion.main
-          className="pt-20 min-h-screen site-container"
-          initial="hidden"
-          animate="enter"
-          exit="exit"
-          variants={pageAnimation}
-        >
+        <LayoutMotion>
           {children}
-        </motion.main>
+        </LayoutMotion>
         <Footer />
       </body>
     </html>

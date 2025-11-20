@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
     // Prepare email
     const recipients = [
       'r.k.prajapati0307@gmail.com',
-      'prajapatirohit0307@gmail.com',
     ];
 
     // Read SMTP credentials from env
