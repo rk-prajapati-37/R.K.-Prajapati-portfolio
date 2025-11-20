@@ -58,7 +58,7 @@ export default function ProjectDetailClient({
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-10 px-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br py-10  flex items-center justify-center">
         <div className="text-center text-red-600">
           <h1 className="text-2xl font-bold mb-2">Error Loading Project</h1>
           <p>{error || "Project not found"}</p>
@@ -68,7 +68,7 @@ export default function ProjectDetailClient({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12 px-6">
+    <div className="min-h-screen bg-gradient-to-br py-12 ">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

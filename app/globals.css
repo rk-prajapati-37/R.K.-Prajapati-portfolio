@@ -18,7 +18,7 @@
 /* Light theme overrides (rarely used since layout uses dark mode) */
 @media (prefers-color-scheme: light){
   :root{
-    --bg: #ffffff;
+    --bg: #f9fafb;
     --surface: #ffffff;
     --muted: #6b7280;
     --text: #0f1724;
@@ -28,7 +28,7 @@
 
 /* Theme toggle via attribute: set `data-theme="light"` on <html> to force light theme */
 html[data-theme="light"]{
-  --bg: #ffffff;
+  --bg: #f9fafb;
   --surface: #ffffff;
   --muted: #6b7280;
   --text: #0f1724;

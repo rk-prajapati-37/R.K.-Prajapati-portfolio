@@ -83,7 +83,7 @@ export default function AdminMessages() {
 
   if (!authenticated || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-10 px-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br py-10  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin inline-block w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -93,7 +93,7 @@ export default function AdminMessages() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12 px-6">
+    <div className="min-h-screen bg-gradient-to-br py-12 ">
       <div className="max-w-6xl mx-auto">
         {/* Header with logout */}
         <motion.div

@@ -40,7 +40,7 @@ export default function ProjectsGridClient({
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-10 px-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br py-10  flex items-center justify-center">
         <div className="text-center text-red-600">
           <h1 className="text-2xl font-bold mb-2">Error Loading Projects</h1>
           <p>{error}</p>
@@ -50,7 +50,7 @@ export default function ProjectsGridClient({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12 px-6">
+    <div className="min-h-screen bg-gradient-to-br py-12 ">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

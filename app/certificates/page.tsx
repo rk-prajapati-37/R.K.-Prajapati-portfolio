@@ -13,7 +13,7 @@ export default async function CertificatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-10 px-6">
+    <div className="min-h-screen bg-gradient-to-br py-10 ">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-800 mb-6">Certificates</h2>
         <CertificateClient certificates={certificates} />

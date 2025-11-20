@@ -3,13 +3,22 @@ import React, { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
   const [isLight, setIsLight] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Set initial theme from localStorage or system preference
     const stored = typeof window !== "undefined" ? window.localStorage.getItem("theme") : null;
-    if (stored === "light") {
+    const prefersDark = typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldBeLight = stored === "light" || (stored === null && !prefersDark);
+    
+    if (shouldBeLight) {
       document.documentElement.setAttribute("data-theme", "light");
       setIsLight(true);
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      setIsLight(false);
     }
+    setMounted(true);
   }, []);
 
   const toggle = () => {
@@ -24,12 +33,17 @@ export default function ThemeToggle() {
     }
   };
 
+  if (!mounted) return <div className="ml-4 w-9 h-9" />; // Prevent hydration mismatch
+
   return (
     <button
       aria-label="Toggle theme"
       onClick={toggle}
-      className="ml-4 p-2 rounded-md border border-white/10 text-sm flex items-center"
-      style={{ background: 'transparent', color: 'var(--text)' }}
+      className={`ml-4 p-2 rounded-md text-sm flex items-center transition-colors ${
+        isLight
+          ? "bg-yellow-400 text-gray-900 border border-yellow-500 hover:bg-yellow-500"
+          : "bg-gray-700 text-white border border-gray-600 hover:bg-gray-600"
+      }`}
       title={isLight ? 'Light theme' : 'Dark theme'}
     >
       {isLight ? (

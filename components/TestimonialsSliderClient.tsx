@@ -57,7 +57,7 @@ export default function TestimonialsSliderClient({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-16 px-6 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br  py-16  flex items-center justify-center">
       <div className="max-w-3xl w-full">
         {/* Header */}
         <motion.div

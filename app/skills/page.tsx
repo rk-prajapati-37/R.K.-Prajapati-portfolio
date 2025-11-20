@@ -12,7 +12,7 @@ export default async function Skills() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-10 px-6">
+    <div className="min-h-screen bg-gradient-to-br py-10 ">
       <SkillsHeaderClient />
 
       <div className="max-w-3xl mx-auto space-y-4">
