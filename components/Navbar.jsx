@@ -7,24 +7,24 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-gray-900 text-white shadow-md z-50">
-      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+    <nav style={{ background: 'var(--surface)', color: 'var(--text)' }} className="fixed top-0 left-0 w-full shadow-md z-50">
+      <div className="site-container flex justify-between items-center">
         <Link href="/" className="flex items-center gap-3">
           <AnimatedLogo size={72} />
-          <span className="hidden sm:inline-block text-lg font-semibold">R.K Prajapati<br /><p className="text-gray-400 text-sm">Web Designer & Developer</p></span>
+          <span className="hidden sm:inline-block text-lg font-semibold">R.K Prajapati<br /><p className="text-[var(--muted)] text-sm">Web Designer & Developer</p></span>
         </Link>
         <div className="hidden md:flex space-x-6 items-center">
-          <Link href="/">Home</Link>
+          <Link href="/" className="hover:underline">Home</Link>
 
           {/* About dropdown (hover) */}
           <div className="relative group">
             <Link href="/about" className="px-3 py-1 rounded-md hover:bg-gray-800 focus:outline-none cursor-pointer">About</Link>
-            <div className="absolute right-0 mt-2 w-48 bg-white text-gray-900 rounded-md shadow-lg hidden group-hover:block">
+            <div className="absolute right-0 mt-2 w-48 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg hidden group-hover:block">
               <div className="py-2">
-                <Link href="/about#experience" className="block px-4 py-2 hover:bg-gray-100">Experience</Link>
-                <Link href="/about#skills" className="block px-4 py-2 hover:bg-gray-100">Skills</Link>
-                <Link href="/about#education" className="block px-4 py-2 hover:bg-gray-100">Education</Link>
-                <Link href="/about#certificates" className="block px-4 py-2 hover:bg-gray-100">Certificates</Link>
+                <Link href="/experience" className="block px-4 py-2 hover:bg-white/3">Experience</Link>
+                <Link href="/skills" className="block px-4 py-2 hover:bg-white/3">Skills</Link>
+                <Link href="/education" className="block px-4 py-2 hover:bg-white/3">Education</Link>
+                <Link href="/certificates" className="block px-4 py-2 hover:bg-white/3">Certificates</Link>
               </div>
             </div>
           </div>
@@ -37,7 +37,8 @@ export default function Navbar() {
 
         <button
           aria-label="Toggle menu"
-          className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+          className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2"
+          style={{ color: 'var(--text)' }}
           onClick={() => setOpen((v) => !v)}
         >
           {open ? (
@@ -52,13 +53,13 @@ export default function Navbar() {
         </button>
       </div>
 
-      <div className={`${open ? "block" : "hidden"} md:hidden bg-gray-900 border-t border-gray-800`}>
-        <div className="px-6 py-4 space-y-3">
+      <div className={`${open ? "block" : "hidden"} md:hidden"`}>
+        <div className="px-4 py-4 space-y-3" style={{ background: 'var(--surface)', color: 'var(--text)' }}>
           <Link href="/" onClick={() => setOpen(false)} className="block">Home</Link>
 
           {/* mobile About submenu */}
           <div className="pt-2">
-            <div className="font-medium text-white">About</div>
+            <div className="font-medium">About</div>
             <Link href="/about" onClick={() => setOpen(false)} className="block pl-3 py-1">About (overview)</Link>
             <Link href="/about#experience" onClick={() => setOpen(false)} className="block pl-3 py-1">Experience</Link>
             <Link href="/about#skills" onClick={() => setOpen(false)} className="block pl-3 py-1">Skills</Link>
