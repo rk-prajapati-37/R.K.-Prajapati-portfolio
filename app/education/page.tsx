@@ -1,5 +1,8 @@
-import { client } from "../../lib/sanityClient";
+import { client } from "@/lib/sanityClient";
 import EducationClient from "@/components/EducationClient";
+
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60;
 
 export default async function EducationPage() {
   let educations: any[] = [];

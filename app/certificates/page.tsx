@@ -1,5 +1,8 @@
-import { client } from "../../lib/sanityClient";
+import { client } from "@/lib/sanityClient";
 import CertificateClient from "@/components/CertificateClient";
+
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60;
 
 export default async function CertificatesPage() {
   let certificates: any[] = [];

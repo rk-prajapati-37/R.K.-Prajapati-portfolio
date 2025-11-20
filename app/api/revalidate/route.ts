@@ -1,40 +1,84 @@
-import { revalidateTag } from 'next/cache';
-import { type NextRequest, NextResponse } from 'next/server';
+export const runtime = "nodejs";
 
-const SANITY_REVALIDATE_SECRET = process.env.SANITY_REVALIDATE_SECRET;
+import { revalidatePath, revalidateTag } from "next/cache";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  // Verify the request is coming from Sanity
-  const secret = req.headers.get('x-sanity-webhook-secret');
-
-  if (secret !== SANITY_REVALIDATE_SECRET) {
-    return NextResponse.json(
-      { message: 'Invalid secret' },
-      { status: 401 }
-    );
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
+    // Support both Sanity webhook secret and a generic revalidate token
+    const sanitySecret = process.env.SANITY_REVALIDATE_SECRET;
+    const vercelToken = process.env.REVALIDATE_TOKEN;
 
-    // Revalidate cache for affected content types
-    revalidateTag('blog');
-    revalidateTag('projects');
-    revalidateTag('skills');
-    revalidateTag('experience');
-    revalidateTag('education');
-    revalidateTag('certificates');
-    revalidateTag('testimonials');
-    revalidateTag('contact');
+    const sanityHeader = request.headers.get("x-sanity-webhook-secret") || request.headers.get("x-sanity-secret");
+    const vercelHeader = request.headers.get("x-vercel-revalidate-token") || request.headers.get("x-revalidate-token");
 
-    return NextResponse.json(
-      { message: 'Revalidated successfully', body },
-      { status: 200 }
-    );
+    let authorized = false;
+    if (!sanitySecret && !vercelToken) {
+      // No secrets configured, allow (use with caution)
+      authorized = true;
+    }
+    if (sanitySecret && sanityHeader === sanitySecret) authorized = true;
+    if (vercelToken && vercelHeader === vercelToken) authorized = true;
+
+    if (!authorized) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+
+    // If the webhook supplies explicit paths, revalidate those
+    const paths: string[] = body?.paths || [];
+    paths.forEach((p) => {
+      try {
+        revalidatePath(p);
+      } catch (e) {
+        // continue on error for individual paths
+        console.error("Failed to revalidate path", p, e);
+      }
+    });
+
+    // If the webhook supplies tags to revalidate, use revalidateTag
+    const tags: string[] = body?.tags || [];
+    tags.forEach((t) => {
+      try {
+        // @ts-ignore - signature differs across Next versions; call with single tag
+        revalidateTag(t);
+      } catch (e) {
+        console.error("Failed to revalidate tag", t, e);
+      }
+    });
+
+    // Backwards-compatible: if no paths or tags provided, revalidate common pages/tags
+    if (paths.length === 0 && tags.length === 0) {
+      // revalidate a set of common paths and tags used by the site
+      const defaultPaths = ["/", "/about", "/experience", "/education", "/certificates", "/skills", "/projects", "/blog", "/contact", "/testimonials"];
+      defaultPaths.forEach((p) => {
+        try {
+          revalidatePath(p);
+        } catch (e) {
+          console.error("Failed to revalidate default path", p, e);
+        }
+      });
+
+      const defaultTags = ["blog", "projects", "skills", "experience", "education", "certificates", "testimonials", "contact"];
+      defaultTags.forEach((t) => {
+        try {
+          // @ts-ignore - signature differs across Next versions; call with single tag
+          revalidateTag(t);
+        } catch (e) {
+          console.error("Failed to revalidate default tag", t, e);
+        }
+      });
+    }
+
+    return NextResponse.json({ message: "Revalidation successful", revalidatedPaths: paths, revalidatedTags: tags }, { status: 200 });
   } catch (error) {
-    console.error('Revalidation error:', error);
+    console.error("Revalidation failed:", error);
     return NextResponse.json(
-      { message: 'Error revalidating' },
+      {
+        message: "Revalidation failed",
+        error: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

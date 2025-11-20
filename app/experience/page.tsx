@@ -1,5 +1,8 @@
-import { client } from "../../lib/sanityClient";
+import { client } from "@/lib/sanityClient";
 import ExperienceClient from "@/components/ExperienceClient";
+
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60;
 
 export default async function ExperiencePage() {
   let experiences: any[] = [];

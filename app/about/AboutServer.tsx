@@ -1,6 +1,9 @@
 import { client } from "../../lib/sanityClient";
 import AboutClient from "./AboutClient";
 
+// Revalidate every 60 seconds (ISR - Incremental Static Regeneration)
+export const revalidate = 60;
+
 export default async function AboutPage() {
   let skills: any[] = [];
   let experiences: any[] = [];
