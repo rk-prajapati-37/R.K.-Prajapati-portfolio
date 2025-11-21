@@ -62,7 +62,7 @@ export default function TestimonialsSliderClient({
 
   return (
     <div className="min-h-screen bg-gradient-to-br  py-16  flex items-center justify-center">
-      <div className="max-w-3xl w-full">
+      <div className="max-w-6xl w-full">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -90,7 +90,7 @@ export default function TestimonialsSliderClient({
                 className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center"
               >
                 {/* Quote Icon */}
-                <div className="text-6xl text-gray-300 mb-6">"</div>
+                <div className="text-6xl text-red-600 mb-6 text-left">"</div>
 
                 {/* Message */}
                 <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic">
@@ -112,7 +112,7 @@ export default function TestimonialsSliderClient({
                 </div>
 
                 {/* Closing Quote */}
-                <div className="text-6xl text-gray-300 mt-6 text-right">"</div>
+                <div className="text-6xl text-red-600 mt-6 text-right">"</div>
               </motion.div>
             );
           })}
