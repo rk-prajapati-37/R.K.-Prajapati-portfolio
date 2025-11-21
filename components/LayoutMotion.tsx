@@ -1,11 +1,25 @@
 "use client";
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
-const pageAnimation = {
+const pageAnimation: Variants = {
   hidden: { opacity: 0, y: 6 },
-  enter: { opacity: 1, y: 0, transition: { duration: 0.36, ease: "easeOut" } },
-  exit: { opacity: 0, y: 6, transition: { duration: 0.24, ease: "easeIn" } },
+  enter: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.36,
+      ease: [0, 0, 0.58, 1], // easeOut
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: 6,
+    transition: {
+      duration: 0.24,
+      ease: [0.42, 0, 1, 1], // easeIn
+    },
+  },
 };
 
 type Props = {
@@ -13,7 +27,10 @@ type Props = {
   className?: string;
 };
 
-export default function LayoutMotion({ children, className = "pt-24 min-h-screen site-container" }: Props) {
+export default function LayoutMotion({
+  children,
+  className = "pt-24 min-h-screen site-container",
+}: Props) {
   return (
     <motion.main
       className={className}
