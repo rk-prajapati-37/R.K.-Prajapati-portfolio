@@ -1,11 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import AnimatedLogo from "./AnimatedLogo";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const aboutRef = useRef(null);
 
   return (
     <nav style={{ background: 'var(--surface)', color: 'var(--text)' }} className="fixed top-0 left-0 w-full h-24 shadow-md z-50">
@@ -20,10 +22,24 @@ export default function Navbar() {
         <div className="hidden md:flex space-x-6 items-center">
           <Link href="/" className="hover:underline">Home</Link>
 
-          {/* About dropdown (hover) */}
-          <div className="relative group">
+          {/* About dropdown (hover + focus) */}
+          {/* About dropdown (hover + focus) - JS backed to avoid disappearing when moving cursor */}
+          <div
+            className="relative"
+            ref={aboutRef}
+            onMouseEnter={() => setAboutOpen(true)}
+            onMouseLeave={() => setAboutOpen(false)}
+            onFocus={() => setAboutOpen(true)}
+            onBlur={(e) => {
+              // close only when focus leaves the whole wrapper
+              const related = e.relatedTarget;
+              if (!aboutRef.current) return;
+              if (related && aboutRef.current.contains(related)) return;
+              setAboutOpen(false);
+            }}
+          >
             <Link href="/about" className="px-3 py-1 rounded-md hover:bg-gray-800 focus:outline-none cursor-pointer">About</Link>
-            <div className="absolute right-0 mt-2 w-48 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg hidden group-hover:block">
+            <div className={`absolute right-0 mt-2 w-48 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg ${aboutOpen ? 'block' : 'hidden'}`}>
               <div className="py-2">
                 <Link href="/experience" className="block px-4 py-2 hover:bg-white/3">Experience</Link>
                 <Link href="/skills" className="block px-4 py-2 hover:bg-white/3">Skills</Link>

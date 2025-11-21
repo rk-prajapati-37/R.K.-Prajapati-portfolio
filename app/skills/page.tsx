@@ -1,5 +1,5 @@
 import { client } from "../../lib/sanityClient";
-import SkillsListClient from "@/components/SkillsListClient";
+import SkillsGridClient from "@/components/SkillsGridClient";
 import SkillsHeaderClient from "@/components/SkillsHeaderClient";
 
 export default async function Skills() {
@@ -15,8 +15,8 @@ export default async function Skills() {
     <div className="min-h-screen bg-gradient-to-br py-10 ">
       <SkillsHeaderClient />
 
-      <div className="max-w-3xl mx-auto space-y-4">
-        <SkillsListClient skills={skills} />
+      <div className="max-w-6xl mx-auto mt-6">
+        <SkillsGridClient skills={skills} columns={2} />
       </div>
     </div>
   );

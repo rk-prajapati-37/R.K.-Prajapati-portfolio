@@ -83,7 +83,7 @@ export default function EducationClient({ educations }: { educations: Education[
         };
         const plainText = extractPlain(descValue);
         return (
-          <motion.div key={edu._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600 hover:shadow-lg transition">
+          <motion.div key={edu._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{edu.degree}</h3>
@@ -96,11 +96,11 @@ export default function EducationClient({ educations }: { educations: Education[
                     </div>
                   )}
                   {institutionUrl ? (
-                    <a href={institutionUrl} target="_blank" rel="noopener noreferrer" className="text-gray-700 font-medium hover:underline">
+                    <a href={institutionUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">
                       {edu.institution}
                     </a>
                   ) : (
-                    <p className="text-gray-700 font-medium">{edu.institution}</p>
+                    <p className="text-blue-600 font-medium">{edu.institution}</p>
                   )}
 
                   {edu.logo && (

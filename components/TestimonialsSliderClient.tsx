@@ -43,6 +43,10 @@ export default function TestimonialsSliderClient({
   }
 
   const currentTestimonial = testimonials[currentIndex];
+  const indicesToShow =
+    testimonials.length === 1
+      ? [currentIndex]
+      : [currentIndex, (currentIndex + 1) % testimonials.length];
 
   const goToPrevious = () => {
     setCurrentIndex((prev) =>
@@ -73,43 +77,46 @@ export default function TestimonialsSliderClient({
         </motion.div>
 
         {/* Testimonial Card */}
-        <motion.div
-          key={currentTestimonial._id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center"
-        >
-          {/* Quote Icon */}
-          <div className="text-6xl text-gray-300 mb-6">"</div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {indicesToShow.map((idx) => {
+            const t = testimonials[idx];
+            return (
+              <motion.div
+                key={t._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center"
+              >
+                {/* Quote Icon */}
+                <div className="text-6xl text-gray-300 mb-6">"</div>
 
-          {/* Message */}
-          <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic">
-            "{currentTestimonial.text || ''}"
-          </p>
+                {/* Message */}
+                <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic">
+                  "{t.text || ''}"
+                </p>
 
-          {/* Profile Section */}
-          <div className="flex flex-col items-center">
-            {currentTestimonial.image && (
-              <img
-                src={currentTestimonial.image}
-                alt={currentTestimonial.name}
-                className="w-20 h-20 rounded-full object-cover border-4 border-yellow-400 mb-4"
-              />
-            )}
+                {/* Profile Section */}
+                <div className="flex flex-col items-center">
+                  {t.image && (
+                    <img
+                      src={t.image}
+                      alt={t.name}
+                      className="w-20 h-20 rounded-full object-cover border-4 border-yellow-400 mb-4"
+                    />
+                  )}
 
-            <h3 className="text-2xl font-bold text-gray-800 mb-1">
-              {currentTestimonial.name}
-            </h3>
-            <p className="text-gray-600 text-sm">
-              {currentTestimonial.position}
-            </p>
-          </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-1">{t.name}</h3>
+                  <p className="text-gray-600 text-sm">{t.position}</p>
+                </div>
 
-          {/* Closing Quote */}
-          <div className="text-6xl text-gray-300 mt-6 text-right">"</div>
-        </motion.div>
+                {/* Closing Quote */}
+                <div className="text-6xl text-gray-300 mt-6 text-right">"</div>
+              </motion.div>
+            );
+          })}
+        </div>
 
         {/* Navigation Arrows */}
         <div className="flex justify-center items-center gap-6 mt-10">

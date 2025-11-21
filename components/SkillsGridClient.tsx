@@ -10,7 +10,7 @@ type Skill = {
   icon?: string;
 };
 
-export default function SkillsGridClient({ skills }: { skills: Skill[] }) {
+export default function SkillsGridClient({ skills, columns = 3 }: { skills: Skill[]; columns?: number }) {
   const getNumericPercent = (skill: Skill): number => {
     if (typeof skill.percent === "number" && skill.percent > 0) {
       return skill.percent;
@@ -28,8 +28,17 @@ export default function SkillsGridClient({ skills }: { skills: Skill[] }) {
     return map[skill.level] ?? 60;
   };
 
+  const mdColsClass =
+    columns === 1
+      ? "md:grid-cols-1"
+      : columns === 2
+      ? "md:grid-cols-2"
+      : columns === 4
+      ? "md:grid-cols-4"
+      : "md:grid-cols-3";
+
   return (
-    <div className="grid md:grid-cols-3 gap-4">
+    <div className={`grid ${mdColsClass} gap-4`}>
       {skills.map((skill, idx) => (
         <motion.div
           key={skill._id}
