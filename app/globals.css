@@ -22,7 +22,7 @@
     --surface: #ffffff;
     --muted: #6b7280;
     --text: #0f1724;
-    --accent: #dc2626;
+    --accent: #c00;
   }
 }
 
@@ -32,7 +32,7 @@ html[data-theme="light"]{
   --surface: #ffffff;
   --muted: #6b7280;
   --text: #0f1724;
-  --accent: #dc2626;
+  --accent: #c00;
 }
 
 /* Base element styles */
@@ -51,8 +51,7 @@ body{padding-top:6rem}
 
 /* Utility: container for consistent page padding */
 .site-container{
-  /* align with Tailwind's max-w-6xl (72rem = 1152px) for consistent page widths */
-  max-width:72rem;
+  max-width:1100px;
   margin:0 auto;
   padding:calc(var(--space-lg) * 1.25) var(--space-md);
 }
