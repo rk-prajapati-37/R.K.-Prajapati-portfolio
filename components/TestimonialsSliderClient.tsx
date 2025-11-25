@@ -70,16 +70,17 @@ export default function TestimonialsSliderClient({
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <p className="text-red-600 font-semibold text-lg mb-2">TESTIMONIAL</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
+          <p className="font-semibold text-lg mb-2 accent">TESTIMONIAL</p>
+          <h1 className="text-4xl md:text-5xl font-bold">
             CLIENT SPEAK
           </h1>
         </motion.div>
 
         {/* Testimonial Card */}
         <div className="grid gap-6 md:grid-cols-2">
-          {indicesToShow.map((idx) => {
+          {indicesToShow.map((idx, mapIndex) => {
             const t = testimonials[idx];
+            const hideOnMobile = mapIndex === 1 ? "hidden md:block" : "";
             return (
               <motion.div
                 key={t._id}
@@ -87,13 +88,13 @@ export default function TestimonialsSliderClient({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5 }}
-                className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center"
+                className={`card rounded-2xl p-8 md:p-12 text-center ${hideOnMobile}`}
               >
                 {/* Quote Icon */}
-                <div className="text-6xl text-red-600 mb-6 text-left">"</div>
+                <div className="text-6xl accent mb-6 text-left">"</div>
 
                 {/* Message */}
-                <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic">
+                <p className="text-lg md:text-xl leading-relaxed mb-8 italic">
                   "{t.text || ''}"
                 </p>
 
@@ -103,16 +104,17 @@ export default function TestimonialsSliderClient({
                     <img
                       src={t.image}
                       alt={t.name}
-                      className="w-20 h-20 rounded-full object-cover border-4 border-yellow-400 mb-4"
+                      className="w-20 h-20 rounded-full object-cover border-4 mb-4"
+                      style={{ borderColor: 'var(--accent)' }}
                     />
                   )}
 
-                  <h3 className="text-2xl font-bold text-gray-800 mb-1">{t.name}</h3>
-                  <p className="text-gray-600 text-sm">{t.position}</p>
+                  <h3 className="text-2xl font-bold mb-1">{t.name}</h3>
+                  <p className="muted text-sm">{t.position}</p>
                 </div>
 
                 {/* Closing Quote */}
-                <div className="text-6xl text-red-600 mt-6 text-right">"</div>
+                <div className="text-6xl accent mt-6 text-right">"</div>
               </motion.div>
             );
           })}

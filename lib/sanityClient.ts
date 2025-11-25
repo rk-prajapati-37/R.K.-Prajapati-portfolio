@@ -21,13 +21,16 @@ try {
   }
 } catch (error) {
   // Create a mock client that warns when used but doesn't crash at module load
-  console.warn("⚠️  Sanity client not configured. Set NEXT_PUBLIC_SANITY_PROJECT_ID to enable content fetching.");
-  
+  console.warn(
+    "⚠️  Sanity client not configured. Set NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET in .env.local and restart the dev server to enable content fetching."
+  );
+
+  // Provide a safe mock implementation so server components won't crash during development
+  // when env vars are not present. This returns an empty array for queries so pages
+  // that expect lists (skills, experiences etc.) receive empty results instead of throwing.
   client = {
-    fetch: async (query: string) => {
-      throw new Error(
-        "Sanity client is not configured. Make sure NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET are set in environment variables."
-      );
+    fetch: async (_query: string) => {
+      return [] as any;
     }
   } as unknown as SanityClient;
 }
