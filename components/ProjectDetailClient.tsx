@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PortableTextClient from "./PortableTextClient";
 import { useRouter } from "next/navigation";
 
 type Project = {
@@ -136,9 +137,9 @@ export default function ProjectDetailClient({
           )}
 
           {/* Description */}
-          <p className="text-gray-700 text-lg mb-8 leading-relaxed border-l-4 border-red-500 pl-6">
-            {project.description || "No description available."}
-          </p>
+          <div className="text-gray-700 text-lg mb-8 leading-relaxed border-l-4 border-red-500 pl-6">
+            <PortableTextClient value={project.description || "No description available."} />
+          </div>
 
           {/* Project Meta Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 p-6 bg-gray-50 rounded-xl">

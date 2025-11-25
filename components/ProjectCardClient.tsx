@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import PortableTextClient from "./PortableTextClient";
 
 type Project = {
   _id: string;
@@ -82,9 +83,9 @@ export default function ProjectCardClient({ project }: { project: Project }) {
         <h3 className="text-xl font-bold text-gray-800 mb-2">
           {project.title || "Untitled"}
         </h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
-          {project.description || "No description"}
-        </p>
+        <div className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
+          <PortableTextClient value={project.description || "No description"} />
+        </div>
 
         {/* Tech Stack */}
         {project.techStack && project.techStack.length > 0 && (
