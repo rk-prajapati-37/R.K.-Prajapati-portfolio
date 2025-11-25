@@ -8,6 +8,8 @@
   --muted: #94a3b8;
   --text: #e6eef8;
   --accent: #ef4444; /* red-500 */
+  --card-border: rgba(255,255,255,0.04);
+  --card-shadow: 0 4px 18px rgba(2,6,23,0.6);
   --radius: 0.75rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -23,6 +25,8 @@
     --muted: #6b7280;
     --text: #0f1724;
     --accent: #c00;
+    --card-border: rgba(0,0,0,0.06);
+    --card-shadow: 0 4px 18px rgba(2,6,23,0.06);
   }
 }
 
@@ -33,6 +37,8 @@ html[data-theme="light"]{
   --muted: #6b7280;
   --text: #0f1724;
   --accent: #c00;
+  --card-border: rgba(0,0,0,0.06);
+  --card-shadow: 0 4px 18px rgba(2,6,23,0.06);
 }
 
 /* Base element styles */
@@ -65,7 +71,45 @@ h2{font-size:1.5rem}
 .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border-radius:0.5rem;background:var(--accent);color:white;font-weight:600}
 
 /* Card style */
-.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:1rem;border:1px solid rgba(255,255,255,0.04);box-shadow:0 4px 18px rgba(2,6,23,0.6)}
+.card{background:var(--surface);border-radius:var(--radius);padding:1rem;border:1px solid var(--card-border);box-shadow:var(--card-shadow);color:var(--text)}
+
+/* Small utility helpers that map to theme variables */
+.accent{color:var(--accent)}
+.accent-bg{background:var(--accent);color:white}
+.muted{color:var(--muted)}
+.dot-inactive{background:rgba(255,255,255,0.12)}
+
+/* Dark-mode overrides: prevent Tailwind's utility classes from producing
+   bright white blocks when the site is in dark theme. Scope to when the
+   document is NOT set to `data-theme="light"` so light theme remains
+   unaffected. Use !important sparingly to override utility classes. */
+html:not([data-theme="light"]) .bg-white,
+html:not([data-theme="light"]) .bg-gray-50,
+html:not([data-theme="light"]) .card,
+html:not([data-theme="light"]) .shadow-2xl,
+html:not([data-theme="light"]) .shadow-lg{
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--card-border) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+/* Form controls (inputs, textarea) often use white backgrounds — make them dark and readable */
+html:not([data-theme="light"]) input,
+html:not([data-theme="light"]) textarea,
+html:not([data-theme="light"]) select,
+html:not([data-theme="light"]) .form-control{
+  background-color: rgba(255,255,255,0.02) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+}
+
+/* Ensure utility text color overrides are readable in dark mode */
+html:not([data-theme="light"]) .text-gray-800,
+html:not([data-theme="light"]) .text-gray-700,
+html:not([data-theme="light"]) .text-gray-600{
+  color: var(--muted) !important;
+}
 
 /* Accessible link style */
 a{color:var(--accent);text-decoration:none}
