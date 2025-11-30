@@ -139,3 +139,36 @@ html:not([data-theme="light"]) .text-gray-600{
 /* helper to hide scrollbars for horizontal tab scroller */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Device mockups: mobile, tablet, laptop */
+.device-frame{position:relative;display:block;max-width:100%;margin:0 auto}
+.device-frame .device-screen{display:block;width:100%;height:100%;overflow:hidden}
+
+/* Mobile frame */
+.device-frame--mobile{width:320px;max-width:100%;border-radius:36px;padding:12px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+.device-frame--mobile .device-screen{border-radius:20px;overflow:hidden;background:var(--surface);}
+.device-frame--mobile:before{content:'';display:block;position:absolute;top:8px;left:50%;transform:translateX(-50%);width:60px;height:6px;background:rgba(255,255,255,0.06);border-radius:8px}
+
+/* Tablet frame */
+.device-frame--tablet{width:720px;max-width:100%;border-radius:20px;padding:16px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 12px 36px rgba(2,6,23,0.6)}
+.device-frame--tablet .device-screen{border-radius:12px;overflow:hidden;background:var(--surface);}
+
+/* Laptop frame */
+.device-frame--laptop{width:940px;max-width:100%;border-radius:12px;padding:18px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 14px 48px rgba(2,6,23,0.6)}
+.device-frame--laptop .device-screen{border-radius:8px;overflow:hidden;background:var(--surface);}
+.device-frame--laptop:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:-18px;width:90%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:8px}
+
+/* Make device frames responsive: mobile on small screens, tablet on medium, laptop on large */
+.device-responsive{width:100%;display:block}
+.device-responsive .device-screen iframe{width:100%;height:100%}
+@media(min-width:768px){
+  .device-responsive{max-width:720px}
+}
+@media(min-width:1024px){
+  .device-responsive{max-width:940px}
+}
+
+/* Frame sizes for consistent aspect ratios */
+.device-frame--mobile .device-screen{aspect-ratio:9/19}
+.device-frame--tablet .device-screen{aspect-ratio:3/2}
+.device-frame--laptop .device-screen{aspect-ratio:16/9}

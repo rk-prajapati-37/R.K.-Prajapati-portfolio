@@ -224,12 +224,26 @@ export default function ProjectDetailClient({
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
                 🎥 Demo Video
               </h2>
-              <div className="rounded-xl overflow-hidden shadow-lg">
-                <iframe
-                  src={project.video}
-                  className="w-full h-96 sm:h-full max-h-96"
-                  allowFullScreen
-                ></iframe>
+              {/* Responsive device frames: mobile on small screens, tablet on md, laptop on lg */}
+              <div className="device-responsive mx-auto">
+                {/* Mobile frame */}
+                <div className="block md:hidden device-frame device-frame--mobile mx-auto">
+                  <div className="device-screen">
+                    <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
+                  </div>
+                </div>
+                {/* Tablet frame */}
+                <div className="hidden md:block lg:hidden device-frame device-frame--tablet mx-auto">
+                  <div className="device-screen">
+                    <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
+                  </div>
+                </div>
+                {/* Laptop frame */}
+                <div className="hidden lg:block device-frame device-frame--laptop mx-auto">
+                  <div className="device-screen">
+                    <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -283,12 +297,12 @@ export default function ProjectDetailClient({
               onClick={(e) => e.stopPropagation()}
               className="relative max-w-4xl max-h-[90vh] flex flex-col"
             >
-              {/* Main Image */}
-              <img
-                src={selectedImage}
-                alt="Gallery view"
-                className="max-w-4xl max-h-[75vh] object-contain rounded-xl"
-              />
+              {/* Main Image / Device frame (laptop) */}
+              <div className="device-frame device-frame--laptop mx-auto">
+                <div className="device-screen">
+                  <img src={selectedImage} alt="Gallery view" className="w-full h-full object-contain" />
+                </div>
+              </div>
 
               {/* Navigation Controls */}
               <div className="flex items-center justify-between gap-4 mt-6">
@@ -331,6 +345,7 @@ export default function ProjectDetailClient({
               >
                 ✕
               </motion.button>
+              {/* (Device-frame modal implemented above; no duplicate overlay needed) */}
             </motion.div>
           </motion.div>
         )}
