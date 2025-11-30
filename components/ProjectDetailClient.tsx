@@ -226,26 +226,14 @@ export default function ProjectDetailClient({
               </h2>
               {/* Responsive device frames: mobile on small screens, tablet on md, and side-by-side on lg */}
               <div className="device-responsive mx-auto">
-                {/* Mobile frame (no iPhone notch) for small screens */}
-                <div className="block md:hidden device-frame device-frame--mobile mx-auto">
-                  <div className="device-screen">
-                    <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
-                  </div>
-                </div>
-                {/* Tablet frame (neutral tablet frame) */}
-                <div className="hidden md:block lg:hidden device-frame device-frame--tablet mx-auto">
-                  <div className="device-screen">
-                    <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
-                  </div>
-                </div>
-                {/* Desktop: show tablet + mobile frames side-by-side as a preview */}
-                <div className="hidden lg:flex device-row items-center justify-center mx-auto">
-                  <div className="device-frame device-frame--tablet">
+                {/* Device preview: stacked on small screens, side-by-side on lg */}
+                <div className="device-row flex flex-col lg:flex-row items-center justify-center mx-auto">
+                  <div className="device-frame device-frame--tablet mx-auto">
                     <div className="device-screen">
                       <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
                     </div>
                   </div>
-                  <div className="device-frame device-frame--mobile">
+                  <div className="device-frame device-frame--mobile mx-auto mt-6 lg:mt-0">
                     <div className="device-screen">
                       <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
                     </div>
