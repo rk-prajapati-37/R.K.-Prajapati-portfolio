@@ -136,9 +136,14 @@ export default function ProjectDetailClient({
             </div>
           )}
 
-          {/* Description */}
-          <div className="text-gray-700 text-lg mb-8 leading-relaxed border-l-4 border-red-500 pl-6">
-            <PortableTextClient value={project.description || "No description available."} />
+          {/* Description / Detailed Info */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Detailed Info</h2>
+            <div className="text-gray-700 text-lg mb-8 leading-relaxed border-l-4 border-red-500 pl-6">
+              <div className="portable-text">
+                <PortableTextClient value={project.description || "No description available."} />
+              </div>
+            </div>
           </div>
 
           {/* Project Meta Info */}
@@ -194,7 +199,7 @@ export default function ProjectDetailClient({
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-900 transition shadow-lg"
+                className="btn px-8 py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-900 transition shadow-lg"
               >
                 GitHub Repository
               </motion.a>
@@ -206,7 +211,7 @@ export default function ProjectDetailClient({
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold rounded-lg hover:shadow-lg transition"
+                className="btn px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold rounded-lg hover:shadow-lg transition"
               >
                 View Live Demo
               </motion.a>

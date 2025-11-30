@@ -63,7 +63,7 @@ export default function EducationClient({ educations }: { educations: Education[
         const descValue = (edu as any).description ?? (edu as any).desc ?? (edu as any).content;
         // Plain text extraction removed; we render PortableText directly for expanded content.
         return (
-          <motion.div key={edu._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
+          <motion.div key={edu._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{edu.degree}</h3>
@@ -112,7 +112,9 @@ export default function EducationClient({ educations }: { educations: Education[
                             } as any
                       }
                     >
-                      <PortableTextClient value={descValue} />
+                      <div className="portable-text">
+                        <PortableTextClient value={descValue} />
+                      </div>
                     </div>
 
                     <button onClick={() => toggleExpanded(edu._id)} className="text-sm text-blue-700 mt-2">
@@ -120,7 +122,7 @@ export default function EducationClient({ educations }: { educations: Education[
                     </button>
 
                     {isExpanded && (
-                      <div className="mt-2 text-gray-700">
+                      <div className="mt-2 text-gray-700 portable-text">
                         <PortableTextClient value={descValue} />
                       </div>
                     )}

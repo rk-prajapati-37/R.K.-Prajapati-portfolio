@@ -65,7 +65,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
         // We no longer need plainText extraction since
         // PortableTextClient handles both block/array and string rendering.
         return (
-          <motion.div key={exp._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
+          <motion.div key={exp._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{exp.position}</h3>
@@ -115,7 +115,9 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                             } as any
                       }
                     >
-                      <PortableTextClient value={descValue} />
+                      <div className="portable-text">
+                        <PortableTextClient value={descValue} />
+                      </div>
                     </div>
 
                     <button onClick={() => toggleExpanded(exp._id)} className="text-sm text-blue-700 mt-2">
@@ -123,7 +125,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                     </button>
 
                     {isExpanded && (
-                      <div className="mt-2 text-gray-700">
+                      <div className="mt-2 text-gray-700 portable-text">
                         {/* Expanded: full portable text so headings, bold, links render */}
                         <PortableTextClient value={descValue} />
                       </div>

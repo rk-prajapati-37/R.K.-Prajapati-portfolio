@@ -111,9 +111,20 @@ html:not([data-theme="light"]) .text-gray-600{
   color: var(--muted) !important;
 }
 
-/* Accessible link style */
-a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
+/* Accessible link style (scoped for content areas only) */
+/* Keep general anchors untouched so button links keep explicit colors from utilities */
+.prose a,
+.card a,
+.portable-text a,
+.site-container a{color:var(--accent);text-decoration:none}
+.prose a:hover,
+.card a:hover,
+.portable-text a:hover,
+.site-container a:hover{text-decoration:underline}
+
+/* Ensure anchor links inside button-like elements inherit the visual color (e.g. text-white) */
+.btn a, .btn, .btn *{ color: inherit !important }
+.px-8.text-white, .bg-gray-800.text-white, .bg-red-600.text-white { color: white !important }
 
 /* Smooth page transitions (for Motion fallback) */
 .page-fade{opacity:0;transform:translateY(6px);transition:opacity 300ms ease, transform 300ms ease}

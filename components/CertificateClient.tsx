@@ -62,7 +62,7 @@ export default function CertificateClient({ certificates }: { certificates: Cert
         // Removed plain text extraction - we now render PortableText directly.
         return (
           <motion.div key={cert._id} variants={item}>
-            <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 hover:shadow-lg transition h-full flex flex-col">
+            <div className="card rounded-lg shadow-md p-4 border border-gray-200 hover:shadow-lg transition h-full flex flex-col">
               {cert.certificateImage && (
                 <div className="mb-4 h-40 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
                     <img
@@ -92,14 +92,16 @@ export default function CertificateClient({ certificates }: { certificates: Cert
                           } as any
                     }
                   >
-                      <PortableTextClient value={descValue} />
+                      <div className="portable-text">
+                        <PortableTextClient value={descValue} />
+                      </div>
                   </div>
                     <button onClick={() => toggleExpanded(cert._id)} className="text-sm text-blue-700 mt-2">
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
 
                     {isExpanded && (
-                      <div className="mt-2 text-gray-700">
+                      <div className="mt-2 text-gray-700 portable-text">
                         <PortableTextClient value={descValue} />
                       </div>
                     )}

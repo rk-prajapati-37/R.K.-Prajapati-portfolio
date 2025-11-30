@@ -95,9 +95,9 @@ export default function TestimonialsSliderClient({
                 <div className="text-6xl accent mb-6 text-left">"</div>
 
                 {/* Message */}
-                  <div className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic">
-                    <PortableTextClient value={t.text || ""} />
-                  </div>
+                  <div className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic portable-text">
+                      <PortableTextClient value={t.text || ""} />
+                    </div>
 
                 {/* Profile Section */}
                 <div className="flex flex-col items-center">
