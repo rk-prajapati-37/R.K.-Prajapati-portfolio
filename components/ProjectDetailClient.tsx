@@ -291,12 +291,12 @@ export default function ProjectDetailClient({
 
           {/* Image Lightbox Modal */}
       <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelectedImage(null)}
+        {(selectedImage || modalMode === 'layout') && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setSelectedImage(null); setModalMode('image'); }}
             className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
           >
             <motion.div
@@ -307,7 +307,8 @@ export default function ProjectDetailClient({
               className="relative max-w-4xl max-h-[90vh] flex flex-col"
             >
               {/* Main Image / Device frame (laptop) */}
-                <div className="device-frame device-frame--mac mx-auto">
+                {/* Prefer image-based Mac bezel if an asset exists at /public/images/device-mac.png */}
+                <div className="device-frame device-frame--mac device-frame--mac-image mx-auto">
                 <div className={`device-screen ${modalMode === 'layout' ? 'overflow-auto' : 'overflow-hidden'}`}>
                   {modalMode === 'layout' && project.demo ? (
                     <iframe
@@ -375,7 +376,7 @@ export default function ProjectDetailClient({
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedImage(null)}
+                onClick={() => { setSelectedImage(null); setModalMode('image'); }}
                 className="absolute top-4 right-4 z-60 text-white text-3xl font-bold hover:text-gray-300 transition"
                 aria-label="Close gallery"
               >

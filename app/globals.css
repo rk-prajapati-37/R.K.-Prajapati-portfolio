@@ -163,6 +163,13 @@ html:not([data-theme="light"]) .text-gray-600{
 .device-frame--mac:before{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);top:8px;width:14px;height:14px;background:rgba(255,255,255,0.06);border-radius:9999px}
 .device-frame--mac:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:10px;width:78%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px}
 
+/* Image-based Mac frame (use a PNG/SVG bezel in /public/images/) */
+.device-frame--mac-image{background-image:url('/images/device-mac.png');background-repeat:no-repeat;background-size:contain;background-position:center;padding:60px 56px 80px;border-radius:0;background-color:transparent}
+.device-frame--mac-image .device-screen{background:transparent;border-radius:6px}
+
+/* If you have an iMac-style bezel (taller top & chin), use a different image and tweak padding */
+.device-frame--mac-image--imac{background-image:url('/images/device-imac.png');background-repeat:no-repeat;background-size:contain;background-position:center;padding:54px 38px 90px}
+
 /* Row layout for multiple devices (e.g., tablet + phone side-by-side) */
 .device-row{display:flex;align-items:center;justify-content:center;gap:2.25rem;width:100%;max-width:100%;flex-direction:column;box-sizing:border-box;padding:0 1rem}
 .device-row .device-frame{flex:0 0 auto}
