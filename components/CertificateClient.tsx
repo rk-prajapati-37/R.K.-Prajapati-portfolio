@@ -59,27 +59,7 @@ export default function CertificateClient({ certificates }: { certificates: Cert
       {sortedCerts.map((cert) => {
         const isExpanded = expandedId === cert._id;
         const descValue = (cert as any).description ?? (cert as any).desc ?? (cert as any).content;
-        const extractPlain = (val: any) => {
-          if (!val) return "";
-          if (typeof val === "string") return val;
-          try {
-            if (Array.isArray(val)) {
-              return val
-                .map((block) => {
-                  if (typeof block === "string") return block;
-                  if (block?.children && Array.isArray(block.children)) {
-                    return block.children.map((c: any) => c.text || "").join("");
-                  }
-                  return "";
-                })
-                .join("\n\n");
-            }
-            return String(val);
-          } catch {
-            return "";
-          }
-        };
-        const plainText = extractPlain(descValue);
+        // Removed plain text extraction - we now render PortableText directly.
         return (
           <motion.div key={cert._id} variants={item}>
             <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 hover:shadow-lg transition h-full flex flex-col">

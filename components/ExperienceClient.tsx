@@ -62,27 +62,8 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
         const isExpanded = expandedId === exp._id;
         const companyUrl = (exp as any).companyUrl;
         const descValue = (exp as any).description ?? (exp as any).desc ?? (exp as any).content;
-        const extractPlain = (val: any) => {
-          if (!val) return "";
-          if (typeof val === "string") return val;
-          try {
-            if (Array.isArray(val)) {
-              return val
-                .map((block) => {
-                  if (typeof block === "string") return block;
-                  if (block?.children && Array.isArray(block.children)) {
-                    return block.children.map((c: any) => c.text || "").join("");
-                  }
-                  return "";
-                })
-                .join("\n\n");
-            }
-            return String(val);
-          } catch {
-            return "";
-          }
-        };
-        const plainText = extractPlain(descValue);
+        // We no longer need plainText extraction since
+        // PortableTextClient handles both block/array and string rendering.
         return (
           <motion.div key={exp._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
             <div className="flex items-start justify-between gap-4">

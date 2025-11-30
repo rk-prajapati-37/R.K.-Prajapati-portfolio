@@ -61,27 +61,7 @@ export default function EducationClient({ educations }: { educations: Education[
         const isExpanded = expandedId === edu._id;
         const institutionUrl = (edu as any).institutionUrl;
         const descValue = (edu as any).description ?? (edu as any).desc ?? (edu as any).content;
-        const extractPlain = (val: any) => {
-          if (!val) return "";
-          if (typeof val === "string") return val;
-          try {
-            if (Array.isArray(val)) {
-              return val
-                .map((block) => {
-                  if (typeof block === "string") return block;
-                  if (block?.children && Array.isArray(block.children)) {
-                    return block.children.map((c: any) => c.text || "").join("");
-                  }
-                  return "";
-                })
-                .join("\n\n");
-            }
-            return String(val);
-          } catch {
-            return "";
-          }
-        };
-        const plainText = extractPlain(descValue);
+        // Plain text extraction removed; we render PortableText directly for expanded content.
         return (
           <motion.div key={edu._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
             <div className="flex items-start justify-between gap-4">
