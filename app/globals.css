@@ -145,26 +145,26 @@ html:not([data-theme="light"]) .text-gray-600{
 .device-frame .device-screen{display:block;width:100%;height:100%;overflow:hidden}
 
 /* Mobile frame */
-.device-frame--mobile{width:320px;max-width:100%;border-radius:18px;padding:10px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+.device-frame--mobile{width:100%;max-width:360px;border-radius:18px;padding:10px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
 .device-frame--mobile .device-screen{border-radius:10px;overflow:hidden;background:var(--surface);}
 
 /* Tablet frame */
-.device-frame--tablet{width:720px;max-width:100%;border-radius:12px;padding:12px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 12px 36px rgba(2,6,23,0.6)}
+.device-frame--tablet{width:100%;max-width:720px;border-radius:12px;padding:12px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 12px 36px rgba(2,6,23,0.6)}
 .device-frame--tablet .device-screen{border-radius:8px;overflow:hidden;background:var(--surface);}
 
 /* Laptop frame */
-.device-frame--laptop{width:940px;max-width:100%;border-radius:12px;padding:18px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 14px 48px rgba(2,6,23,0.6)}
+.device-frame--laptop{width:100%;max-width:940px;border-radius:12px;padding:18px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 14px 48px rgba(2,6,23,0.6)}
 .device-frame--laptop .device-screen{border-radius:8px;overflow:hidden;background:var(--surface);}
 .device-frame--laptop:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:-18px;width:90%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:8px}
 
 /* MacBook-like frame (use for gallery modal) */
-.device-frame--mac{width:980px;max-width:100%;border-radius:12px;padding:22px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 18px 60px rgba(2,6,23,0.6)}
+.device-frame--mac{width:100%;max-width:980px;border-radius:12px;padding:22px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 18px 60px rgba(2,6,23,0.6)}
 .device-frame--mac .device-screen{border-radius:10px;overflow:hidden;background:var(--surface);}
 .device-frame--mac:before{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);top:8px;width:14px;height:14px;background:rgba(255,255,255,0.06);border-radius:9999px}
 .device-frame--mac:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:10px;width:78%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px}
 
 /* Row layout for multiple devices (e.g., tablet + phone side-by-side) */
-.device-row{display:flex;align-items:center;justify-content:center;gap:2.25rem;width:100%;max-width:100%;flex-direction:column}
+.device-row{display:flex;align-items:center;justify-content:center;gap:2.25rem;width:100%;max-width:100%;flex-direction:column;box-sizing:border-box;padding:0 1rem}
 .device-row .device-frame{flex:0 0 auto}
 .device-row .device-frame--tablet{transform:scale(1);}
 .device-row .device-frame--mobile{transform:scale(0.8);} 
@@ -174,10 +174,18 @@ html:not([data-theme="light"]) .text-gray-600{
 }
 @media(min-width:1024px){
   .device-row{flex-direction:row}
+  .device-row .device-frame--tablet{flex-basis:66%;max-width:66%}
+  .device-row .device-frame--mobile{flex-basis:32%;max-width:32%}
 }
 
+/* Overlay nav buttons used in modal */
+.device-overlay-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:60;background:rgba(255,255,255,0.85);border-radius:9999px;padding:6px;display:flex;align-items:center;justify-content:center}
+.device-overlay-btn--left{left:8px}
+.device-overlay-btn--right{right:8px}
+.device-overlay-btn svg{width:20px;height:20px}
+
 /* Make device frames responsive: mobile on small screens, tablet on medium, laptop on large */
-.device-responsive{width:100%;display:block}
+.device-responsive{width:100%;display:block;overflow:hidden;padding:0 0.5rem;box-sizing:border-box}
 .device-responsive .device-screen iframe{width:100%;height:100%}
 @media(min-width:768px){
   .device-responsive{max-width:720px}

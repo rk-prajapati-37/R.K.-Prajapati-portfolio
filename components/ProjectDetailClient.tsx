@@ -222,8 +222,8 @@ export default function ProjectDetailClient({
           {project.video && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                🎥 Demo Video
-              </h2>
+                    📱 Mobile & Tablet Preview
+                  </h2>
               {/* Responsive device frames: mobile on small screens, tablet on md, and side-by-side on lg */}
               <div className="device-responsive mx-auto">
                 {/* Device preview: stacked on small screens, side-by-side on lg */}
@@ -293,14 +293,14 @@ export default function ProjectDetailClient({
               className="relative max-w-4xl max-h-[90vh] flex flex-col"
             >
               {/* Main Image / Device frame (laptop) */}
-              <div className="device-frame device-frame--laptop mx-auto">
+              <div className="device-frame device-frame--mac mx-auto">
                 <div className="device-screen">
                   <img src={selectedImage} alt="Gallery view" className="w-full h-full object-contain" />
                 </div>
               </div>
 
-              {/* Navigation Controls */}
-              <div className="flex items-center justify-between gap-4 mt-6">
+              {/* Navigation Controls (moved overlay) */}
+              <div className="flex items-center justify-between gap-4 mt-6 hidden lg:flex">
                 {/* Previous Button */}
                 {currentImageIndex > 0 && (
                   <motion.button
@@ -331,12 +331,30 @@ export default function ProjectDetailClient({
                 )}
               </div>
 
-              {/* Close Button */}
+              {/* Overlay navigation for small screens (left/right arrows on device frame) */}
+              <button
+                aria-label="Previous image"
+                onClick={goToPrev}
+                className={`device-overlay-btn device-overlay-btn--left ${currentImageIndex <= 0 ? 'hidden' : ''}`}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"></path></svg>
+              </button>
+
+              <button
+                aria-label="Next image"
+                onClick={goToNext}
+                className={`device-overlay-btn device-overlay-btn--right ${currentImageIndex >= allImages.length - 1 ? 'hidden' : ''}`}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
+              </button>
+
+              {/* Close Button (inside modal, visible on all sizes) */}
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedImage(null)}
-                className="absolute -top-12 right-0 text-white text-3xl font-bold hover:text-gray-300 transition"
+                className="absolute top-4 right-4 z-60 text-white text-3xl font-bold hover:text-gray-300 transition"
+                aria-label="Close gallery"
               >
                 ✕
               </motion.button>
