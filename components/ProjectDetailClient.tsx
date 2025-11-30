@@ -226,29 +226,24 @@ export default function ProjectDetailClient({
               </h2>
               {/* Responsive device frames: mobile on small screens, tablet on md, laptop on lg */}
               <div className="device-responsive mx-auto">
-                {/* Mobile frame */}
+                {/* Mobile frame (no iPhone notch) */}
                 <div className="block md:hidden device-frame device-frame--mobile mx-auto">
                   <div className="device-screen">
                     <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
                   </div>
                 </div>
-                {/* Tablet frame */}
+                {/* Tablet frame (neutral tablet frame) */}
                 <div className="hidden md:block lg:hidden device-frame device-frame--tablet mx-auto">
                   <div className="device-screen">
                     <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
                   </div>
                 </div>
-                {/* Laptop frame */}
-                <div className="hidden lg:block device-frame device-frame--laptop mx-auto">
-                  <div className="device-screen">
-                    <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
-                  </div>
-                </div>
+                {/* Desktop: hide demo video on large screens */}
               </div>
             </div>
           )}
 
-          {/* Gallery Section */}
+              {/* Gallery Section */}
           {project.extraImages && project.extraImages.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
@@ -280,7 +275,7 @@ export default function ProjectDetailClient({
         </div>
       </motion.div>
 
-      {/* Image Lightbox Modal */}
+          {/* Image Lightbox Modal */}
       <AnimatePresence>
         {selectedImage && (
           <motion.div
