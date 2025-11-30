@@ -28,6 +28,7 @@ export default function ProjectDetailClient({
 }) {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [modalMode, setModalMode] = useState<'image' | 'layout'>('image');
   const [allImages, setAllImages] = useState<string[]>([]);
 
   const openGallery = (image: string) => {
@@ -36,6 +37,15 @@ export default function ProjectDetailClient({
     ) as string[];
     setAllImages(images);
     setSelectedImage(image);
+    setModalMode('image');
+  };
+
+  const openLayout = (event?: React.MouseEvent) => {
+    if (event) event.stopPropagation();
+    const images = [project?.imageUrl, ...(project?.extraImages || [])].filter(Boolean) as string[];
+    setAllImages(images);
+    setSelectedImage(null);
+    setModalMode('layout');
   };
 
   const currentImageIndex = allImages.indexOf(selectedImage || "");
@@ -262,10 +272,21 @@ export default function ProjectDetailClient({
                       alt={`Gallery ${i + 1}`}
                       className="w-full h-64 object-cover group-hover:brightness-75 transition duration-300"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                      <span className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg">
-                        View
-                      </span>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); openGallery(img); }}
+                        className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg"
+                      >
+                        View Image
+                      </button>
+                      {project.demo && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openLayout(e); }}
+                          className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg"
+                        >
+                          View Website Layout
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -295,7 +316,16 @@ export default function ProjectDetailClient({
               {/* Main Image / Device frame (laptop) */}
               <div className="device-frame device-frame--mac mx-auto">
                 <div className="device-screen">
-                  <img src={selectedImage} alt="Gallery view" className="w-full h-full object-contain" />
+                  {modalMode === 'layout' && project.demo ? (
+                    <iframe
+                      src={project.demo}
+                      className="w-full h-full"
+                      allowFullScreen
+                      title={project.title || "Project demo"}
+                    />
+                  ) : (
+                    <img src={selectedImage || project.imageUrl || ''} alt="Gallery view" className="w-full h-full object-contain" />
+                  )}
                 </div>
               </div>
 
