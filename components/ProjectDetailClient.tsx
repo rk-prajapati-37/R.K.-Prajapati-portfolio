@@ -223,7 +223,7 @@ export default function ProjectDetailClient({
                 whileTap={{ scale: 0.95 }}
                 className="btn px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold rounded-lg hover:shadow-lg transition"
               >
-                View Live Demo
+                Official Website
               </motion.a>
             )}
           </div>
@@ -257,8 +257,7 @@ export default function ProjectDetailClient({
           {project.extraImages && project.extraImages.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                📸 Gallery
-              </h2>
+                Website Layout              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {project.extraImages.map((img, i) => (
                   <motion.div
@@ -272,13 +271,7 @@ export default function ProjectDetailClient({
                       alt={`Gallery ${i + 1}`}
                       className="w-full h-64 object-cover group-hover:brightness-75 transition duration-300"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 gap-2">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); openGallery(img); }}
-                        className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg"
-                      >
-                        View Image
-                      </button>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                       {project.demo && (
                         <button
                           onClick={(e) => { e.stopPropagation(); openLayout(e); }}
@@ -314,8 +307,8 @@ export default function ProjectDetailClient({
               className="relative max-w-4xl max-h-[90vh] flex flex-col"
             >
               {/* Main Image / Device frame (laptop) */}
-              <div className="device-frame device-frame--mac mx-auto">
-                <div className="device-screen">
+                <div className="device-frame device-frame--mac mx-auto">
+                <div className={`device-screen ${modalMode === 'layout' ? 'overflow-auto' : 'overflow-hidden'}`}>
                   {modalMode === 'layout' && project.demo ? (
                     <iframe
                       src={project.demo}
