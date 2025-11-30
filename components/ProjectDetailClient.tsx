@@ -40,12 +40,17 @@ export default function ProjectDetailClient({
     setModalMode('image');
   };
 
-  const openLayout = (event?: React.MouseEvent) => {
+  const openLayout = (image?: string, event?: React.MouseEvent) => {
     if (event) event.stopPropagation();
     const images = [project?.imageUrl, ...(project?.extraImages || [])].filter(Boolean) as string[];
     setAllImages(images);
-    setSelectedImage(null);
-    setModalMode('layout');
+    if (image) {
+      setSelectedImage(image);
+      setModalMode('image');
+    } else {
+      setSelectedImage(null);
+      setModalMode('layout');
+    }
   };
 
   const currentImageIndex = allImages.indexOf(selectedImage || "");
@@ -272,9 +277,9 @@ export default function ProjectDetailClient({
                       className="w-full h-64 object-cover group-hover:brightness-75 transition duration-300"
                     />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                      {project.demo && (
+                        {project.demo && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); openLayout(e); }}
+                          onClick={(e) => { e.stopPropagation(); openLayout(img, e); }}
                           className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg"
                         >
                           View Website Layout
