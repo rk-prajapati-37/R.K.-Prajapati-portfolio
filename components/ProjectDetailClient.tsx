@@ -224,9 +224,9 @@ export default function ProjectDetailClient({
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
                 🎥 Demo Video
               </h2>
-              {/* Responsive device frames: mobile on small screens, tablet on md, laptop on lg */}
+              {/* Responsive device frames: mobile on small screens, tablet on md, and side-by-side on lg */}
               <div className="device-responsive mx-auto">
-                {/* Mobile frame (no iPhone notch) */}
+                {/* Mobile frame (no iPhone notch) for small screens */}
                 <div className="block md:hidden device-frame device-frame--mobile mx-auto">
                   <div className="device-screen">
                     <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
@@ -238,7 +238,19 @@ export default function ProjectDetailClient({
                     <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
                   </div>
                 </div>
-                {/* Desktop: hide demo video on large screens */}
+                {/* Desktop: show tablet + mobile frames side-by-side as a preview */}
+                <div className="hidden lg:flex device-row items-center justify-center mx-auto">
+                  <div className="device-frame device-frame--tablet">
+                    <div className="device-screen">
+                      <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
+                    </div>
+                  </div>
+                  <div className="device-frame device-frame--mobile">
+                    <div className="device-screen">
+                      <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -163,6 +163,16 @@ html:not([data-theme="light"]) .text-gray-600{
 .device-frame--mac:before{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);top:8px;width:14px;height:14px;background:rgba(255,255,255,0.06);border-radius:9999px}
 .device-frame--mac:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:-20px;width:78%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px}
 
+/* Row layout for multiple devices (e.g., tablet + phone side-by-side) */
+.device-row{display:flex;align-items:center;justify-content:center;gap:2.25rem;width:100%;max-width:100%;}
+.device-row .device-frame{flex:0 0 auto}
+.device-row .device-frame--tablet{transform:scale(1);}
+.device-row .device-frame--mobile{transform:scale(0.8);} 
+@media(max-width:1024px){
+  .device-row{gap:1rem}
+  .device-row .device-frame--mobile{transform:scale(0.76)}
+}
+
 /* Make device frames responsive: mobile on small screens, tablet on medium, laptop on large */
 .device-responsive{width:100%;display:block}
 .device-responsive .device-screen iframe{width:100%;height:100%}
