@@ -118,8 +118,10 @@ export default function CertificateClient({ certificates }: { certificates: Cert
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
 
-                    {isExpanded && plainText && (
-                      <div className="mt-2 text-gray-700 whitespace-pre-wrap">{plainText}</div>
+                    {isExpanded && (
+                      <div className="mt-2 text-gray-700">
+                        <PortableTextClient value={descValue} />
+                      </div>
                     )}
                 </div>
               )}

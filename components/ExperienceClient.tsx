@@ -120,6 +120,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                 </p>
                 {descValue && (
                   <div className="mt-3 text-gray-700">
+                    {/* Collapsed: portable text but visually clamped to 3 lines */}
                     <div
                       className="max-w-none"
                       style={
@@ -133,7 +134,6 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                             } as any
                       }
                     >
-                      {/* support alternative field names if description is stored differently */}
                       <PortableTextClient value={descValue} />
                     </div>
 
@@ -141,7 +141,12 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
 
-                    {isExpanded && plainText && <div className="mt-2 text-gray-700 whitespace-pre-wrap">{plainText}</div>}
+                    {isExpanded && (
+                      <div className="mt-2 text-gray-700">
+                        {/* Expanded: full portable text so headings, bold, links render */}
+                        <PortableTextClient value={descValue} />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
