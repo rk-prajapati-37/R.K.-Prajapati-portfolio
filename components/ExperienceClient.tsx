@@ -39,7 +39,17 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
   const sortedExperiences = [...experiences].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
   const toggleExpanded = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId((prev) => {
+      const next = prev === id ? null : id;
+      if (next === id) {
+        // Scroll the expanded content into view a bit after the DOM updates
+        setTimeout(() => {
+          const el = document.getElementById(`exp-desc-${id}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 80);
+      }
+      return next;
+    });
   };
 
   const formatDate = (date: string) => {
@@ -70,6 +80,18 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{exp.position}</h3>
+                {/* Render company name with optional link */}
+                {exp.company && (
+                  <div className="mt-1">
+                    {companyUrl ? (
+                      <a href={companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-800 hover:underline">
+                        {exp.company}
+                      </a>
+                    ) : (
+                      <p className="text-sm font-medium text-gray-800">{exp.company}</p>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center gap-2 mt-1">
                   {exp.logo ? (
                     <img src={exp.logo} alt={`${exp.company} logo`} className="w-8 h-8 object-contain rounded-full bg-white p-1 border" />
@@ -99,7 +121,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                     {/* Collapsed: portable text but visually clamped to 3 lines */}
                         <div className={`max-w-none ${isExpanded ? '' : ''}`} style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
                               {!isExpanded ? (
-                                <div className="text-gray-700" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                <div className={`text-gray-700 portable-text-collapse ${isExpanded ? 'expanded' : ''}`}>
                                   {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
                                 </div>
                               ) : (

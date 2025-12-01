@@ -526,10 +526,10 @@ export default function ProjectDetailClient({
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
                         {project.demo && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); openLayout(img, e); }}
+                          onClick={(e) => { e.stopPropagation(); openGallery(img); }}
                           className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg"
                         >
-                          View Layout Image
+                          View Image
                         </button>
                       )}
                     </div>

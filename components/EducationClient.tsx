@@ -38,7 +38,16 @@ export default function EducationClient({ educations }: { educations: Education[
   const sortedEducations = [...educations].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
   const toggleExpanded = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId((prev) => {
+      const next = prev === id ? null : id;
+      if (next === id) {
+        setTimeout(() => {
+          const el = document.getElementById(`edu-desc-${id}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 80);
+      }
+      return next;
+    });
   };
 
   const formatDate = (date: string) => {
@@ -102,7 +111,7 @@ export default function EducationClient({ educations }: { educations: Education[
                     <div className="mt-3 text-gray-700">
                       <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
                         {!isExpanded ? (
-                          <div className="text-gray-700" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <div className={`text-gray-700 portable-text-collapse ${isExpanded ? 'expanded' : ''}`}>
                             {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
                           </div>
                         ) : (

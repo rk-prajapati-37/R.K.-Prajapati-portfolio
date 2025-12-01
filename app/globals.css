@@ -83,6 +83,10 @@ h2{font-size:1.5rem}
 /* Card style */
 .card{background:var(--surface);border-radius:var(--radius);padding:1rem;border:1px solid var(--card-border);box-shadow:var(--card-shadow);color:var(--text)}
 
+.certificate-card{border:1px solid rgba(0,0,0,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
+.certificate-card .portable-text{line-height:1.5}
+.certificate-card .text-gray-600{color:var(--muted)}
+
 /* Small utility helpers that map to theme variables */
 .accent{color:var(--accent)}
 .accent-bg{background:var(--accent);color:white}
@@ -226,3 +230,19 @@ html:not([data-theme="light"]) .text-gray-600{
 .device-frame--mobile .device-screen{aspect-ratio:9/19}
 .device-frame--tablet .device-screen{aspect-ratio:3/2}
 .device-frame--laptop .device-screen{aspect-ratio:16/9}
+
+/* Collapsible portable text helper – 2-line clamp for collapsed, full content when expanded */
+.portable-text-collapse {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.portable-text-collapse.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  max-height: none !important;
+  overflow: visible !important;
+}
