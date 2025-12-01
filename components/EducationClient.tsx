@@ -43,20 +43,26 @@ export default function EducationClient({ educations }: { educations: Education[
 
   const formatDate = (date: string) => {
     if (!date) return "";
-                  <div className="max-w-none">
-                    {!isExpanded ? (
-                      <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                        {toPlainText(text).slice(0, 240) + (toPlainText(text).length > 240 ? '…' : '')}
-                      </div>
-                    ) : (
-                      <div className="portable-text">
-                        <PortableTextClient value={text} />
-                      </div>
-                    )}
-                  </div>
+    try {
+      return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short" });
+    } catch {
+      return date;
+    }
+  };
+
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.2 }}
+      className="space-y-4"
+    >
+      {sortedEducations.map((edu) => {
+        const isExpanded = expandedId === edu._id;
         const institutionUrl = (edu as any).institutionUrl;
         const descValue = (edu as any).description ?? (edu as any).desc ?? (edu as any).content;
-        // Plain text extraction removed; we render PortableText directly for expanded content.
+
         return (
           <motion.div key={edu._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
             <div className="flex items-start justify-between gap-4">
@@ -94,22 +100,16 @@ export default function EducationClient({ educations }: { educations: Education[
                 </p>
                 {descValue && (
                   <div className="mt-3 text-gray-700">
-                    <div
-                      className="max-w-none"
-                      style={
-                        isExpanded
-                          ? undefined
-                          : {
-                              overflow: "hidden",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: "vertical",
-                            } as any
-                      }
-                    >
-                      <div className="portable-text">
-                        <PortableTextClient value={descValue} />
-                      </div>
+                    <div className="max-w-none">
+                      {!isExpanded ? (
+                        <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
+                          {toPlainText(descValue).slice(0, 240) + (toPlainText(descValue).length > 240 ? '…' : '')}
+                        </div>
+                      ) : (
+                        <div className="portable-text">
+                          <PortableTextClient value={descValue} />
+                        </div>
+                      )}
                     </div>
 
                     <button onClick={() => toggleExpanded(edu._id)} className="text-sm text-blue-700 mt-2">
@@ -131,3 +131,5 @@ export default function EducationClient({ educations }: { educations: Education[
     </motion.div>
   );
 }
+
+
