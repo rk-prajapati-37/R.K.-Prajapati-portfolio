@@ -33,3 +33,11 @@ export function toPlainText(value: any) {
     return "";
   }
 }
+
+export function toPlainWords(value: any, wordCount = 30) {
+  const text = toPlainText(value || "");
+  if (!text) return "";
+  const words = text.trim().split(/\s+/);
+  if (words.length <= wordCount) return text;
+  return words.slice(0, wordCount).join(" ") + "…";
+}

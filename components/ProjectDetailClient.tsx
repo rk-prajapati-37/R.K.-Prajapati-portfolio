@@ -239,7 +239,8 @@ export default function ProjectDetailClient({
 
   // Pointer-based drag (mouse/pen) support
   const onPointerDown: React.PointerEventHandler = (e) => {
-    if (zoom <= 1) return;
+    // allow pan when zoomed-in OR when in image modal so users can reposition vertically
+    if (zoom <= 1 && modalMode !== 'image') return;
     isPanningRef.current = true;
     pointerStartRef.current = { x: e.clientX, y: e.clientY };
     initialPanRef.current = { ...pan };
@@ -290,8 +291,14 @@ export default function ProjectDetailClient({
   const clampPan = (x: number, y: number, container: HTMLDivElement | null, zoomFactor: number) => {
     if (!container) return { x, y };
     const rect = container.getBoundingClientRect();
-    const maxX = Math.max(0, (rect.width * (zoomFactor - 1)) / 2);
-    const maxY = Math.max(0, (rect.height * (zoomFactor - 1)) / 2);
+    // if zoom > 1, standard clamp to avoid moving image outside viewport
+    let maxX = Math.max(0, (rect.width * (zoomFactor - 1)) / 2);
+    let maxY = Math.max(0, (rect.height * (zoomFactor - 1)) / 2);
+    // if not zoomed but it's a simple image modal, allow limited vertical reposition
+    if (zoomFactor <= 1 && modalMode === 'image') {
+      maxY = Math.max(maxY, rect.height * 0.25);
+      maxX = Math.max(maxX, rect.width * 0.08);
+    }
     const clamp = (v: number, m: number) => Math.max(-m, Math.min(m, v));
     return { x: clamp(x, maxX), y: clamp(y, maxY) };
   };
@@ -541,15 +548,14 @@ export default function ProjectDetailClient({
               className="relative max-w-4xl max-h-[90vh] flex flex-col"
             >
               {/* Main Image / Device frame (laptop) */}
-                {/* Prefer image-based Mac bezel if an asset exists at /public/images/device-mac.png */}
+              {modalMode === 'layout' ? (
                 <div className="device-frame device-frame--mac device-frame--mac-image mx-auto">
-                <div
-                  ref={modalRef}
-                  className={`device-screen ${modalMode === 'layout' ? 'overflow-auto' : 'overflow-hidden'}`}
-                  onTouchStart={onTouchStart}
-                  onTouchEnd={onTouchEnd}
-                >
-                  {modalMode === 'layout' && project.demo ? (
+                  <div
+                    ref={modalRef}
+                    className={`device-screen ${modalMode === 'layout' ? 'overflow-auto' : 'overflow-hidden'}`}
+                    onTouchStart={onTouchStart}
+                    onTouchEnd={onTouchEnd}
+                  >
                     <iframe
                       src={project.demo}
                       className="w-full h-full"
@@ -558,11 +564,20 @@ export default function ProjectDetailClient({
                       onLoad={() => setIsIframeLoaded(true)}
                       onError={() => setIsIframeLoaded(false)}
                     />
-                  ) : (
+                  </div>
+                </div>
+              ) : (
+                <div className="mx-auto bg-black rounded-md overflow-hidden" style={{ maxWidth: '100%', maxHeight: '80vh' }}>
+                  <div
+                    ref={modalRef}
+                    className={`w-full h-full overflow-hidden`}
+                    onTouchStart={onTouchStart}
+                    onTouchEnd={onTouchEnd}
+                  >
                     <img
                       src={selectedImage || project.imageUrl || ''}
                       alt="Gallery view"
-                      className="w-full h-full object-contain project-modal-image"
+                      className="w-full h-auto max-h-[80vh] object-contain project-modal-image"
                       style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
                       onPointerDown={onPointerDown}
                       onPointerMove={onPointerMove}
@@ -572,9 +587,9 @@ export default function ProjectDetailClient({
                       onTouchMove={onTouchMove}
                       onTouchEnd={onTouchEnd}
                     />
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
               {/* Layout iframe fallback: show notice/cta if not loaded */}
               {modalMode === 'layout' && project.demo && isIframeLoaded === false && (
                 <div className="mt-3 p-3 bg-yellow-50 text-yellow-900 rounded">This site may block framing; <a href={project.demo} target="_blank" rel="noopener noreferrer" className="underline">Open in a new tab</a>.</div>
@@ -584,47 +599,62 @@ export default function ProjectDetailClient({
               <div className="flex items-center justify-between gap-2 mt-4">
                 <div className="text-white font-semibold">{project.title || 'Project'}</div>
                 <div className="flex items-center gap-2">
-                  <button aria-label="Zoom" onClick={() => setZoom((z) => z === 1 ? 2 : 1)} className="btn text-sm">{zoom === 1 ? 'Zoom' : 'Reset'}</button>
-                  <button
-                    aria-label="Toggle Fullscreen"
-                    onClick={() => {
-                      const el = modalRef.current?.parentElement;
-                      if (!el) return;
-                      if (!document.fullscreenElement) {
-                        el.requestFullscreen?.();
-                        setFullscreen(true);
-                      } else {
-                        document.exitFullscreen?.();
-                        setFullscreen(false);
-                      }
-                    }}
-                    className="btn text-sm"
-                  >
-                    {fullscreen ? 'Exit' : 'Fullscreen'}
-                  </button>
-                  <button aria-label="Open in new tab" onClick={() => window.open(selectedImage || project.imageUrl || project.demo || '', '_blank')} className="btn text-sm">Open</button>
+                  {/* When in image mode, keep only minimal actions */}
+                  {modalMode === 'image' ? (
+                    <>
+                      <button aria-label="Open in new tab" onClick={() => window.open(selectedImage || project.imageUrl || project.demo || '', '_blank')} className="btn text-sm">Open</button>
+                      <button className="btn text-sm" onClick={() => { const link = document.createElement('a'); link.href = selectedImage || project.imageUrl || ''; link.download = `${project.title || 'project'}.png`; document.body.appendChild(link); link.click(); link.remove(); }}>Download</button>
+                    </>
+                  ) : (
+                    <>
+                      <button aria-label="Zoom" onClick={() => setZoom((z) => z === 1 ? 2 : 1)} className="btn text-sm">{zoom === 1 ? 'Zoom' : 'Reset'}</button>
+                      <button
+                        aria-label="Toggle Fullscreen"
+                        onClick={() => {
+                          const el = modalRef.current?.parentElement;
+                          if (!el) return;
+                          if (!document.fullscreenElement) {
+                            el.requestFullscreen?.();
+                            setFullscreen(true);
+                          } else {
+                            document.exitFullscreen?.();
+                            setFullscreen(false);
+                          }
+                        }}
+                        className="btn text-sm"
+                      >
+                        {fullscreen ? 'Exit' : 'Fullscreen'}
+                      </button>
+                      <button aria-label="Open in new tab" onClick={() => window.open(selectedImage || project.imageUrl || project.demo || '', '_blank')} className="btn text-sm">Open</button>
+                    </>
+                  )}
                 </div>
                 {showZoomIndicator && (
                   <div className="zoom-indicator">{Math.round(zoom * 100)}%</div>
                 )}
               </div>
               <div className="mt-2 flex items-center gap-2 justify-between">
-                <div className="hidden md:flex items-center gap-2">
-                  <label className="text-gray-300 text-sm">Zoom</label>
-                  <input type="range" min={1} max={3} step={0.1} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} onMouseUp={() => snapZoom(zoom)} onTouchEnd={() => snapZoom(zoom)} className="w-40" />
-                  <span className="text-gray-300 text-xs">{zoom.toFixed(2)}x</span>
-                </div>
-                <div className="hidden md:flex items-center gap-2">
-                  <label className="text-gray-300 text-sm">Momentum</label>
-                  <input type="range" min={0.8} max={0.98} step={0.01} value={friction} onChange={(e) => setFriction(Number(e.target.value))} className="w-36" />
-                  <span className="text-gray-300 text-xs">{friction}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="btn text-sm hidden md:block" onClick={() => { const link = document.createElement('a'); link.href = selectedImage || project.imageUrl || ''; link.download = `${project.title || 'project'}.png`; document.body.appendChild(link); link.click(); link.remove(); }}>Download</button>
-                  <button className="btn text-sm" onClick={() => setShowSettings((v) => !v)}>⚙️</button>
-                </div>
+                {/* When simple image modal, hide advanced controls on small screens */}
+                {modalMode === 'layout' && (
+                  <>
+                    <div className="hidden md:flex items-center gap-2">
+                      <label className="text-gray-300 text-sm">Zoom</label>
+                      <input type="range" min={1} max={3} step={0.1} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} onMouseUp={() => snapZoom(zoom)} onTouchEnd={() => snapZoom(zoom)} className="w-40" />
+                      <span className="text-gray-300 text-xs">{zoom.toFixed(2)}x</span>
+                    </div>
+                    <div className="hidden md:flex items-center gap-2">
+                      <label className="text-gray-300 text-sm">Momentum</label>
+                      <input type="range" min={0.8} max={0.98} step={0.01} value={friction} onChange={(e) => setFriction(Number(e.target.value))} className="w-36" />
+                      <span className="text-gray-300 text-xs">{friction}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button className="btn text-sm hidden md:block" onClick={() => { const link = document.createElement('a'); link.href = selectedImage || project.imageUrl || ''; link.download = `${project.title || 'project'}.png`; document.body.appendChild(link); link.click(); link.remove(); }}>Download</button>
+                      <button className="btn text-sm" onClick={() => setShowSettings((v) => !v)}>⚙️</button>
+                    </div>
+                  </>
+                )}
               </div>
-              {showSettings && (
+              {showSettings && modalMode === 'layout' && (
                 <div className="mt-2 bg-white/5 p-3 rounded-md text-gray-200 hidden md:block">
                   <div className="grid grid-cols-3 gap-2 items-center">
                     <label>Pad top</label>

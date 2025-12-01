@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
-import { toPlainText } from "../lib/portableText";
+import { toPlainText, toPlainWords } from "../lib/portableText";
 
 type Experience = {
   _id: string;
@@ -100,7 +100,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                         <div className="max-w-none">
                           {!isExpanded ? (
                             <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                              {toPlainText(descValue).slice(0, 320) + (toPlainText(descValue).length > 320 ? '…' : '')}
+                              {toPlainWords(descValue, 30)}
                             </div>
                           ) : (
                             <div className="portable-text">
