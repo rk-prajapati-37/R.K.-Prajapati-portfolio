@@ -92,8 +92,8 @@ export default function CertificateClient({ certificates }: { certificates: Cert
                 <div className="mt-3 text-gray-700">
                   <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
                       {!isExpanded ? (
-                        <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                            {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
+                        <div className="text-gray-700" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
                         </div>
                       ) : (
                         <div id={`cert-desc-${cert._id}`} className="portable-text" style={{ overflow: 'visible' }}>

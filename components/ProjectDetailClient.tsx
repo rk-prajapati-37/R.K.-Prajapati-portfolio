@@ -585,10 +585,10 @@ export default function ProjectDetailClient({
                     onTouchStart={onTouchStart}
                     onTouchEnd={onTouchEnd}
                   >
-                    <img
-                      src={selectedImage || project.imageUrl || ''}
-                      alt="Gallery view"
-                      className="w-full h-auto max-h-[80vh] object-contain project-modal-image"
+                      <img
+                        src={selectedImage || project.imageUrl || allImages[0] || ''}
+                        alt={selectedImage ? 'Gallery view' : (project.title || 'Project image')}
+                        className="w-full h-auto max-h-[80vh] object-contain project-modal-image"
                       style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
                       onPointerDown={onPointerDown}
                       onPointerMove={onPointerMove}
@@ -598,6 +598,9 @@ export default function ProjectDetailClient({
                       onTouchMove={onTouchMove}
                       onTouchEnd={onTouchEnd}
                     />
+                    {!(selectedImage || project.imageUrl || allImages[0]) && (
+                      <div className="p-6 text-center text-gray-400">No image available</div>
+                    )}
                   </div>
                 </div>
               )}
