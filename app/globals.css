@@ -166,6 +166,9 @@ html:not([data-theme="light"]) .text-gray-600{
 /* Image-based Mac frame (use a PNG/SVG bezel in /public/images/) */
 .device-frame--mac-image{position:relative;padding:60px 56px 80px;border-radius:0;background-color:transparent}
 .device-frame--mac-image .device-screen{background:transparent;border-radius:6px;position:relative;z-index:10}
+.device-frame--mac-image .device-screen{display:flex;align-items:center;justify-content:center}
+.device-frame--mac .device-screen{max-height:calc(90vh - 120px)}
+.device-frame--mac-image .device-screen img{max-width:100%;max-height:calc(90vh - 200px);width:auto;object-fit:contain}
 .device-frame--mac-image::after{content:'';position:absolute;inset:0;display:block;background-image:url('/images/device-mac.png');background-repeat:no-repeat;background-size:contain;background-position:center;border-radius:0;z-index:20;pointer-events:none}
 
 /* If you have an iMac-style bezel (taller top & chin), use a different image and tweak padding */

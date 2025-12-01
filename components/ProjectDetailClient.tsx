@@ -282,7 +282,7 @@ export default function ProjectDetailClient({
                           onClick={(e) => { e.stopPropagation(); openLayout(img, e); }}
                           className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg"
                         >
-                          View Website Layout
+                          View Layout Image
                         </button>
                       )}
                     </div>

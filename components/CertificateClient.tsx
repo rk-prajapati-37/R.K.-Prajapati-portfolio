@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
+import { toPlainText } from "../lib/portableText";
 
 type Certificate = {
   _id: string;
@@ -79,22 +80,16 @@ export default function CertificateClient({ certificates }: { certificates: Cert
               <p className="text-xs text-gray-500 mt-2">{formatDate(cert.date)}</p>
               {descValue && (
                 <div className="mt-3 text-gray-700">
-                  <div
-                    className="max-w-none"
-                    style={
-                      isExpanded
-                        ? undefined
-                        : {
-                            overflow: "hidden",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: "vertical",
-                          } as any
-                    }
-                  >
-                      <div className="portable-text">
-                        <PortableTextClient value={descValue} />
-                      </div>
+                  <div className="max-w-none">
+                      {!isExpanded ? (
+                        <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
+                          {toPlainText(descValue).slice(0, 240) + (toPlainText(descValue).length > 240 ? '…' : '')}
+                        </div>
+                      ) : (
+                        <div className="portable-text">
+                          <PortableTextClient value={descValue} />
+                        </div>
+                      )}
                   </div>
                     <button onClick={() => toggleExpanded(cert._id)} className="text-sm text-blue-700 mt-2">
                       {isExpanded ? "Show less" : "Show more"}

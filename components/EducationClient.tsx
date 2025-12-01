@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
+import { toPlainText } from "../lib/portableText";
 
 type Education = {
   _id: string;
@@ -42,23 +43,17 @@ export default function EducationClient({ educations }: { educations: Education[
 
   const formatDate = (date: string) => {
     if (!date) return "";
-    try {
-      return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short" });
-    } catch {
-      return date;
-    }
-  };
-
-  return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.2 }}
-      className="space-y-4"
-    >
-      {sortedEducations.map((edu) => {
-        const isExpanded = expandedId === edu._id;
+                  <div className="max-w-none">
+                    {!isExpanded ? (
+                      <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
+                        {toPlainText(text).slice(0, 240) + (toPlainText(text).length > 240 ? '…' : '')}
+                      </div>
+                    ) : (
+                      <div className="portable-text">
+                        <PortableTextClient value={text} />
+                      </div>
+                    )}
+                  </div>
         const institutionUrl = (edu as any).institutionUrl;
         const descValue = (edu as any).description ?? (edu as any).desc ?? (edu as any).content;
         // Plain text extraction removed; we render PortableText directly for expanded content.
