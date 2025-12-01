@@ -72,6 +72,9 @@ export default function Navbar() {
             </svg>
           )}
         </button>
+        <div className="md:hidden ml-3">
+          <ThemeToggle />
+        </div>
       </div>
 
       <div className={`${open ? "block" : "hidden"} md:hidden`}>

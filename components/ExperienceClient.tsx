@@ -78,13 +78,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                       <span className="text-xs text-gray-600">🏢</span>
                     </div>
                   )}
-                  {companyUrl ? (
-                    <a href={companyUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">
-                      {exp.company}
-                    </a>
-                  ) : (
-                    <p className="text-blue-600 font-medium">{exp.company}</p>
-                  )}
+                    
 
                   {exp.logo && (
                     <div className="relative group inline-block">
@@ -106,7 +100,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                         <div className="max-w-none">
                           {!isExpanded ? (
                             <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                              {toPlainText(descValue).slice(0, 240) + (toPlainText(descValue).length > 240 ? '…' : '')}
+                              {toPlainText(descValue).slice(0, 320) + (toPlainText(descValue).length > 320 ? '…' : '')}
                             </div>
                           ) : (
                             <div className="portable-text">
@@ -119,12 +113,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
 
-                    {isExpanded && (
-                      <div className="mt-2 text-gray-700 portable-text">
-                        {/* Expanded: full portable text so headings, bold, links render */}
-                        <PortableTextClient value={descValue} />
-                      </div>
-                    )}
+                    {/* full content shown by the main conditional when isExpanded === true */}
                   </div>
                 )}
               </div>

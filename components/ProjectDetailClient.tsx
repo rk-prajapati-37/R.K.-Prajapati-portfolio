@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,26 @@ export default function ProjectDetailClient({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [modalMode, setModalMode] = useState<'image' | 'layout'>('image');
   const [allImages, setAllImages] = useState<string[]>([]);
+  const [zoom, setZoom] = useState<number>(1);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [isIframeLoaded, setIsIframeLoaded] = useState<boolean | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const touchStartRef = useRef<number | null>(null);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isPanningRef = useRef(false);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const initialPanRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const pinchStartDistRef = useRef<number | null>(null);
+  const initialZoomRef = useRef<number | null>(null);
+  const lastTapRef = useRef<number | null>(null);
+  // Momentum / velocity tracking
+  const velocityRef = useRef<{ vx: number; vy: number }>({ vx: 0, vy: 0 });
+  const rafRef = useRef<number | null>(null);
+  const lastMoveRef = useRef<{ t: number; x: number; y: number } | null>(null);
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false);
+  const zoomLevels = [1, 1.5, 2, 3];
+  const [friction, setFriction] = useState(0.94);
+  const [showSettings, setShowSettings] = useState(false);
 
   const openGallery = (image: string) => {
     const images = [project?.imageUrl, ...(project?.extraImages || [])].filter(
@@ -50,6 +70,7 @@ export default function ProjectDetailClient({
     } else {
       setSelectedImage(null);
       setModalMode('layout');
+      setIsIframeLoaded(null);
     }
   };
 
@@ -65,6 +86,214 @@ export default function ProjectDetailClient({
     if (currentImageIndex > 0) {
       setSelectedImage(allImages[currentImageIndex - 1]);
     }
+  };
+
+  // Keyboard navigation and ESC to close
+  useEffect(() => {
+    if (!selectedImage && modalMode !== 'layout') return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedImage(null);
+        setModalMode('image');
+      } else if (e.key === 'ArrowRight') {
+        goToNext();
+      } else if (e.key === 'ArrowLeft') {
+        goToPrev();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedImage, modalMode, allImages]);
+
+  // Reset zoom when modal changes
+  useEffect(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, [selectedImage, modalMode]);
+
+  // Reset pan when zoom resets to 1
+  useEffect(() => {
+    if (zoom === 1) setPan({ x: 0, y: 0 });
+  }, [zoom]);
+
+  // show zoom indicator whenever zoom changes
+  useEffect(() => {
+    setShowZoomIndicator(true);
+    const t = setTimeout(() => setShowZoomIndicator(false), 900);
+    return () => clearTimeout(t);
+  }, [zoom]);
+
+  // Apply momentum after pointer/touch release
+  const startInertia = (vx: number, vy: number) => {
+    cancelAnimationFrame(rafRef.current || 0);
+    const step = () => {
+      // decay velocity
+      vx *= friction;
+      vy *= friction;
+      const newX = pan.x + vx;
+      const newY = pan.y + vy;
+      const clamped = clampPan(newX, newY, modalRef.current, zoom);
+      setPan({ x: clamped.x, y: clamped.y });
+      // stop when velocity small
+      if (Math.abs(vx) > 0.05 || Math.abs(vy) > 0.05) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        cancelAnimationFrame(rafRef.current || 0);
+      }
+    };
+    rafRef.current = requestAnimationFrame(step);
+  };
+
+  // Touch swipe handling for mobile
+  const onTouchStart = (e: React.TouchEvent) => {
+    // double-tap detection
+    const now = Date.now();
+    if (lastTapRef.current && now - lastTapRef.current < 300) {
+      // double-tap -> toggle zoom
+      setZoom((z) => (z === 1 ? 2 : 1));
+      lastTapRef.current = null;
+      e.preventDefault();
+      return;
+    }
+    lastTapRef.current = now;
+
+    // pinch start
+    if (e.touches && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchStartDistRef.current = Math.hypot(dx, dy);
+      initialZoomRef.current = zoom;
+    } else {
+      touchStartRef.current = e.touches?.[0]?.clientX || null;
+      // single-finger pan start
+      if (zoom > 1 && e.touches && e.touches.length === 1) {
+        isPanningRef.current = true;
+        pointerStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        initialPanRef.current = { ...pan };
+      }
+    }
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (pinchStartDistRef.current && e.touches && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const ratio = dist / (pinchStartDistRef.current || dist);
+      const newZoom = Math.max(1, Math.min(3, (initialZoomRef.current || zoom) * ratio));
+      setZoom(newZoom);
+      setShowZoomIndicator(true);
+      return;
+    }
+    if (isPanningRef.current && e.touches && e.touches.length === 1 && pointerStartRef.current) {
+      const dx = e.touches[0].clientX - pointerStartRef.current.x;
+      const dy = e.touches[0].clientY - pointerStartRef.current.y;
+      const newPan = { x: initialPanRef.current.x + dx, y: initialPanRef.current.y + dy };
+      const clamped = clampPan(newPan.x, newPan.y, modalRef.current, zoom);
+      const now = Date.now();
+      if (lastMoveRef.current) {
+        const dt = Math.max(16, now - lastMoveRef.current.t);
+        const vx = (clamped.x - lastMoveRef.current.x) / (dt / 16);
+        const vy = (clamped.y - lastMoveRef.current.y) / (dt / 16);
+        velocityRef.current = { vx, vy };
+      }
+      lastMoveRef.current = { t: now, x: clamped.x, y: clamped.y };
+      setPan({ x: clamped.x, y: clamped.y });
+      return;
+    }
+    touchStartRef.current = touchStartRef.current || e.touches?.[0]?.clientX || null;
+  };
+
+  const snapZoom = (z: number) => {
+    const nearest = zoomLevels.reduce((prev, curr) => Math.abs(curr - z) < Math.abs(prev - z) ? curr : prev, zoomLevels[0]);
+    setZoom(nearest);
+    setShowZoomIndicator(true);
+    setTimeout(() => setShowZoomIndicator(false), 900);
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    // reset pinch
+    if (pinchStartDistRef.current) {
+      // pinch ended -> snap to nearest
+      snapZoom(zoom);
+    }
+    pinchStartDistRef.current = null;
+    initialZoomRef.current = null;
+    if (isPanningRef.current) {
+      isPanningRef.current = false;
+      pointerStartRef.current = null;
+      // start inertia
+      const { vx, vy } = velocityRef.current;
+      startInertia(vx, vy);
+    } else {
+      const start = touchStartRef.current;
+      const end = e.changedTouches?.[0]?.clientX || null;
+      if (start == null || end == null) return;
+      const delta = start - end;
+      if (Math.abs(delta) > 30) {
+        if (delta > 0) goToNext();
+        else goToPrev();
+      }
+    }
+    touchStartRef.current = null;
+  };
+
+  // Pointer-based drag (mouse/pen) support
+  const onPointerDown: React.PointerEventHandler = (e) => {
+    if (zoom <= 1) return;
+    isPanningRef.current = true;
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+    initialPanRef.current = { ...pan };
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    // reset velocity tracking
+    velocityRef.current = { vx: 0, vy: 0 };
+    lastMoveRef.current = { t: Date.now(), x: pan.x, y: pan.y };
+  };
+  const onPointerMove: React.PointerEventHandler = (e) => {
+    if (!isPanningRef.current || !pointerStartRef.current) return;
+    const dx = e.clientX - pointerStartRef.current.x;
+    const dy = e.clientY - pointerStartRef.current.y;
+    const newPan = { x: initialPanRef.current.x + dx, y: initialPanRef.current.y + dy };
+    const clamped = clampPan(newPan.x, newPan.y, modalRef.current, zoom);
+    // track velocity in px per frame
+    const now = Date.now();
+    if (lastMoveRef.current) {
+      const dt = Math.max(16, now - lastMoveRef.current.t);
+      const vx = (clamped.x - lastMoveRef.current.x) / (dt / 16);
+      const vy = (clamped.y - lastMoveRef.current.y) / (dt / 16);
+      velocityRef.current = { vx, vy };
+    }
+    lastMoveRef.current = { t: now, x: clamped.x, y: clamped.y };
+    setPan({ x: clamped.x, y: clamped.y });
+  };
+  const onPointerUp: React.PointerEventHandler = (e) => {
+    if (isPanningRef.current) {
+      isPanningRef.current = false;
+      try { (e.target as Element).releasePointerCapture?.(e.pointerId); } catch {/* ignore */}
+      pointerStartRef.current = null;
+      // start inertia
+      const { vx, vy } = velocityRef.current;
+      startInertia(vx, vy);
+      // snap after inertia start if needed
+      if (zoom !== 1) snapZoom(zoom);
+    }
+  };
+
+  // Double click to zoom toggle
+  const onDoubleClick: React.MouseEventHandler = () => {
+    const z = zoom === 1 ? 2 : 1;
+    setZoom(z);
+    setShowZoomIndicator(true);
+    setTimeout(() => setShowZoomIndicator(false), 900);
+  };
+
+  // Clamp pan to avoid moving image too far outside viewport
+  const clampPan = (x: number, y: number, container: HTMLDivElement | null, zoomFactor: number) => {
+    if (!container) return { x, y };
+    const rect = container.getBoundingClientRect();
+    const maxX = Math.max(0, (rect.width * (zoomFactor - 1)) / 2);
+    const maxY = Math.max(0, (rect.height * (zoomFactor - 1)) / 2);
+    const clamp = (v: number, m: number) => Math.max(-m, Math.min(m, v));
+    return { x: clamp(x, maxX), y: clamp(y, maxY) };
   };
 
   const handleCategoryClick = (category: string) => {
@@ -314,19 +543,102 @@ export default function ProjectDetailClient({
               {/* Main Image / Device frame (laptop) */}
                 {/* Prefer image-based Mac bezel if an asset exists at /public/images/device-mac.png */}
                 <div className="device-frame device-frame--mac device-frame--mac-image mx-auto">
-                <div className={`device-screen ${modalMode === 'layout' ? 'overflow-auto' : 'overflow-hidden'}`}>
+                <div
+                  ref={modalRef}
+                  className={`device-screen ${modalMode === 'layout' ? 'overflow-auto' : 'overflow-hidden'}`}
+                  onTouchStart={onTouchStart}
+                  onTouchEnd={onTouchEnd}
+                >
                   {modalMode === 'layout' && project.demo ? (
                     <iframe
                       src={project.demo}
                       className="w-full h-full"
                       allowFullScreen
                       title={project.title || "Project demo"}
+                      onLoad={() => setIsIframeLoaded(true)}
+                      onError={() => setIsIframeLoaded(false)}
                     />
                   ) : (
-                    <img src={selectedImage || project.imageUrl || ''} alt="Gallery view" className="w-full h-full object-contain" />
+                    <img
+                      src={selectedImage || project.imageUrl || ''}
+                      alt="Gallery view"
+                      className="w-full h-full object-contain project-modal-image"
+                      style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+                      onPointerDown={onPointerDown}
+                      onPointerMove={onPointerMove}
+                      onPointerUp={onPointerUp}
+                      onDoubleClick={onDoubleClick}
+                      onTouchStart={onTouchStart}
+                      onTouchMove={onTouchMove}
+                      onTouchEnd={onTouchEnd}
+                    />
                   )}
                 </div>
               </div>
+              {/* Layout iframe fallback: show notice/cta if not loaded */}
+              {modalMode === 'layout' && project.demo && isIframeLoaded === false && (
+                <div className="mt-3 p-3 bg-yellow-50 text-yellow-900 rounded">This site may block framing; <a href={project.demo} target="_blank" rel="noopener noreferrer" className="underline">Open in a new tab</a>.</div>
+              )}
+
+              {/* Header / Caption & Action Buttons */}
+              <div className="flex items-center justify-between gap-2 mt-4">
+                <div className="text-white font-semibold">{project.title || 'Project'}</div>
+                <div className="flex items-center gap-2">
+                  <button aria-label="Zoom" onClick={() => setZoom((z) => z === 1 ? 2 : 1)} className="btn text-sm">{zoom === 1 ? 'Zoom' : 'Reset'}</button>
+                  <button
+                    aria-label="Toggle Fullscreen"
+                    onClick={() => {
+                      const el = modalRef.current?.parentElement;
+                      if (!el) return;
+                      if (!document.fullscreenElement) {
+                        el.requestFullscreen?.();
+                        setFullscreen(true);
+                      } else {
+                        document.exitFullscreen?.();
+                        setFullscreen(false);
+                      }
+                    }}
+                    className="btn text-sm"
+                  >
+                    {fullscreen ? 'Exit' : 'Fullscreen'}
+                  </button>
+                  <button aria-label="Open in new tab" onClick={() => window.open(selectedImage || project.imageUrl || project.demo || '', '_blank')} className="btn text-sm">Open</button>
+                </div>
+                {showZoomIndicator && (
+                  <div className="zoom-indicator">{Math.round(zoom * 100)}%</div>
+                )}
+              </div>
+              <div className="mt-2 flex items-center gap-2 justify-between">
+                <div className="hidden md:flex items-center gap-2">
+                  <label className="text-gray-300 text-sm">Zoom</label>
+                  <input type="range" min={1} max={3} step={0.1} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} onMouseUp={() => snapZoom(zoom)} onTouchEnd={() => snapZoom(zoom)} className="w-40" />
+                  <span className="text-gray-300 text-xs">{zoom.toFixed(2)}x</span>
+                </div>
+                <div className="hidden md:flex items-center gap-2">
+                  <label className="text-gray-300 text-sm">Momentum</label>
+                  <input type="range" min={0.8} max={0.98} step={0.01} value={friction} onChange={(e) => setFriction(Number(e.target.value))} className="w-36" />
+                  <span className="text-gray-300 text-xs">{friction}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button className="btn text-sm hidden md:block" onClick={() => { const link = document.createElement('a'); link.href = selectedImage || project.imageUrl || ''; link.download = `${project.title || 'project'}.png`; document.body.appendChild(link); link.click(); link.remove(); }}>Download</button>
+                  <button className="btn text-sm" onClick={() => setShowSettings((v) => !v)}>⚙️</button>
+                </div>
+              </div>
+              {showSettings && (
+                <div className="mt-2 bg-white/5 p-3 rounded-md text-gray-200 hidden md:block">
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <label>Pad top</label>
+                    <input type="number" defaultValue={60} onChange={(e) => document.documentElement.style.setProperty('--mac-pad-top', `${e.target.value}px`)} className="px-2 py-1 rounded bg-white/5" />
+                    <span className="text-xs">px</span>
+                    <label>Pad sides</label>
+                    <input type="number" defaultValue={56} onChange={(e) => document.documentElement.style.setProperty('--mac-pad-sides', `${e.target.value}px`)} className="px-2 py-1 rounded bg-white/5" />
+                    <span className="text-xs">px</span>
+                    <label>Pad bottom</label>
+                    <input type="number" defaultValue={80} onChange={(e) => document.documentElement.style.setProperty('--mac-pad-bottom', `${e.target.value}px`)} className="px-2 py-1 rounded bg-white/5" />
+                    <span className="text-xs">px</span>
+                  </div>
+                </div>
+              )}
 
               {/* Navigation Controls (moved overlay) */}
               <div className="flex items-center justify-between gap-4 mt-6 hidden lg:flex">

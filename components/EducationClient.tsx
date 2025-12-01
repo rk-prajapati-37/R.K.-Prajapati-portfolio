@@ -103,7 +103,7 @@ export default function EducationClient({ educations }: { educations: Education[
                     <div className="max-w-none">
                       {!isExpanded ? (
                         <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                          {toPlainText(descValue).slice(0, 240) + (toPlainText(descValue).length > 240 ? '…' : '')}
+                          {toPlainText(descValue).slice(0, 320) + (toPlainText(descValue).length > 320 ? '…' : '')}
                         </div>
                       ) : (
                         <div className="portable-text">
@@ -116,11 +116,7 @@ export default function EducationClient({ educations }: { educations: Education[
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
 
-                    {isExpanded && (
-                      <div className="mt-2 text-gray-700 portable-text">
-                        <PortableTextClient value={descValue} />
-                      </div>
-                    )}
+                    {/* Expanded content already rendered above when isExpanded === true */}
                   </div>
                 )}
               </div>

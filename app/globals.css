@@ -164,11 +164,16 @@ html:not([data-theme="light"]) .text-gray-600{
 .device-frame--mac:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:10px;width:78%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px}
 
 /* Image-based Mac frame (use a PNG/SVG bezel in /public/images/) */
-.device-frame--mac-image{position:relative;padding:60px 56px 80px;border-radius:0;background-color:transparent}
+.device-frame--mac-image{position:relative;padding:var(--mac-pad-top,60px) var(--mac-pad-sides,56px) var(--mac-pad-bottom,80px);border-radius:0;background-color:transparent}
 .device-frame--mac-image .device-screen{background:transparent;border-radius:6px;position:relative;z-index:10}
 .device-frame--mac-image .device-screen{display:flex;align-items:center;justify-content:center}
 .device-frame--mac .device-screen{max-height:calc(90vh - 120px)}
-.device-frame--mac-image .device-screen img{max-width:100%;max-height:calc(90vh - 200px);width:auto;object-fit:contain}
+.device-frame--mac-image .device-screen img{max-width:100%;max-height:calc(90vh - 200px);width:auto;object-fit:contain;transition:transform .25s ease}
+.project-modal-image{cursor:grab;touch-action: none}
+.project-modal-image:active{cursor:grabbing}
+.project-modal-image[style*="translate"]{will-change: transform}
+.zoom-indicator{position:absolute;right:10px;top:10px;background:rgba(0,0,0,0.6);color:#fff;padding:6px 10px;border-radius:999px;font-weight:600;z-index:70}
+.project-modal-image[style*="scale(2)"]{ /* basic panning support placeholder */ pointer-events: auto }
 .device-frame--mac-image::after{content:'';position:absolute;inset:0;display:block;background-image:url('/images/device-mac.png');background-repeat:no-repeat;background-size:contain;background-position:center;border-radius:0;z-index:20;pointer-events:none}
 
 /* If you have an iMac-style bezel (taller top & chin), use a different image and tweak padding */

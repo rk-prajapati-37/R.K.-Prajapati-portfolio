@@ -15,7 +15,7 @@ export default function Certificates() {
   return (
     <section className="mt-10 text-center">
       <h2 className="text-2xl font-bold text-red-700 mb-5">Certificates</h2>
-      <div className="flex items-center justify-center space-x-4 px-4">
+       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4">
         <button onClick={prev} className="text-3xl text-red-500">⟨</button>
         <div className="bg-white p-5 rounded-xl shadow-lg w-full max-w-xs sm:max-w-md mx-auto">
           <img src={cert.image} alt={cert.title} className="rounded-xl" />
