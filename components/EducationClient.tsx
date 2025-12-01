@@ -64,7 +64,7 @@ export default function EducationClient({ educations }: { educations: Education[
         const descValue = (edu as any).description ?? (edu as any).desc ?? (edu as any).content;
 
         return (
-          <motion.div key={edu._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
+          <motion.div key={edu._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition min-h-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{edu.degree}</h3>
@@ -100,19 +100,19 @@ export default function EducationClient({ educations }: { educations: Education[
                 </p>
                 {descValue && (
                   <div className="mt-3 text-gray-700">
-                    <div className="max-w-none">
+                    <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
                       {!isExpanded ? (
                         <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
                           {toPlainWords(descValue, 30)}
                         </div>
                       ) : (
-                        <div className="portable-text">
+                        <div id={`edu-desc-${edu._id}`} className="portable-text" style={{ overflow: 'visible' }}>
                           <PortableTextClient value={descValue} />
                         </div>
                       )}
                     </div>
 
-                    <button onClick={() => toggleExpanded(edu._id)} className="text-sm text-blue-700 mt-2">
+                    <button id={`edu-toggle-${edu._id}`} aria-expanded={isExpanded} aria-controls={`edu-desc-${edu._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(edu._id); }} className="text-sm text-blue-700 mt-2">
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
 

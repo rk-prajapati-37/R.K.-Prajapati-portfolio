@@ -62,6 +62,16 @@ body{padding-top:6rem}
   padding:calc(var(--space-lg) * 1.25) var(--space-md);
 }
 
+/* When a modal is open, blur/dim underlying content to reduce visual clutter */
+html.modal-open .site-container,
+html.modal-open main,
+html.modal-open .max-w-6xl,
+html.modal-open .min-h-screen{
+  filter: blur(4px) brightness(0.65);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Headings */
 h1,h2,h3,h4{color:var(--text);margin:0 0 0.5rem 0;font-weight:600}
 h1{font-size:2rem}

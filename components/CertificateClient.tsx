@@ -40,6 +40,16 @@ export default function CertificateClient({ certificates }: { certificates: Cert
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
+  const handleCardClick = (e: React.MouseEvent, id: string) => {
+    // Prevent toggling when clicking any interactive element inside the card
+    const target = e.target as HTMLElement;
+    if (target.closest && target.closest('a, button, input, textarea, label')) return;
+    // On mobile/tablet, tapping the card toggles expanded view for convenience
+    if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+      toggleExpanded(id);
+    }
+  };
+
   const formatDate = (date: string) => {
     if (!date) return "";
     try {
@@ -63,9 +73,9 @@ export default function CertificateClient({ certificates }: { certificates: Cert
         // Removed plain text extraction - we now render PortableText directly.
         return (
           <motion.div key={cert._id} variants={item}>
-            <div className="card rounded-lg shadow-md p-4 border border-gray-200 hover:shadow-lg transition h-full flex flex-col">
+            <div onClick={(e) => handleCardClick(e, cert._id)} aria-expanded={isExpanded} aria-controls={`cert-desc-${cert._id}`} className={`card rounded-lg shadow-md p-4 border border-gray-200 hover:shadow-lg transition h-full flex flex-col min-h-0 cursor-pointer md:cursor-auto ${isExpanded ? 'ring-2 ring-red-500' : ''}`}>
               {cert.certificateImage && (
-                <div className="mb-4 h-40 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+                <div className="mb-4 h-28 md:h-40 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
                     <img
                       src={cert.certificateImage}
                       alt={cert.title}
@@ -80,18 +90,18 @@ export default function CertificateClient({ certificates }: { certificates: Cert
               <p className="text-xs text-gray-500 mt-2">{formatDate(cert.date)}</p>
               {descValue && (
                 <div className="mt-3 text-gray-700">
-                  <div className="max-w-none">
+                  <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
                       {!isExpanded ? (
                         <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
                           {toPlainWords(descValue, 30)}
                         </div>
                       ) : (
-                        <div className="portable-text">
+                        <div id={`cert-desc-${cert._id}`} className="portable-text" style={{ overflow: 'visible' }}>
                           <PortableTextClient value={descValue} />
                         </div>
                       )}
                   </div>
-                      <button onClick={() => toggleExpanded(cert._id)} className="text-sm text-blue-700 mt-2">
+                      <button id={`cert-toggle-${cert._id}`} aria-expanded={isExpanded} aria-controls={`cert-desc-${cert._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(cert._id); }} className="text-sm text-blue-700 mt-2">
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
                     

@@ -105,6 +105,17 @@ export default function ProjectDetailClient({
     return () => window.removeEventListener('keydown', handler);
   }, [selectedImage, modalMode, allImages]);
 
+  // Add a class to the root element when modal is open to dim/blur background content
+  useEffect(() => {
+    const el = document.documentElement;
+    if (selectedImage || modalMode === 'layout') {
+      el.classList.add('modal-open');
+    } else {
+      el.classList.remove('modal-open');
+    }
+    return () => el.classList.remove('modal-open');
+  }, [selectedImage, modalMode]);
+
   // Reset zoom when modal changes
   useEffect(() => {
     setZoom(1);
@@ -538,7 +549,7 @@ export default function ProjectDetailClient({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => { setSelectedImage(null); setModalMode('image'); }}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -567,7 +578,7 @@ export default function ProjectDetailClient({
                   </div>
                 </div>
               ) : (
-                <div className="mx-auto bg-black rounded-md overflow-hidden" style={{ maxWidth: '100%', maxHeight: '80vh' }}>
+                <div className="mx-auto bg-[var(--surface)] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/5 p-4" style={{ maxWidth: '100%', maxHeight: '80vh' }}>
                   <div
                     ref={modalRef}
                     className={`w-full h-full overflow-hidden`}
@@ -595,65 +606,24 @@ export default function ProjectDetailClient({
                 <div className="mt-3 p-3 bg-yellow-50 text-yellow-900 rounded">This site may block framing; <a href={project.demo} target="_blank" rel="noopener noreferrer" className="underline">Open in a new tab</a>.</div>
               )}
 
-              {/* Header / Caption & Action Buttons */}
+              {/* Minimal header: only title (subtle)  and Close button. Buttons removed for a cleaner popup */}
               <div className="flex items-center justify-between gap-2 mt-4">
-                <div className="text-white font-semibold">{project.title || 'Project'}</div>
-                <div className="flex items-center gap-2">
-                  {/* When in image mode, keep only minimal actions */}
-                  {modalMode === 'image' ? (
-                    <>
-                      <button aria-label="Open in new tab" onClick={() => window.open(selectedImage || project.imageUrl || project.demo || '', '_blank')} className="btn text-sm">Open</button>
-                      <button className="btn text-sm" onClick={() => { const link = document.createElement('a'); link.href = selectedImage || project.imageUrl || ''; link.download = `${project.title || 'project'}.png`; document.body.appendChild(link); link.click(); link.remove(); }}>Download</button>
-                    </>
-                  ) : (
-                    <>
-                      <button aria-label="Zoom" onClick={() => setZoom((z) => z === 1 ? 2 : 1)} className="btn text-sm">{zoom === 1 ? 'Zoom' : 'Reset'}</button>
-                      <button
-                        aria-label="Toggle Fullscreen"
-                        onClick={() => {
-                          const el = modalRef.current?.parentElement;
-                          if (!el) return;
-                          if (!document.fullscreenElement) {
-                            el.requestFullscreen?.();
-                            setFullscreen(true);
-                          } else {
-                            document.exitFullscreen?.();
-                            setFullscreen(false);
-                          }
-                        }}
-                        className="btn text-sm"
-                      >
-                        {fullscreen ? 'Exit' : 'Fullscreen'}
-                      </button>
-                      <button aria-label="Open in new tab" onClick={() => window.open(selectedImage || project.imageUrl || project.demo || '', '_blank')} className="btn text-sm">Open</button>
-                    </>
-                  )}
-                </div>
+                {/* Keep the title smaller and subtle so the image remains prominent */}
+                <div className="text-white font-semibold opacity-70 text-sm">{project.title || ''}</div>
                 {showZoomIndicator && (
                   <div className="zoom-indicator">{Math.round(zoom * 100)}%</div>
                 )}
               </div>
-              <div className="mt-2 flex items-center gap-2 justify-between">
-                {/* When simple image modal, hide advanced controls on small screens */}
-                {modalMode === 'layout' && (
-                  <>
+                <div className="mt-2 flex items-center gap-2 justify-between">
+                  {/* Keeping layout-only sliders present is optional; hide for image-only popups */}
+                  {modalMode === 'layout' && (
                     <div className="hidden md:flex items-center gap-2">
                       <label className="text-gray-300 text-sm">Zoom</label>
                       <input type="range" min={1} max={3} step={0.1} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} onMouseUp={() => snapZoom(zoom)} onTouchEnd={() => snapZoom(zoom)} className="w-40" />
                       <span className="text-gray-300 text-xs">{zoom.toFixed(2)}x</span>
                     </div>
-                    <div className="hidden md:flex items-center gap-2">
-                      <label className="text-gray-300 text-sm">Momentum</label>
-                      <input type="range" min={0.8} max={0.98} step={0.01} value={friction} onChange={(e) => setFriction(Number(e.target.value))} className="w-36" />
-                      <span className="text-gray-300 text-xs">{friction}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="btn text-sm hidden md:block" onClick={() => { const link = document.createElement('a'); link.href = selectedImage || project.imageUrl || ''; link.download = `${project.title || 'project'}.png`; document.body.appendChild(link); link.click(); link.remove(); }}>Download</button>
-                      <button className="btn text-sm" onClick={() => setShowSettings((v) => !v)}>⚙️</button>
-                    </div>
-                  </>
-                )}
-              </div>
+                  )}
+                </div>
               {showSettings && modalMode === 'layout' && (
                 <div className="mt-2 bg-white/5 p-3 rounded-md text-gray-200 hidden md:block">
                   <div className="grid grid-cols-3 gap-2 items-center">
@@ -724,7 +694,7 @@ export default function ProjectDetailClient({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => { setSelectedImage(null); setModalMode('image'); }}
-                className="absolute top-4 right-4 z-60 text-white text-3xl font-bold hover:text-gray-300 transition"
+                className="absolute top-4 right-4 z-60 bg-white/5 backdrop-blur-sm w-11 h-11 flex items-center justify-center rounded-full text-white text-2xl font-medium hover:bg-white/8 transition"
                 aria-label="Close gallery"
               >
                 ✕

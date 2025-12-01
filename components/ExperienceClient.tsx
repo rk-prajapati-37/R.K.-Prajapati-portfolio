@@ -66,7 +66,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
         // We no longer need plainText extraction since
         // PortableTextClient handles both block/array and string rendering.
         return (
-          <motion.div key={exp._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
+          <motion.div key={exp._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition min-h-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{exp.position}</h3>
@@ -97,19 +97,19 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                 {descValue && (
                   <div className="mt-3 text-gray-700">
                     {/* Collapsed: portable text but visually clamped to 3 lines */}
-                        <div className="max-w-none">
-                          {!isExpanded ? (
-                            <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                              {toPlainWords(descValue, 30)}
+                        <div className={`max-w-none ${isExpanded ? '' : ''}`} style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
+                              {!isExpanded ? (
+                                <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
+                                  {toPlainWords(descValue, 30)}
+                                </div>
+                              ) : (
+                                <div id={`exp-desc-${exp._id}`} className="portable-text" style={{ overflow: 'visible' }}>
+                                  <PortableTextClient value={descValue} />
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <div className="portable-text">
-                              <PortableTextClient value={descValue} />
-                            </div>
-                          )}
-                        </div>
 
-                    <button onClick={() => toggleExpanded(exp._id)} className="text-sm text-blue-700 mt-2">
+                    <button id={`exp-toggle-${exp._id}`} aria-expanded={isExpanded} aria-controls={`exp-desc-${exp._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(exp._id); }} className="text-sm text-blue-700 mt-2">
                       {isExpanded ? "Show less" : "Show more"}
                     </button>
 
