@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
-import { toPlainText, toPlainWords } from "../lib/portableText";
+import { toPlainText, toPlainWords, toPlainFirstParagraph } from "../lib/portableText";
 
 type Experience = {
   _id: string;
@@ -100,7 +100,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                         <div className={`max-w-none ${isExpanded ? '' : ''}`} style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
                               {!isExpanded ? (
                                 <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                                  {toPlainWords(descValue, 30)}
+                                  {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
                                 </div>
                               ) : (
                                 <div id={`exp-desc-${exp._id}`} className="portable-text" style={{ overflow: 'visible' }}>
@@ -109,9 +109,11 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                               )}
                             </div>
 
-                    <button id={`exp-toggle-${exp._id}`} aria-expanded={isExpanded} aria-controls={`exp-desc-${exp._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(exp._id); }} className="text-sm text-blue-700 mt-2">
-                      {isExpanded ? "Show less" : "Show more"}
+                    <div className="mt-2 flex justify-end">
+                      <button id={`exp-toggle-${exp._id}`} aria-expanded={isExpanded} aria-controls={`exp-desc-${exp._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(exp._id); }} className={`text-sm font-semibold mt-2 text-red-600`}>
+                      {isExpanded ? "show less" : "show more"}
                     </button>
+                    </div>
 
                     {/* full content shown by the main conditional when isExpanded === true */}
                   </div>

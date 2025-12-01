@@ -96,9 +96,7 @@ export default function Navbar() {
           <Link href="/testimonials" onClick={() => setOpen(false)} className="block">Testimonials</Link>
           <Link href="/contact" onClick={() => setOpen(false)} className="block">Contact</Link>
         </div>
-        <div className="md:hidden px-4 py-3 border-t border-gray-200 flex items-center justify-center">
-          <ThemeToggle />
-        </div>
+        {/* Theme toggle is intentionally kept in header for mobile - remove duplicate in menu */}
       </div>
     </nav>
   );

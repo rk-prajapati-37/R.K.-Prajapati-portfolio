@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
-import { toPlainText, toPlainWords } from "../lib/portableText";
+import { toPlainText, toPlainWords, toPlainFirstParagraph } from "../lib/portableText";
 
 type Education = {
   _id: string;
@@ -99,22 +99,24 @@ export default function EducationClient({ educations }: { educations: Education[
                   {formatDate(edu.startDate)} - {formatDate(edu.endDate || "")}
                 </p>
                 {descValue && (
-                  <div className="mt-3 text-gray-700">
-                    <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
-                      {!isExpanded ? (
-                        <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                          {toPlainWords(descValue, 30)}
-                        </div>
-                      ) : (
-                        <div id={`edu-desc-${edu._id}`} className="portable-text" style={{ overflow: 'visible' }}>
-                          <PortableTextClient value={descValue} />
-                        </div>
-                      )}
-                    </div>
+                    <div className="mt-3 text-gray-700">
+                      <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
+                        {!isExpanded ? (
+                          <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
+                            {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
+                          </div>
+                        ) : (
+                          <div id={`edu-desc-${edu._id}`} className="portable-text" style={{ overflow: 'visible' }}>
+                            <PortableTextClient value={descValue} />
+                          </div>
+                        )}
+                      </div>
 
-                    <button id={`edu-toggle-${edu._id}`} aria-expanded={isExpanded} aria-controls={`edu-desc-${edu._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(edu._id); }} className="text-sm text-blue-700 mt-2">
-                      {isExpanded ? "Show less" : "Show more"}
+                      <div className="mt-2 flex justify-end">
+                         <button id={`edu-toggle-${edu._id}`} aria-expanded={isExpanded} aria-controls={`edu-desc-${edu._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(edu._id); }} className={`text-sm font-semibold mt-2 text-red-600`}>
+                          {isExpanded ? "show less" : "show more"}
                     </button>
+                      </div>
 
                     {/* Expanded content already rendered above when isExpanded === true */}
                   </div>

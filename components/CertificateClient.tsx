@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
-import { toPlainText, toPlainWords } from "../lib/portableText";
+import { toPlainText, toPlainWords, toPlainFirstParagraph } from "../lib/portableText";
 
 type Certificate = {
   _id: string;
@@ -93,7 +93,7 @@ export default function CertificateClient({ certificates }: { certificates: Cert
                   <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
                       {!isExpanded ? (
                         <div className="text-gray-700" style={{ whiteSpace: 'pre-wrap' }}>
-                          {toPlainWords(descValue, 30)}
+                            {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
                         </div>
                       ) : (
                         <div id={`cert-desc-${cert._id}`} className="portable-text" style={{ overflow: 'visible' }}>
@@ -101,9 +101,11 @@ export default function CertificateClient({ certificates }: { certificates: Cert
                         </div>
                       )}
                   </div>
-                      <button id={`cert-toggle-${cert._id}`} aria-expanded={isExpanded} aria-controls={`cert-desc-${cert._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(cert._id); }} className="text-sm text-blue-700 mt-2">
-                      {isExpanded ? "Show less" : "Show more"}
+                      <div className="mt-2 flex justify-end">
+                        <button id={`cert-toggle-${cert._id}`} aria-expanded={isExpanded} aria-controls={`cert-desc-${cert._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(cert._id); }} className={`text-sm font-semibold mt-2 text-red-600`}>
+                          {isExpanded ? "show less" : "show more"}
                     </button>
+                      </div>
                     
                 </div>
               )}
