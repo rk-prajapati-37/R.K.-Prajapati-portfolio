@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
+import { toPlainText, toPlainWords, toPlainFirstParagraph } from "../lib/portableText";
 
 type Experience = {
   _id: string;
@@ -38,7 +39,17 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
   const sortedExperiences = [...experiences].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
   const toggleExpanded = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId((prev) => {
+      const next = prev === id ? null : id;
+      if (next === id) {
+        // Scroll the expanded content into view a bit after the DOM updates
+        setTimeout(() => {
+          const el = document.getElementById(`exp-desc-${id}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 80);
+      }
+      return next;
+    });
   };
 
   const formatDate = (date: string) => {
@@ -62,32 +73,25 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
         const isExpanded = expandedId === exp._id;
         const companyUrl = (exp as any).companyUrl;
         const descValue = (exp as any).description ?? (exp as any).desc ?? (exp as any).content;
-        const extractPlain = (val: any) => {
-          if (!val) return "";
-          if (typeof val === "string") return val;
-          try {
-            if (Array.isArray(val)) {
-              return val
-                .map((block) => {
-                  if (typeof block === "string") return block;
-                  if (block?.children && Array.isArray(block.children)) {
-                    return block.children.map((c: any) => c.text || "").join("");
-                  }
-                  return "";
-                })
-                .join("\n\n");
-            }
-            return String(val);
-          } catch {
-            return "";
-          }
-        };
-        const plainText = extractPlain(descValue);
+        // We no longer need plainText extraction since
+        // PortableTextClient handles both block/array and string rendering.
         return (
-          <motion.div key={exp._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
+          <motion.div key={exp._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition min-h-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{exp.position}</h3>
+                {/* Render company name with optional link */}
+                {exp.company && (
+                  <div className="mt-1">
+                    {companyUrl ? (
+                      <a href={companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-800 hover:underline">
+                        {exp.company}
+                      </a>
+                    ) : (
+                      <p className="text-sm font-medium text-gray-800">{exp.company}</p>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center gap-2 mt-1">
                   {exp.logo ? (
                     <img src={exp.logo} alt={`${exp.company} logo`} className="w-8 h-8 object-contain rounded-full bg-white p-1 border" />
@@ -96,13 +100,7 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                       <span className="text-xs text-gray-600">🏢</span>
                     </div>
                   )}
-                  {companyUrl ? (
-                    <a href={companyUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">
-                      {exp.company}
-                    </a>
-                  ) : (
-                    <p className="text-blue-600 font-medium">{exp.company}</p>
-                  )}
+                    
 
                   {exp.logo && (
                     <div className="relative group inline-block">
@@ -120,28 +118,26 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
                 </p>
                 {descValue && (
                   <div className="mt-3 text-gray-700">
-                    <div
-                      className="max-w-none"
-                      style={
-                        isExpanded
-                          ? undefined
-                          : {
-                              overflow: "hidden",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: "vertical",
-                            } as any
-                      }
-                    >
-                      {/* support alternative field names if description is stored differently */}
-                      <PortableTextClient value={descValue} />
+                    {/* Collapsed: portable text but visually clamped to 3 lines */}
+                        <div className={`max-w-none ${isExpanded ? '' : ''}`} style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
+                              {!isExpanded ? (
+                                <div className={`text-gray-700 portable-text-collapse ${isExpanded ? 'expanded' : ''}`}>
+                                  {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
+                                </div>
+                              ) : (
+                                <div id={`exp-desc-${exp._id}`} className="portable-text" style={{ overflow: 'visible' }}>
+                                  <PortableTextClient value={descValue} />
+                                </div>
+                              )}
+                            </div>
+
+                    <div className="mt-2 flex justify-end">
+                      <button id={`exp-toggle-${exp._id}`} aria-expanded={isExpanded} aria-controls={`exp-desc-${exp._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(exp._id); }} className={`text-sm font-semibold mt-2 text-red-600`}>
+                      {isExpanded ? "show less" : "show more"}
+                    </button>
                     </div>
 
-                    <button onClick={() => toggleExpanded(exp._id)} className="text-sm text-blue-700 mt-2">
-                      {isExpanded ? "Show less" : "Show more"}
-                    </button>
-
-                    {isExpanded && plainText && <div className="mt-2 text-gray-700 whitespace-pre-wrap">{plainText}</div>}
+                    {/* full content shown by the main conditional when isExpanded === true */}
                   </div>
                 )}
               </div>

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { experienceData } from "../data/experienceData";
 import Image from "next/image";
+import PortableTextClient from "@/components/PortableTextClient";
 
 export default function Experience() {
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -40,7 +41,9 @@ export default function Experience() {
 
             {expanded === i ? (
               <>
-                <p className="text-gray-700 mt-3">{exp.description}</p>
+                <div className="text-gray-700 mt-3">
+                  <PortableTextClient value={exp.description} />
+                </div>
                 <button
                   className="text-red-600 mt-2"
                   onClick={() => setExpanded(null)}

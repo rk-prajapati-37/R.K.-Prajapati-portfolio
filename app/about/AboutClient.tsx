@@ -48,7 +48,10 @@ export default function AboutClient({
       if (valid.includes(hash)) {
         setActiveTab(hash as any);
         const el = document.getElementById(hash);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (el) {
+          // allow layout changes / animation to settle before scrolling to correct position
+          setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+        }
       }
     };
 
@@ -176,25 +179,25 @@ export default function AboutClient({
 
         {/* Tab Content */}
         {activeTab === "experience" && experiences.length > 0 && (
-          <motion.div id="experience" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div id="experience" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <ExperienceClient experiences={experiences} />
           </motion.div>
         )}
 
         {activeTab === "skills" && (
-          <motion.div id="skills" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div id="skills" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <SkillsGridClient skills={skills} />
           </motion.div>
         )}
 
         {activeTab === "education" && educations.length > 0 && (
-          <motion.div id="education" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div id="education" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <EducationClient educations={educations} />
           </motion.div>
         )}
 
         {activeTab === "certificates" && certificates.length > 0 && (
-          <motion.div id="certificates" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div id="certificates" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <CertificateClient certificates={certificates} />
           </motion.div>
         )}

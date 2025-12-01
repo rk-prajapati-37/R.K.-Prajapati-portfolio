@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import PortableTextClient from "./PortableTextClient";
 
 type Project = {
   _id: string;
@@ -38,7 +39,7 @@ export default function ProjectCardClient({ project }: { project: Project }) {
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className="cursor-pointer focus:outline-none h-full flex flex-col"
+      className="card cursor-pointer focus:outline-none h-full flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -82,9 +83,11 @@ export default function ProjectCardClient({ project }: { project: Project }) {
         <h3 className="text-xl font-bold text-gray-800 mb-2">
           {project.title || "Untitled"}
         </h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
-          {project.description || "No description"}
-        </p>
+        <div className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
+          <div className="portable-text">
+            <PortableTextClient value={project.description || "No description"} />
+          </div>
+        </div>
 
         {/* Tech Stack */}
         {project.techStack && project.techStack.length > 0 && (

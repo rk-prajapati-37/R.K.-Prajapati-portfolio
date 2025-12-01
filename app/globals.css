@@ -62,6 +62,16 @@ body{padding-top:6rem}
   padding:calc(var(--space-lg) * 1.25) var(--space-md);
 }
 
+/* When a modal is open, blur/dim underlying content to reduce visual clutter */
+html.modal-open .site-container,
+html.modal-open main,
+html.modal-open .max-w-6xl,
+html.modal-open .min-h-screen{
+  filter: blur(4px) brightness(0.65);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Headings */
 h1,h2,h3,h4{color:var(--text);margin:0 0 0.5rem 0;font-weight:600}
 h1{font-size:2rem}
@@ -72,6 +82,10 @@ h2{font-size:1.5rem}
 
 /* Card style */
 .card{background:var(--surface);border-radius:var(--radius);padding:1rem;border:1px solid var(--card-border);box-shadow:var(--card-shadow);color:var(--text)}
+
+.certificate-card{border:1px solid rgba(0,0,0,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
+.certificate-card .portable-text{line-height:1.5}
+.certificate-card .text-gray-600{color:var(--muted)}
 
 /* Small utility helpers that map to theme variables */
 .accent{color:var(--accent)}
@@ -111,9 +125,20 @@ html:not([data-theme="light"]) .text-gray-600{
   color: var(--muted) !important;
 }
 
-/* Accessible link style */
-a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
+/* Accessible link style (scoped for content areas only) */
+/* Keep general anchors untouched so button links keep explicit colors from utilities */
+.prose a,
+.card a,
+.portable-text a,
+.site-container a{color:var(--accent);text-decoration:none}
+.prose a:hover,
+.card a:hover,
+.portable-text a:hover,
+.site-container a:hover{text-decoration:underline}
+
+/* Ensure anchor links inside button-like elements inherit the visual color (e.g. text-white) */
+.btn a, .btn, .btn *{ color: inherit !important }
+.px-8.text-white, .bg-gray-800.text-white, .bg-red-600.text-white { color: white !important }
 
 /* Smooth page transitions (for Motion fallback) */
 .page-fade{opacity:0;transform:translateY(6px);transition:opacity 300ms ease, transform 300ms ease}
@@ -128,3 +153,96 @@ a:hover{text-decoration:underline}
 /* helper to hide scrollbars for horizontal tab scroller */
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Device mockups: mobile, tablet, laptop */
+.device-frame{position:relative;display:block;max-width:100%;margin:0 auto;box-sizing:border-box;overflow:hidden}
+.device-frame .device-screen{display:block;width:100%;height:100%;overflow:hidden}
+
+/* Mobile frame */
+.device-frame--mobile{width:100%;max-width:360px;border-radius:18px;padding:10px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+.device-frame--mobile .device-screen{border-radius:10px;overflow:hidden;background:var(--surface);}
+
+/* Tablet frame */
+.device-frame--tablet{width:100%;max-width:720px;border-radius:12px;padding:12px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 12px 36px rgba(2,6,23,0.6)}
+.device-frame--tablet .device-screen{border-radius:8px;overflow:hidden;background:var(--surface);}
+
+/* Laptop frame */
+.device-frame--laptop{width:100%;max-width:940px;border-radius:12px;padding:18px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 14px 48px rgba(2,6,23,0.6)}
+.device-frame--laptop .device-screen{border-radius:8px;overflow:hidden;background:var(--surface);}
+.device-frame--laptop:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:-18px;width:90%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:8px}
+
+/* MacBook-like frame (use for gallery modal) */
+.device-frame--mac{width:100%;max-width:980px;border-radius:12px;padding:22px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 18px 60px rgba(2,6,23,0.6)}
+.device-frame--mac .device-screen{border-radius:10px;overflow:auto;background:var(--surface);}
+.device-frame--mac:before{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);top:8px;width:14px;height:14px;background:rgba(255,255,255,0.06);border-radius:9999px}
+.device-frame--mac:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:10px;width:78%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px}
+
+/* Image-based Mac frame (use a PNG/SVG bezel in /public/images/) */
+.device-frame--mac-image{position:relative;padding:var(--mac-pad-top,60px) var(--mac-pad-sides,56px) var(--mac-pad-bottom,80px);border-radius:0;background-color:transparent}
+.device-frame--mac-image .device-screen{background:transparent;border-radius:6px;position:relative;z-index:10}
+.device-frame--mac-image .device-screen{display:flex;align-items:center;justify-content:center}
+.device-frame--mac .device-screen{max-height:calc(90vh - 120px)}
+.device-frame--mac-image .device-screen img{max-width:100%;max-height:calc(90vh - 200px);width:auto;object-fit:contain;transition:transform .25s ease}
+.project-modal-image{cursor:grab;touch-action: none}
+.project-modal-image:active{cursor:grabbing}
+.project-modal-image[style*="translate"]{will-change: transform}
+.zoom-indicator{position:absolute;right:10px;top:10px;background:rgba(0,0,0,0.6);color:#fff;padding:6px 10px;border-radius:999px;font-weight:600;z-index:70}
+.project-modal-image[style*="scale(2)"]{ /* basic panning support placeholder */ pointer-events: auto }
+.device-frame--mac-image::after{content:'';position:absolute;inset:0;display:block;background-image:url('/images/device-mac.png');background-repeat:no-repeat;background-size:contain;background-position:center;border-radius:0;z-index:20;pointer-events:none}
+
+/* If you have an iMac-style bezel (taller top & chin), use a different image and tweak padding */
+.device-frame--mac-image--imac{position:relative;padding:54px 38px 90px}
+.device-frame--mac-image--imac .device-screen{position:relative;z-index:10}
+.device-frame--mac-image--imac::after{content:'';position:absolute;inset:0;display:block;background-image:url('/images/device-imac.png');background-repeat:no-repeat;background-size:contain;background-position:center;z-index:20;pointer-events:none}
+
+/* Row layout for multiple devices (e.g., tablet + phone side-by-side) */
+.device-row{display:flex;align-items:center;justify-content:center;gap:2.25rem;width:100%;max-width:100%;flex-direction:column;box-sizing:border-box;padding:0 1rem}
+.device-row .device-frame{flex:0 0 auto}
+.device-row .device-frame--tablet{transform:scale(1);}
+.device-row .device-frame--mobile{transform:scale(0.8);} 
+@media(max-width:1024px){
+  .device-row{gap:1rem}
+  .device-row .device-frame--mobile{transform:scale(0.76)}
+}
+@media(min-width:1024px){
+  .device-row{flex-direction:row}
+  .device-row .device-frame--tablet{flex-basis:66%;max-width:66%}
+  .device-row .device-frame--mobile{flex-basis:32%;max-width:32%}
+}
+
+/* Overlay nav buttons used in modal */
+.device-overlay-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:60;background:rgba(255,255,255,0.85);border-radius:9999px;padding:6px;display:flex;align-items:center;justify-content:center}
+.device-overlay-btn--left{left:8px}
+.device-overlay-btn--right{right:8px}
+.device-overlay-btn svg{width:20px;height:20px}
+
+/* Make device frames responsive: mobile on small screens, tablet on medium, laptop on large */
+.device-responsive{width:100%;display:block;overflow:hidden;padding:0 0.5rem;box-sizing:border-box}
+.device-responsive .device-screen iframe{width:100%;height:100%}
+@media(min-width:768px){
+  .device-responsive{max-width:720px}
+}
+@media(min-width:1024px){
+  .device-responsive{max-width:940px}
+}
+
+/* Frame sizes for consistent aspect ratios */
+.device-frame--mobile .device-screen{aspect-ratio:9/19}
+.device-frame--tablet .device-screen{aspect-ratio:3/2}
+.device-frame--laptop .device-screen{aspect-ratio:16/9}
+
+/* Collapsible portable text helper – 2-line clamp for collapsed, full content when expanded */
+.portable-text-collapse {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.portable-text-collapse.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  max-height: none !important;
+  overflow: visible !important;
+}

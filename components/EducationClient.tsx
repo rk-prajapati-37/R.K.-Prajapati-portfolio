@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClient";
+import { toPlainText, toPlainWords, toPlainFirstParagraph } from "../lib/portableText";
 
 type Education = {
   _id: string;
@@ -37,7 +38,16 @@ export default function EducationClient({ educations }: { educations: Education[
   const sortedEducations = [...educations].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
   const toggleExpanded = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId((prev) => {
+      const next = prev === id ? null : id;
+      if (next === id) {
+        setTimeout(() => {
+          const el = document.getElementById(`edu-desc-${id}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 80);
+      }
+      return next;
+    });
   };
 
   const formatDate = (date: string) => {
@@ -61,29 +71,9 @@ export default function EducationClient({ educations }: { educations: Education[
         const isExpanded = expandedId === edu._id;
         const institutionUrl = (edu as any).institutionUrl;
         const descValue = (edu as any).description ?? (edu as any).desc ?? (edu as any).content;
-        const extractPlain = (val: any) => {
-          if (!val) return "";
-          if (typeof val === "string") return val;
-          try {
-            if (Array.isArray(val)) {
-              return val
-                .map((block) => {
-                  if (typeof block === "string") return block;
-                  if (block?.children && Array.isArray(block.children)) {
-                    return block.children.map((c: any) => c.text || "").join("");
-                  }
-                  return "";
-                })
-                .join("\n\n");
-            }
-            return String(val);
-          } catch {
-            return "";
-          }
-        };
-        const plainText = extractPlain(descValue);
+
         return (
-          <motion.div key={edu._id} variants={item} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition">
+          <motion.div key={edu._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition min-h-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">{edu.degree}</h3>
@@ -118,28 +108,26 @@ export default function EducationClient({ educations }: { educations: Education[
                   {formatDate(edu.startDate)} - {formatDate(edu.endDate || "")}
                 </p>
                 {descValue && (
-                  <div className="mt-3 text-gray-700">
-                    <div
-                      className="max-w-none"
-                      style={
-                        isExpanded
-                          ? undefined
-                          : {
-                              overflow: "hidden",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: "vertical",
-                            } as any
-                      }
-                    >
-                      <PortableTextClient value={descValue} />
-                    </div>
+                    <div className="mt-3 text-gray-700">
+                      <div className="max-w-none" style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
+                        {!isExpanded ? (
+                          <div className={`text-gray-700 portable-text-collapse ${isExpanded ? 'expanded' : ''}`}>
+                            {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
+                          </div>
+                        ) : (
+                          <div id={`edu-desc-${edu._id}`} className="portable-text" style={{ overflow: 'visible' }}>
+                            <PortableTextClient value={descValue} />
+                          </div>
+                        )}
+                      </div>
 
-                    <button onClick={() => toggleExpanded(edu._id)} className="text-sm text-blue-700 mt-2">
-                      {isExpanded ? "Show less" : "Show more"}
+                      <div className="mt-2 flex justify-end">
+                         <button id={`edu-toggle-${edu._id}`} aria-expanded={isExpanded} aria-controls={`edu-desc-${edu._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(edu._id); }} className={`text-sm font-semibold mt-2 text-red-600`}>
+                          {isExpanded ? "show less" : "show more"}
                     </button>
+                      </div>
 
-                    {isExpanded && plainText && <div className="mt-2 text-gray-700 whitespace-pre-wrap">{plainText}</div>}
+                    {/* Expanded content already rendered above when isExpanded === true */}
                   </div>
                 )}
               </div>
@@ -150,3 +138,5 @@ export default function EducationClient({ educations }: { educations: Education[
     </motion.div>
   );
 }
+
+

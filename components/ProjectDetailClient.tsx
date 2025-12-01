@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PortableTextClient from "./PortableTextClient";
 import { useRouter } from "next/navigation";
 
 type Project = {
@@ -27,7 +28,28 @@ export default function ProjectDetailClient({
 }) {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [modalMode, setModalMode] = useState<'image' | 'layout'>('image');
   const [allImages, setAllImages] = useState<string[]>([]);
+  const [zoom, setZoom] = useState<number>(1);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [isIframeLoaded, setIsIframeLoaded] = useState<boolean | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const touchStartRef = useRef<number | null>(null);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isPanningRef = useRef(false);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const initialPanRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const pinchStartDistRef = useRef<number | null>(null);
+  const initialZoomRef = useRef<number | null>(null);
+  const lastTapRef = useRef<number | null>(null);
+  // Momentum / velocity tracking
+  const velocityRef = useRef<{ vx: number; vy: number }>({ vx: 0, vy: 0 });
+  const rafRef = useRef<number | null>(null);
+  const lastMoveRef = useRef<{ t: number; x: number; y: number } | null>(null);
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false);
+  const zoomLevels = [1, 1.5, 2, 3];
+  const [friction, setFriction] = useState(0.94);
+  const [showSettings, setShowSettings] = useState(false);
 
   const openGallery = (image: string) => {
     const images = [project?.imageUrl, ...(project?.extraImages || [])].filter(
@@ -35,6 +57,22 @@ export default function ProjectDetailClient({
     ) as string[];
     setAllImages(images);
     setSelectedImage(image);
+    setModalMode('image');
+  };
+
+  const openLayout = (image?: string, event?: React.MouseEvent) => {
+    if (event) event.stopPropagation();
+    const images = [project?.imageUrl, ...(project?.extraImages || [])].filter(Boolean) as string[];
+    setAllImages(images);
+    if (image) {
+      // If an explicit image is provided when opening layout, open in image gallery mode
+      setSelectedImage(image);
+      setModalMode('image');
+    } else {
+      setSelectedImage(null);
+      setModalMode('layout');
+      setIsIframeLoaded(null);
+    }
   };
 
   const currentImageIndex = allImages.indexOf(selectedImage || "");
@@ -49,6 +87,232 @@ export default function ProjectDetailClient({
     if (currentImageIndex > 0) {
       setSelectedImage(allImages[currentImageIndex - 1]);
     }
+  };
+
+  // Keyboard navigation and ESC to close
+  useEffect(() => {
+    if (!selectedImage && modalMode !== 'layout') return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedImage(null);
+        setModalMode('image');
+      } else if (e.key === 'ArrowRight') {
+        goToNext();
+      } else if (e.key === 'ArrowLeft') {
+        goToPrev();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedImage, modalMode, allImages]);
+
+  // Add a class to the root element when modal is open to dim/blur background content
+  useEffect(() => {
+    const el = document.documentElement;
+    if (selectedImage || modalMode === 'layout') {
+      el.classList.add('modal-open');
+    } else {
+      el.classList.remove('modal-open');
+    }
+    return () => el.classList.remove('modal-open');
+  }, [selectedImage, modalMode]);
+
+  // Reset zoom when modal changes
+  useEffect(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, [selectedImage, modalMode]);
+
+  // Reset pan when zoom resets to 1
+  useEffect(() => {
+    if (zoom === 1) setPan({ x: 0, y: 0 });
+  }, [zoom]);
+
+  // show zoom indicator whenever zoom changes
+  useEffect(() => {
+    setShowZoomIndicator(true);
+    const t = setTimeout(() => setShowZoomIndicator(false), 900);
+    return () => clearTimeout(t);
+  }, [zoom]);
+
+  // Apply momentum after pointer/touch release
+  const startInertia = (vx: number, vy: number) => {
+    cancelAnimationFrame(rafRef.current || 0);
+    const step = () => {
+      // decay velocity
+      vx *= friction;
+      vy *= friction;
+      const newX = pan.x + vx;
+      const newY = pan.y + vy;
+      const clamped = clampPan(newX, newY, modalRef.current, zoom);
+      setPan({ x: clamped.x, y: clamped.y });
+      // stop when velocity small
+      if (Math.abs(vx) > 0.05 || Math.abs(vy) > 0.05) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        cancelAnimationFrame(rafRef.current || 0);
+      }
+    };
+    rafRef.current = requestAnimationFrame(step);
+  };
+
+  // Touch swipe handling for mobile
+  const onTouchStart = (e: React.TouchEvent) => {
+    // double-tap detection
+    const now = Date.now();
+    if (lastTapRef.current && now - lastTapRef.current < 300) {
+      // double-tap -> toggle zoom
+      setZoom((z) => (z === 1 ? 2 : 1));
+      lastTapRef.current = null;
+      e.preventDefault();
+      return;
+    }
+    lastTapRef.current = now;
+
+    // pinch start
+    if (e.touches && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchStartDistRef.current = Math.hypot(dx, dy);
+      initialZoomRef.current = zoom;
+    } else {
+      touchStartRef.current = e.touches?.[0]?.clientX || null;
+      // single-finger pan start
+      if (zoom > 1 && e.touches && e.touches.length === 1) {
+        isPanningRef.current = true;
+        pointerStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        initialPanRef.current = { ...pan };
+      }
+    }
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (pinchStartDistRef.current && e.touches && e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const ratio = dist / (pinchStartDistRef.current || dist);
+      const newZoom = Math.max(1, Math.min(3, (initialZoomRef.current || zoom) * ratio));
+      setZoom(newZoom);
+      setShowZoomIndicator(true);
+      return;
+    }
+    if (isPanningRef.current && e.touches && e.touches.length === 1 && pointerStartRef.current) {
+      const dx = e.touches[0].clientX - pointerStartRef.current.x;
+      const dy = e.touches[0].clientY - pointerStartRef.current.y;
+      const newPan = { x: initialPanRef.current.x + dx, y: initialPanRef.current.y + dy };
+      const clamped = clampPan(newPan.x, newPan.y, modalRef.current, zoom);
+      const now = Date.now();
+      if (lastMoveRef.current) {
+        const dt = Math.max(16, now - lastMoveRef.current.t);
+        const vx = (clamped.x - lastMoveRef.current.x) / (dt / 16);
+        const vy = (clamped.y - lastMoveRef.current.y) / (dt / 16);
+        velocityRef.current = { vx, vy };
+      }
+      lastMoveRef.current = { t: now, x: clamped.x, y: clamped.y };
+      setPan({ x: clamped.x, y: clamped.y });
+      return;
+    }
+    touchStartRef.current = touchStartRef.current || e.touches?.[0]?.clientX || null;
+  };
+
+  const snapZoom = (z: number) => {
+    const nearest = zoomLevels.reduce((prev, curr) => Math.abs(curr - z) < Math.abs(prev - z) ? curr : prev, zoomLevels[0]);
+    setZoom(nearest);
+    setShowZoomIndicator(true);
+    setTimeout(() => setShowZoomIndicator(false), 900);
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    // reset pinch
+    if (pinchStartDistRef.current) {
+      // pinch ended -> snap to nearest
+      snapZoom(zoom);
+    }
+    pinchStartDistRef.current = null;
+    initialZoomRef.current = null;
+    if (isPanningRef.current) {
+      isPanningRef.current = false;
+      pointerStartRef.current = null;
+      // start inertia
+      const { vx, vy } = velocityRef.current;
+      startInertia(vx, vy);
+    } else {
+      const start = touchStartRef.current;
+      const end = e.changedTouches?.[0]?.clientX || null;
+      if (start == null || end == null) return;
+      const delta = start - end;
+      if (Math.abs(delta) > 30) {
+        if (delta > 0) goToNext();
+        else goToPrev();
+      }
+    }
+    touchStartRef.current = null;
+  };
+
+  // Pointer-based drag (mouse/pen) support
+  const onPointerDown: React.PointerEventHandler = (e) => {
+    // allow pan when zoomed-in OR when in image modal so users can reposition vertically
+    if (zoom <= 1 && modalMode !== 'image') return;
+    isPanningRef.current = true;
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+    initialPanRef.current = { ...pan };
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    // reset velocity tracking
+    velocityRef.current = { vx: 0, vy: 0 };
+    lastMoveRef.current = { t: Date.now(), x: pan.x, y: pan.y };
+  };
+  const onPointerMove: React.PointerEventHandler = (e) => {
+    if (!isPanningRef.current || !pointerStartRef.current) return;
+    const dx = e.clientX - pointerStartRef.current.x;
+    const dy = e.clientY - pointerStartRef.current.y;
+    const newPan = { x: initialPanRef.current.x + dx, y: initialPanRef.current.y + dy };
+    const clamped = clampPan(newPan.x, newPan.y, modalRef.current, zoom);
+    // track velocity in px per frame
+    const now = Date.now();
+    if (lastMoveRef.current) {
+      const dt = Math.max(16, now - lastMoveRef.current.t);
+      const vx = (clamped.x - lastMoveRef.current.x) / (dt / 16);
+      const vy = (clamped.y - lastMoveRef.current.y) / (dt / 16);
+      velocityRef.current = { vx, vy };
+    }
+    lastMoveRef.current = { t: now, x: clamped.x, y: clamped.y };
+    setPan({ x: clamped.x, y: clamped.y });
+  };
+  const onPointerUp: React.PointerEventHandler = (e) => {
+    if (isPanningRef.current) {
+      isPanningRef.current = false;
+      try { (e.target as Element).releasePointerCapture?.(e.pointerId); } catch {/* ignore */}
+      pointerStartRef.current = null;
+      // start inertia
+      const { vx, vy } = velocityRef.current;
+      startInertia(vx, vy);
+      // snap after inertia start if needed
+      if (zoom !== 1) snapZoom(zoom);
+    }
+  };
+
+  // Double click to zoom toggle
+  const onDoubleClick: React.MouseEventHandler = () => {
+    const z = zoom === 1 ? 2 : 1;
+    setZoom(z);
+    setShowZoomIndicator(true);
+    setTimeout(() => setShowZoomIndicator(false), 900);
+  };
+
+  // Clamp pan to avoid moving image too far outside viewport
+  const clampPan = (x: number, y: number, container: HTMLDivElement | null, zoomFactor: number) => {
+    if (!container) return { x, y };
+    const rect = container.getBoundingClientRect();
+    // if zoom > 1, standard clamp to avoid moving image outside viewport
+    let maxX = Math.max(0, (rect.width * (zoomFactor - 1)) / 2);
+    let maxY = Math.max(0, (rect.height * (zoomFactor - 1)) / 2);
+    // if not zoomed but it's a simple image modal, allow limited vertical reposition
+    if (zoomFactor <= 1 && modalMode === 'image') {
+      maxY = Math.max(maxY, rect.height * 0.25);
+      maxX = Math.max(maxX, rect.width * 0.08);
+    }
+    const clamp = (v: number, m: number) => Math.max(-m, Math.min(m, v));
+    return { x: clamp(x, maxX), y: clamp(y, maxY) };
   };
 
   const handleCategoryClick = (category: string) => {
@@ -135,10 +399,15 @@ export default function ProjectDetailClient({
             </div>
           )}
 
-          {/* Description */}
-          <p className="text-gray-700 text-lg mb-8 leading-relaxed border-l-4 border-red-500 pl-6">
-            {project.description || "No description available."}
-          </p>
+          {/* Description / Detailed Info */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Detailed Info</h2>
+            <div className="text-gray-700 text-lg mb-8 leading-relaxed border-l-4 border-red-500 pl-6">
+              <div className="portable-text">
+                <PortableTextClient value={project.description || "No description available."} />
+              </div>
+            </div>
+          </div>
 
           {/* Project Meta Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 p-6 bg-gray-50 rounded-xl">
@@ -193,7 +462,7 @@ export default function ProjectDetailClient({
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-900 transition shadow-lg"
+                className="btn px-8 py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-900 transition shadow-lg"
               >
                 GitHub Repository
               </motion.a>
@@ -205,9 +474,9 @@ export default function ProjectDetailClient({
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold rounded-lg hover:shadow-lg transition"
+                className="btn px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold rounded-lg hover:shadow-lg transition"
               >
-                View Live Demo
+                Official Website
               </motion.a>
             )}
           </div>
@@ -216,24 +485,32 @@ export default function ProjectDetailClient({
           {project.video && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                🎥 Demo Video
-              </h2>
-              <div className="rounded-xl overflow-hidden shadow-lg">
-                <iframe
-                  src={project.video}
-                  className="w-full h-96 sm:h-full max-h-96"
-                  allowFullScreen
-                ></iframe>
+                    📱 Mobile & Tablet Preview
+                  </h2>
+              {/* Responsive device frames: mobile on small screens, tablet on md, and side-by-side on lg */}
+              <div className="device-responsive mx-auto">
+                {/* Device preview: stacked on small screens, side-by-side on lg */}
+                <div className="device-row flex flex-col lg:flex-row items-center justify-center mx-auto">
+                  <div className="device-frame device-frame--tablet mx-auto">
+                    <div className="device-screen">
+                      <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
+                    </div>
+                  </div>
+                  <div className="device-frame device-frame--mobile mx-auto mt-6 lg:mt-0">
+                    <div className="device-screen">
+                      <iframe src={project.video} className="w-full h-full" allowFullScreen title={project.title || "Project demo"} />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Gallery Section */}
+              {/* Gallery Section */}
           {project.extraImages && project.extraImages.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                📸 Gallery
-              </h2>
+                Website Layout              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {project.extraImages.map((img, i) => (
                   <motion.div
@@ -248,9 +525,14 @@ export default function ProjectDetailClient({
                       className="w-full h-64 object-cover group-hover:brightness-75 transition duration-300"
                     />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                      <span className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg">
-                        View
-                      </span>
+                        {project.demo && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openGallery(img); }}
+                          className="text-white text-sm font-semibold bg-black/50 px-4 py-2 rounded-lg"
+                        >
+                          View Layout Image
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -260,15 +542,15 @@ export default function ProjectDetailClient({
         </div>
       </motion.div>
 
-      {/* Image Lightbox Modal */}
+          {/* Image Lightbox Modal */}
       <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelectedImage(null)}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+        {(selectedImage || modalMode === 'layout') && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setSelectedImage(null); setModalMode('image'); }}
+            className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -277,15 +559,93 @@ export default function ProjectDetailClient({
               onClick={(e) => e.stopPropagation()}
               className="relative max-w-4xl max-h-[90vh] flex flex-col"
             >
-              {/* Main Image */}
-              <img
-                src={selectedImage}
-                alt="Gallery view"
-                className="max-w-4xl max-h-[75vh] object-contain rounded-xl"
-              />
+              {/* Main Image / Device frame (laptop) */}
+              {modalMode === 'layout' ? (
+                <div className="device-frame device-frame--mac device-frame--mac-image mx-auto">
+                  <div
+                    ref={modalRef}
+                    className={`device-screen ${modalMode === 'layout' ? 'overflow-auto' : 'overflow-hidden'}`}
+                    onTouchStart={onTouchStart}
+                    onTouchEnd={onTouchEnd}
+                  >
+                    <iframe
+                      src={project.demo}
+                      className="w-full h-full"
+                      allowFullScreen
+                      title={project.title || "Project demo"}
+                      onLoad={() => setIsIframeLoaded(true)}
+                      onError={() => setIsIframeLoaded(false)}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="mx-auto bg-[var(--surface)] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/5 p-4" style={{ maxWidth: '100%', maxHeight: '80vh' }}>
+                  <div
+                    ref={modalRef}
+                    className={`w-full h-full overflow-hidden`}
+                    onTouchStart={onTouchStart}
+                    onTouchEnd={onTouchEnd}
+                  >
+                      <img
+                        src={selectedImage || project.imageUrl || allImages[0] || ''}
+                        alt={selectedImage ? 'Gallery view' : (project.title || 'Project image')}
+                        className="w-full h-auto max-h-[80vh] object-contain project-modal-image"
+                      style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+                      onPointerDown={onPointerDown}
+                      onPointerMove={onPointerMove}
+                      onPointerUp={onPointerUp}
+                      onDoubleClick={onDoubleClick}
+                      onTouchStart={onTouchStart}
+                      onTouchMove={onTouchMove}
+                      onTouchEnd={onTouchEnd}
+                    />
+                    {!(selectedImage || project.imageUrl || allImages[0]) && (
+                      <div className="p-6 text-center text-gray-400">No image available</div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Layout iframe fallback: show notice/cta if not loaded */}
+              {modalMode === 'layout' && project.demo && isIframeLoaded === false && (
+                <div className="mt-3 p-3 bg-yellow-50 text-yellow-900 rounded">This site may block framing; <a href={project.demo} target="_blank" rel="noopener noreferrer" className="underline">Open in a new tab</a>.</div>
+              )}
 
-              {/* Navigation Controls */}
-              <div className="flex items-center justify-between gap-4 mt-6">
+              {/* Minimal header: only title (subtle)  and Close button. Buttons removed for a cleaner popup */}
+              <div className="flex items-center justify-between gap-2 mt-4">
+                {/* Keep the title smaller and subtle so the image remains prominent */}
+                <div className="text-white font-semibold opacity-70 text-sm">{project.title || ''}</div>
+                {showZoomIndicator && (
+                  <div className="zoom-indicator">{Math.round(zoom * 100)}%</div>
+                )}
+              </div>
+                <div className="mt-2 flex items-center gap-2 justify-between">
+                  {/* Keeping layout-only sliders present is optional; hide for image-only popups */}
+                  {modalMode === 'layout' && (
+                    <div className="hidden md:flex items-center gap-2">
+                      <label className="text-gray-300 text-sm">Zoom</label>
+                      <input type="range" min={1} max={3} step={0.1} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} onMouseUp={() => snapZoom(zoom)} onTouchEnd={() => snapZoom(zoom)} className="w-40" />
+                      <span className="text-gray-300 text-xs">{zoom.toFixed(2)}x</span>
+                    </div>
+                  )}
+                </div>
+              {showSettings && modalMode === 'layout' && (
+                <div className="mt-2 bg-white/5 p-3 rounded-md text-gray-200 hidden md:block">
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <label>Pad top</label>
+                    <input type="number" defaultValue={60} onChange={(e) => document.documentElement.style.setProperty('--mac-pad-top', `${e.target.value}px`)} className="px-2 py-1 rounded bg-white/5" />
+                    <span className="text-xs">px</span>
+                    <label>Pad sides</label>
+                    <input type="number" defaultValue={56} onChange={(e) => document.documentElement.style.setProperty('--mac-pad-sides', `${e.target.value}px`)} className="px-2 py-1 rounded bg-white/5" />
+                    <span className="text-xs">px</span>
+                    <label>Pad bottom</label>
+                    <input type="number" defaultValue={80} onChange={(e) => document.documentElement.style.setProperty('--mac-pad-bottom', `${e.target.value}px`)} className="px-2 py-1 rounded bg-white/5" />
+                    <span className="text-xs">px</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Controls (moved overlay) */}
+              <div className="flex items-center justify-between gap-4 mt-6 hidden lg:flex">
                 {/* Previous Button */}
                 {currentImageIndex > 0 && (
                   <motion.button
@@ -316,15 +676,36 @@ export default function ProjectDetailClient({
                 )}
               </div>
 
-              {/* Close Button */}
+              {/* Overlay navigation for small screens (left/right arrows on device frame) */}
+              <button
+                aria-label="Previous image"
+                onClick={goToPrev}
+                className={`device-overlay-btn device-overlay-btn--left ${currentImageIndex <= 0 ? 'hidden' : ''}`}
+                style={{ display: currentImageIndex <= 0 ? 'none' : 'flex' }}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"></path></svg>
+              </button>
+
+              <button
+                aria-label="Next image"
+                onClick={goToNext}
+                className={`device-overlay-btn device-overlay-btn--right ${currentImageIndex >= allImages.length - 1 ? 'hidden' : ''}`}
+                style={{ display: currentImageIndex >= allImages.length - 1 ? 'none' : 'flex' }}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
+              </button>
+
+              {/* Close Button (inside modal, visible on all sizes) */}
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedImage(null)}
-                className="absolute -top-12 right-0 text-white text-3xl font-bold hover:text-gray-300 transition"
+                onClick={() => { setSelectedImage(null); setModalMode('image'); }}
+                className="absolute top-4 right-4 z-60 bg-white/5 backdrop-blur-sm w-11 h-11 flex items-center justify-center rounded-full text-white text-2xl font-medium hover:bg-white/8 transition"
+                aria-label="Close gallery"
               >
                 ✕
               </motion.button>
+              {/* (Device-frame modal implemented above; no duplicate overlay needed) */}
             </motion.div>
           </motion.div>
         )}

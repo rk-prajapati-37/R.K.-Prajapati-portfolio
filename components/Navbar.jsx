@@ -56,7 +56,9 @@ export default function Navbar() {
           <ThemeToggle />
         </div>
 
-        <button
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
           aria-label="Toggle menu"
           className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2"
           style={{ color: 'var(--text)' }}
@@ -71,7 +73,8 @@ export default function Navbar() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
-        </button>
+          </button>
+        </div>
       </div>
 
       <div className={`${open ? "block" : "hidden"} md:hidden`}>
@@ -82,10 +85,10 @@ export default function Navbar() {
           <div className="pt-2">
             <div className="font-medium">About</div>
             <Link href="/about" onClick={() => setOpen(false)} className="block pl-3 py-1">About (overview)</Link>
-            <Link href="/about#experience" onClick={() => setOpen(false)} className="block pl-3 py-1">Experience</Link>
-            <Link href="/about#skills" onClick={() => setOpen(false)} className="block pl-3 py-1">Skills</Link>
-            <Link href="/about#education" onClick={() => setOpen(false)} className="block pl-3 py-1">Education</Link>
-            <Link href="/about#certificates" onClick={() => setOpen(false)} className="block pl-3 py-1">Certificates</Link>
+            <Link href="/experience" onClick={() => setOpen(false)} className="block pl-3 py-1">Experience</Link>
+            <Link href="/skills" onClick={() => setOpen(false)} className="block pl-3 py-1">Skills</Link>
+            <Link href="/education" onClick={() => setOpen(false)} className="block pl-3 py-1">Education</Link>
+            <Link href="/certificates" onClick={() => setOpen(false)} className="block pl-3 py-1">Certificates</Link>
           </div>
 
           <Link href="/projects" onClick={() => setOpen(false)} className="block">Projects</Link>
@@ -93,6 +96,7 @@ export default function Navbar() {
           <Link href="/testimonials" onClick={() => setOpen(false)} className="block">Testimonials</Link>
           <Link href="/contact" onClick={() => setOpen(false)} className="block">Contact</Link>
         </div>
+        {/* Theme toggle is intentionally kept in header for mobile - remove duplicate in menu */}
       </div>
     </nav>
   );
