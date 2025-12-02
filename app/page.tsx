@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function HomePage() {
   return (
-    <div className="bg-gray-50 min-h-screen pt-24 pb-20 px-6 md:px-10">
+    <div className=" pt-12 pb-8 px-6 md:px-10">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10">
         {/* Left text */}
         <div className="md:w-2/3">

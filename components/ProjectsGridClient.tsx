@@ -40,7 +40,7 @@ export default function ProjectsGridClient({
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br py-10  flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br  pt-12 pb-8 px-6 md:px-10 flex items-center justify-center">
         <div className="text-center text-red-600">
           <h1 className="text-2xl font-bold mb-2">Error Loading Projects</h1>
           <p>{error}</p>

@@ -69,7 +69,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-10 ">
+    <div className="min-h-screen bg-gradient-to-br  pt-12 pb-8 px-6 md:px-10">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-center text-3xl sm:text-4xl font-bold text-gray-800 mb-8">GET IN TOUCH</h2>
 

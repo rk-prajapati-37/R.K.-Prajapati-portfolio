@@ -16,9 +16,10 @@ type Project = {
 export default async function Projects({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams?: { category?: string };
 }) {
-  const params = await searchParams;
+  const params = searchParams || {};
+
   const selectedCategory = params.category ? decodeURIComponent(params.category) : null;
 
   let projects: Project[] = [];

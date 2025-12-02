@@ -2,8 +2,54 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import PortableTextClient from "./PortableTextClientFixed";
-import { toPlainFirstParagraph, toPlainWords } from "../lib/portableText";
+import PortableTextClient from "./PortableTextClientFixed";  // ✅ ADD KIA
+
+// ✅ UTILITY FUNCTIONS (lib/portableText.ts ki jagah)
+function toPlainText(value: any): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (!Array.isArray(value)) return String(value);
+  
+  const parts: string[] = [];
+  for (const block of value) {
+    if (!block) continue;
+    if (typeof block === "string") {
+      parts.push(block);
+      continue;
+    }
+    if (Array.isArray(block.children)) {
+      parts.push(block.children.map((c: any) => (c?.text ? String(c.text) : "")).join(""));
+      continue;
+    }
+    if (block.text) {
+      parts.push(String(block.text));
+      continue;
+    }
+    try { 
+      parts.push(JSON.stringify(block)); 
+    } catch { 
+      /* ignore */ 
+    }
+  }
+  return parts.join("\n\n");
+}
+
+function toPlainWords(value: any, wordCount = 30): string {
+  const text = toPlainText(value || "");
+  if (!text) return "";
+  const words = text.trim().split(/\s+/);
+  if (words.length <= wordCount) return text;
+  return words.slice(0, wordCount).join(" ") + "…";
+}
+
+function toPlainFirstParagraph(value: any): string {
+  if (!value) return "";
+  if (typeof value === "string") {
+    return (value.split(/\n{2,}/)[0] || value);
+  }
+  const text = toPlainText(value);
+  return (text.split(/\n{2,}/)[0] || text);
+}
 
 type Certificate = {
   _id: string;

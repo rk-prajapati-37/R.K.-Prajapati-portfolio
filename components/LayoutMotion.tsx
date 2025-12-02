@@ -29,7 +29,7 @@ type Props = {
 
 export default function LayoutMotion({
   children,
-  className = "pt-24 min-h-screen site-container",
+  className = "pt-24 site-container",
 }: Props) {
   return (
     <motion.main

@@ -111,18 +111,67 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
 
       <AnimatePresence>
         {selectedImage && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setSelectedImage(null)}>
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="relative max-w-4xl w-full max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-              <div ref={modalRef} className="bg-[var(--surface)] rounded-xl overflow-hidden p-4">
-                <img src={selectedImage} alt="Gallery" className="w-full h-auto max-h-[80vh] object-contain" />
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" 
+            onClick={() => setSelectedImage(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.8, opacity: 0 }} 
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative max-w-5xl w-full flex flex-col items-center" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <button 
+                onClick={() => setSelectedImage(null)} 
+                className="absolute -top-10 right-0 text-white/60 hover:text-white transition text-2xl z-10"
+                aria-label="Close gallery"
+              >
+                ✕
+              </button>
+
+              {/* Image Container */}
+              <div ref={modalRef} className="w-full bg-black/40 rounded-xl overflow-hidden backdrop-blur-sm">
+                <img 
+                  src={selectedImage} 
+                  alt="Gallery view" 
+                  className="w-full h-auto max-h-[80vh] object-contain"
+                  onError={(e) => {
+                    console.error("Image failed to load:", selectedImage);
+                    (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                  }}
+                />
               </div>
 
-              <div className="mt-2 flex items-center justify-between text-white">
-                <div>{currentImageIndex + 1} / {allImages.length}</div>
+              {/* Controls */}
+              <div className="mt-4 flex items-center justify-between text-white w-full px-2">
+                <div className="text-sm font-medium">{currentImageIndex + 1} / {allImages.length}</div>
                 <div className="flex gap-2 items-center">
-                  <button onClick={goToPrev} className="bg-white/8 px-3 py-2 rounded disabled:opacity-50" disabled={currentImageIndex <= 0}>Prev</button>
-                  <button onClick={goToNext} className="bg-white/8 px-3 py-2 rounded disabled:opacity-50" disabled={currentImageIndex >= allImages.length - 1}>Next</button>
+                  <button 
+                    onClick={goToPrev} 
+                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg disabled:opacity-30 transition text-sm font-medium"
+                    disabled={currentImageIndex <= 0}
+                  >
+                    ← Prev
+                  </button>
+                  <button 
+                    onClick={goToNext} 
+                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg disabled:opacity-30 transition text-sm font-medium"
+                    disabled={currentImageIndex >= allImages.length - 1}
+                  >
+                    Next →
+                  </button>
                 </div>
+              </div>
+
+              {/* Keyboard hint */}
+              <div className="mt-3 text-xs text-white/40 text-center">
+                Use arrow keys to navigate • ESC to close
               </div>
             </motion.div>
           </motion.div>

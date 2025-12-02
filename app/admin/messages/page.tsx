@@ -83,7 +83,7 @@ export default function AdminMessages() {
 
   if (!authenticated || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br py-10  flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br  pt-12 pb-8 px-6 md:px-10 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin inline-block w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full"></div>
           <p className="mt-4 text-gray-600">Loading...</p>

@@ -3,7 +3,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClientFixed";
-import { toPlainText, toPlainWords, toPlainFirstParagraph } from "../lib/portableText";
 
 type Experience = {
   _id: string;
@@ -17,6 +16,51 @@ type Experience = {
   description?: any;
   order?: number;
 };
+
+function toPlainText(value: any): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (!Array.isArray(value)) return String(value);
+
+  const parts: string[] = [];
+  for (const block of value) {
+    if (!block) continue;
+    if (typeof block === "string") {
+      parts.push(block);
+      continue;
+    }
+    if (Array.isArray((block as any).children)) {
+      parts.push(
+        (block as any).children
+          .map((c: any) => (c?.text ? String(c.text) : ""))
+          .join("")
+      );
+      continue;
+    }
+    if ((block as any).text) {
+      parts.push(String((block as any).text));
+      continue;
+    }
+  }
+  return parts.join("\n\n");
+}
+
+function toPlainWords(value: any, wordCount = 30): string {
+  const text = toPlainText(value || "");
+  if (!text) return "";
+  const words = text.trim().split(/\s+/);
+  if (words.length <= wordCount) return text;
+  return words.slice(0, wordCount).join(" ") + "…";
+}
+
+function toPlainFirstParagraph(value: any): string {
+  if (!value) return "";
+  if (typeof value === "string") {
+    return value.split(/\n{2,}/)[0] || value;
+  }
+  const text = toPlainText(value);
+  return text.split(/\n{2,}/)[0] || text;
+}
 
 const container = {
   hidden: { opacity: 0 },
@@ -34,18 +78,23 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-export default function ExperienceClient({ experiences }: { experiences: Experience[] }) {
+export default function ExperienceClient({
+  experiences,
+}: {
+  experiences: Experience[];
+}) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const sortedExperiences = [...experiences].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+  const sortedExperiences = [...experiences].sort(
+    (a, b) => (a.order ?? 999) - (b.order ?? 999)
+  );
 
   const toggleExpanded = (id: string) => {
     setExpandedId((prev) => {
       const next = prev === id ? null : id;
       if (next === id) {
-        // Scroll the expanded content into view a bit after the DOM updates
         setTimeout(() => {
           const el = document.getElementById(`exp-desc-${id}`);
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }, 80);
       }
       return next;
@@ -55,7 +104,10 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
   const formatDate = (date: string) => {
     if (!date) return "";
     try {
-      return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short" });
+      return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+      });
     } catch {
       return date;
     }
@@ -72,72 +124,126 @@ export default function ExperienceClient({ experiences }: { experiences: Experie
       {sortedExperiences.map((exp) => {
         const isExpanded = expandedId === exp._id;
         const companyUrl = (exp as any).companyUrl;
-        const descValue = (exp as any).description ?? (exp as any).desc ?? (exp as any).content;
-        // We no longer need plainText extraction since
-        // PortableTextClient handles both block/array and string rendering.
+        const descValue =
+          (exp as any).description ?? (exp as any).desc ?? (exp as any).content;
+
         return (
-          <motion.div key={exp._id} variants={item} className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition min-h-0">
+          <motion.div
+            key={exp._id}
+            variants={item}
+            className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition min-h-0"
+          >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-800">{exp.position}</h3>
-                {/* Render company name with optional link */}
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {exp.position}
+                </h3>
+
                 {exp.company && (
                   <div className="mt-1">
                     {companyUrl ? (
-                      <a href={companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-800 hover:underline">
+                      <a
+                        href={companyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-gray-800 hover:underline"
+                      >
                         {exp.company}
                       </a>
                     ) : (
-                      <p className="text-sm font-medium text-gray-800">{exp.company}</p>
+                      <p className="text-sm font-medium text-gray-800">
+                        {exp.company}
+                      </p>
                     )}
                   </div>
                 )}
+
                 <div className="flex items-center gap-2 mt-1">
                   {exp.logo ? (
-                    <img src={exp.logo} alt={`${exp.company} logo`} className="w-8 h-8 object-contain rounded-full bg-white p-1 border" />
+                    <img
+                      src={exp.logo}
+                      alt={`${exp.company} logo`}
+                      className="w-8 h-8 object-contain rounded-full bg-white p-1 border"
+                    />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                       <span className="text-xs text-gray-600">🏢</span>
                     </div>
                   )}
-                    
 
                   {exp.logo && (
                     <div className="relative group inline-block">
                       <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-30">
                         <div className="bg-white p-2 rounded-lg shadow-lg border">
-                          <img src={exp.logo} alt={`${exp.company} logo`} width={80} height={80} className="object-contain rounded" />
+                          <img
+                            src={exp.logo}
+                            alt={`${exp.company} logo`}
+                            width={80}
+                            height={80}
+                            className="object-contain rounded"
+                          />
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
+
                 <p className="text-sm text-gray-500 mt-1">{exp.location}</p>
                 <p className="text-sm text-gray-500">
-                  {formatDate(exp.startDate)} - {exp.isCurrent ? "Present" : formatDate(exp.endDate || "")}
+                  {formatDate(exp.startDate)} -{" "}
+                  {exp.isCurrent ? "Present" : formatDate(exp.endDate || "")}
                 </p>
+
                 {descValue && (
                   <div className="mt-3 text-gray-700">
-                    {/* Collapsed: portable text but visually clamped to 3 lines */}
-                        <div className={`max-w-none ${isExpanded ? '' : ''}`} style={isExpanded ? { overflow: 'visible', maxHeight: 'none' } as React.CSSProperties : { overflow: 'hidden', maxHeight: '6.5rem' } as React.CSSProperties}>
-                              {!isExpanded ? (
-                                <div className={`text-gray-700 portable-text-collapse ${isExpanded ? 'expanded' : ''}`}>
-                                  {toPlainFirstParagraph(descValue) || toPlainWords(descValue, 30)}
-                                </div>
-                              ) : (
-                                <div id={`exp-desc-${exp._id}`} className="portable-text" style={{ overflow: 'visible' }}>
-                                  <PortableTextClient value={descValue} />
-                                </div>
-                              )}
-                            </div>
-
-                    <div className="mt-2 flex justify-end">
-                      <button id={`exp-toggle-${exp._id}`} aria-expanded={isExpanded} aria-controls={`exp-desc-${exp._id}`} onClick={(ev) => { ev.stopPropagation(); toggleExpanded(exp._id); }} className={`text-sm font-semibold mt-2 text-red-600`}>
-                      {isExpanded ? "show less" : "show more"}
-                    </button>
+                    <div
+                      className="max-w-none"
+                      style={
+                        isExpanded
+                          ? ({
+                              overflow: "visible",
+                              maxHeight: "none",
+                            } as React.CSSProperties)
+                          : ({
+                              overflow: "hidden",
+                              maxHeight: "6.5rem",
+                            } as React.CSSProperties)
+                      }
+                    >
+                      {!isExpanded ? (
+                        <div
+                          className={`text-gray-700 portable-text-collapse ${
+                            isExpanded ? "expanded" : ""
+                          }`}
+                        >
+                          {toPlainFirstParagraph(descValue) ||
+                            toPlainWords(descValue, 30)}
+                        </div>
+                      ) : (
+                        <div
+                          id={`exp-desc-${exp._id}`}
+                          className="portable-text"
+                          style={{ overflow: "visible" }}
+                        >
+                          <PortableTextClient value={descValue} />
+                        </div>
+                      )}
                     </div>
 
-                    {/* full content shown by the main conditional when isExpanded === true */}
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        id={`exp-toggle-${exp._id}`}
+                        aria-expanded={isExpanded}
+                        aria-controls={`exp-desc-${exp._id}`}
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          toggleExpanded(exp._id);
+                        }}
+                        className="text-sm font-semibold mt-2 text-red-600"
+                      >
+                        {isExpanded ? "show less" : "show more"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

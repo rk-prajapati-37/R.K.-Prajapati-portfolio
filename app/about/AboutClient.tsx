@@ -61,7 +61,7 @@ export default function AboutClient({
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-12 text-gray-800 pt-24 pb-20 px-4 md:px-10">
+    <div className="min-h-screen bg-gradient-to-br py-12 text-gray-800 pt-12 pb-8 px-6 md:px-10">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-10 items-start">
         {/* Left Profile Section */}
         <div className="md:w-1/3 flex justify-center">
@@ -151,19 +151,29 @@ export default function AboutClient({
 
               if (pathname === "/about" || pathname === "/about/") {
                 return (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => {
-                      setActiveTab(tab as any);
-                      if (typeof window !== "undefined") {
-                        window.history.replaceState(null, "", `#${tab}`);
-                      }
-                    }}
-                    className={baseClass}
-                  >
-                    {label}
-                  </button>
+                 <button
+  key={tab}
+  type="button"
+  onClick={() => {
+    setActiveTab(tab as any);
+
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `#${tab}`);
+
+      // tab content par scroll karao
+      setTimeout(() => {
+        const el = document.getElementById(tab);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 80);
+    }
+  }}
+  className={baseClass}
+>
+  {label}
+</button>
+
                 );
               }
 
