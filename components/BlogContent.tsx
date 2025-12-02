@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { client } from "@/lib/sanityClient";
-import PortableTextClient from "./PortableTextClient";
+import PortableTextClient from "./PortableTextClientFixed";
 
 type Blog = {
   title: string;

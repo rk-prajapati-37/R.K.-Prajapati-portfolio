@@ -1,6 +1,6 @@
 "use client";
 
-import PortableTextClient from "./PortableTextClient";
+import PortableTextClient from "./PortableTextClientFixed";
 
 type Blog = {
   title: string;

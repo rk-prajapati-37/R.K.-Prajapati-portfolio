@@ -1,5 +1,5 @@
 import { client } from "@/lib/sanityClient";
-import EducationClient from "@/components/EducationClient";
+import EducationClient from "@/components/EducationClientFixed";
 
 // Revalidate every 60 seconds (ISR)
 export const revalidate = 60;

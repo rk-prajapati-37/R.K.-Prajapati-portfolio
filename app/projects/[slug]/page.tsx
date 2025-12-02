@@ -1,5 +1,5 @@
 ﻿import { client } from "../../../lib/sanityClient";
-import ProjectDetailClient from "@/components/ProjectDetailClient";
+import ProjectDetailClient from "@/components/ProjectDetailClientFixed";
 import { notFound } from "next/navigation";
 
 type Project = {
