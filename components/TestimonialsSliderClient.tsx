@@ -9,10 +9,13 @@ import { motion } from "framer-motion";
 type Testimonial = {
   _id: string;
   name: string;
-  text?: string;
-  position: string;
+  feedback?: string;
+  position?: string; // optional
+  company?: string;
+  role?: string;
   image?: string;
 };
+
 
 export default function TestimonialsSliderClient({
   testimonials,
@@ -98,23 +101,33 @@ export default function TestimonialsSliderClient({
 
                 {/* Message */}
                   <div className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8 italic portable-text">
-                      <PortableTextClient value={t.text || ""} />
+                      <PortableTextClient value={t.feedback || ""} />
                     </div>
 
                 {/* Profile Section */}
-                <div className="flex flex-col items-center">
-                  {t.image && (
-                    <img
-                      src={t.image}
-                      alt={t.name}
-                      className="w-20 h-20 rounded-full object-cover border-4 mb-4"
-                      style={{ borderColor: 'var(--accent)' }}
-                    />
-                  )}
+              {/* Profile Section */}
+<div className="flex flex-col items-center">
+  {t.image && (
+    <img
+      src={t.image}
+      alt={t.name}
+      className="w-20 h-20 rounded-full object-cover border-4 mb-4"
+      style={{ borderColor: "var(--accent)" }}
+    />
+  )}
 
-                  <h3 className="text-2xl font-bold mb-1">{t.name}</h3>
-                  <p className="muted text-sm">{t.position}</p>
-                </div>
+  <h3 className="text-2xl font-bold mb-1">{t.name}</h3>
+
+  {(t.position || t.company || t.role) && (
+    <p className="muted text-sm">
+      {t.role && <span>{t.role}</span>}
+      {t.role && t.company && <span> · </span>}
+      {t.company && <span>{t.company}</span>}
+      {!t.role && !t.company && t.position && <span>{t.position}</span>}
+    </p>
+  )}
+</div>
+
 
                 {/* Closing Quote */}
                 <div className="text-6xl accent mt-6 text-right">"</div>
