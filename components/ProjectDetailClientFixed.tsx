@@ -61,6 +61,37 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
   const goToNext = () => { if (currentImageIndex >= 0 && currentImageIndex < allImages.length - 1) setSelectedImage(allImages[currentImageIndex + 1]); };
   const goToPrev = () => { if (currentImageIndex > 0) setSelectedImage(allImages[currentImageIndex - 1]); };
 
+  // Convert common video links to embeddable URLs (YouTube / Vimeo). If already embed, return as-is.
+  const getEmbedUrl = (url?: string | null) => {
+    if (!url) return null;
+    try {
+      const u = new URL(url);
+      const host = u.hostname.replace('www.', '').toLowerCase();
+      // YouTube watch links -> embed
+      if (host.includes('youtube.com')) {
+        const v = u.searchParams.get('v');
+        if (v) return `https://www.youtube.com/embed/${v}`;
+        // playlist or other formats - return as-is
+        return url;
+      }
+      // youtu.be short links
+      if (host.includes('youtu.be')) {
+        const id = u.pathname.slice(1);
+        if (id) return `https://www.youtube.com/embed/${id}`;
+      }
+      // Vimeo
+      if (host.includes('vimeo.com')) {
+        const id = u.pathname.split('/').filter(Boolean).pop();
+        if (id) return `https://player.vimeo.com/video/${id}`;
+      }
+      // If already an embed URL (contains /embed/ or player.vimeo), return as-is
+      if (url.includes('/embed/') || url.includes('player.vimeo.com')) return url;
+      return url; // fallback
+    } catch (e) {
+      return url;
+    }
+  };
+
   const handleCategoryClick = (category: string) => {
     router.push(`/projects?category=${encodeURIComponent(category)}`);
   };
@@ -69,10 +100,55 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
     <div className="min-h-screen bg-gradient-to-br py-12">
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-6xl mx-auto">
         {project.imageUrl && (
-          <motion.div className="relative mb-12 rounded-2xl overflow-hidden shadow-lg cursor-pointer" whileHover={{ scale: 1.02 }} onClick={() => openGallery(project.imageUrl!)}>
+          <motion.div className="relative mb-6 rounded-2xl overflow-hidden shadow-lg cursor-pointer" whileHover={{ scale: 1.02 }} onClick={() => openGallery(project.imageUrl!)}>
             <img src={project.imageUrl} alt={project.title || 'Project'} className="w-full h-96 object-cover" />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition"><span className="text-white text-lg font-semibold bg-black/50 px-4 py-2 rounded">Click to view</span></div>
           </motion.div>
+        )}
+
+        {/* Video preview inside device frames for mobile/tablet if project.video exists */}
+        {project.video && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Mobile frame */}
+            <div className="device-frame device-frame--mobile device-responsive">
+              <div className="device-frame--mobile device-screen">
+                {(() => {
+                  const embed = getEmbedUrl(project.video);
+                  if (!embed) return <div className="flex items-center justify-center h-full text-sm text-gray-400">Invalid video</div>;
+                  return (
+                    <iframe
+                      src={embed}
+                      title={project.title || 'Project demo'}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Tablet/Large frame */}
+            <div className="device-frame device-frame--tablet device-responsive">
+              <div className="device-frame--tablet device-screen">
+                {(() => {
+                  const embed = getEmbedUrl(project.video);
+                  if (!embed) return <div className="flex items-center justify-center h-full text-sm text-gray-400">Invalid video</div>;
+                  return (
+                    <iframe
+                      src={embed}
+                      title={project.title || 'Project demo'}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
         )}
 
         <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10">
