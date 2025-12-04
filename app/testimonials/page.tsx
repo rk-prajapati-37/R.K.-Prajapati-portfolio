@@ -11,7 +11,6 @@ type Testimonial = {
 };
 
 
-
 export default async function Testimonials() {
   let testimonials: Testimonial[] = [];
   let error: string | null = null;
