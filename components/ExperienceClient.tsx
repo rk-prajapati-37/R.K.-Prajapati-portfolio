@@ -158,35 +158,33 @@ export default function ExperienceClient({
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 mt-1">
-                  {exp.logo ? (
-                    <img
-                      src={exp.logo}
-                      alt={`${exp.company} logo`}
-                      className="w-8 h-8 object-contain rounded-full bg-white p-1 border"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-xs text-gray-600">🏢</span>
-                    </div>
-                  )}
+                <div className="mt-2 flex items-center gap-3">
+  {exp.logo && (
+    <img
+      src={exp.logo}
+      alt={`${exp.company} logo`}
+      className="w-8 h-8 object-contain rounded-full bg-white p-1 border"
+    />
+  )}
 
-                  {exp.logo && (
-                    <div className="relative group inline-block">
-                      <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-30">
-                        <div className="bg-white p-2 rounded-lg shadow-lg border">
-                          <img
-                            src={exp.logo}
-                            alt={`${exp.company} logo`}
-                            width={80}
-                            height={80}
-                            className="object-contain rounded"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+  {exp.company && (
+    companyUrl ? (
+      <a
+        href={companyUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm font-medium text-gray-800 hover:underline"
+      >
+        {exp.company}
+      </a>
+    ) : (
+      <p className="text-sm font-medium text-gray-800">
+        {exp.company}
+      </p>
+    )
+  )}
+</div>
+
 
                 <p className="text-sm text-gray-500 mt-1">{exp.location}</p>
                 <p className="text-sm text-gray-500">

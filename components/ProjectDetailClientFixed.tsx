@@ -3,7 +3,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PortableTextClient from "./PortableTextClientFixed";
+import ProjectSocialLinks from "./ProjectSocialLinks";
 import { useRouter } from "next/navigation";
+
+type SocialLink = {
+  platform: string;
+  url: string;
+};
 
 type Project = {
   title?: string;
@@ -18,6 +24,7 @@ type Project = {
   date?: string;
   clientName?: string;
   slug?: string;
+  socialLinks?: SocialLink[];
 };
 
 export default function ProjectDetailClientFixed({ project, error }: { project: Project | null; error: string | null; }) {
@@ -88,9 +95,18 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
             </div>
           </div>
 
-          <div className="flex gap-4 flex-wrap mb-6">
-            {project.github && (<a href={project.github} target="_blank" rel="noreferrer" className="px-6 py-3 bg-gray-800 text-white rounded">GitHub</a>)}
-            {project.demo && (<a href={project.demo} target="_blank" rel="noreferrer" className="px-6 py-3 bg-red-600 text-white rounded">Open Demo</a>)}
+          <div className="flex gap-4 flex-wrap mb-6 items-center">
+            <div className="flex gap-4 flex-wrap">
+              {project.github && (<a href={project.github} target="_blank" rel="noreferrer" className="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-900 transition">GitHub</a>)}
+              {project.demo && (<a href={project.demo} target="_blank" rel="noreferrer" className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition">Open Demo</a>)}
+            </div>
+            
+            {/* Social Links */}
+            {project.socialLinks && project.socialLinks.length > 0 && (
+              <div className="ml-auto">
+                <ProjectSocialLinks socialLinks={project.socialLinks} />
+              </div>
+            )}
           </div>
 
           {project.extraImages && project.extraImages.length > 0 && (

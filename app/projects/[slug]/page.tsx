@@ -2,6 +2,11 @@
 import ProjectDetailClient from "@/components/ProjectDetailClientFixed";
 import { notFound } from "next/navigation";
 
+type SocialLink = {
+  platform: string;
+  url: string;
+};
+
 type Project = {
   title?: string;
   description?: string;
@@ -14,6 +19,7 @@ type Project = {
   video?: string;
   date?: string;
   clientName?: string;
+  socialLinks?: SocialLink[];
 };
 
 export default async function ProjectDetail({
@@ -36,7 +42,11 @@ export default async function ProjectDetail({
         title, description, github, demo, techStack, category,
         clientName, date, video,
         "imageUrl": image.asset->url,
-        "extraImages": extraImages[].asset->url
+        "extraImages": extraImages[].asset->url,
+        socialLinks[] {
+          platform,
+          url
+        }
       }`,
       { slug }
     );
