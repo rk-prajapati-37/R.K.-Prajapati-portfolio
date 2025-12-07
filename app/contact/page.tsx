@@ -163,8 +163,17 @@ export default function ContactPage() {
           </form>
 
           {status && (
-            <div className={`mt-6 p-4 rounded-md ${status.ok ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-              {status.msg}
+            <div
+              className={`mt-6 p-4 rounded-md border-l-4 ${
+                status.ok
+                  ? 'bg-green-50 text-green-800 border-l-green-500'
+                  : 'bg-red-50 text-red-800 border-l-red-500'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{status.ok ? '✅' : '❌'}</span>
+                <span>{status.msg}</span>
+              </div>
             </div>
           )}
         </div>
