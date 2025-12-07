@@ -26,9 +26,10 @@ export async function POST(req: NextRequest) {
     const mobileValid = mobileClean && /^\d{7,15}$/.test(mobileClean);
     const emailValid = email && emailRegex.test(String(email));
 
-    if (!emailValid && !mobileValid) {
+    // Require BOTH contact methods: email AND mobile
+    if (!emailValid || !mobileValid) {
       return new Response(
-        JSON.stringify({ error: 'Provide a valid email or mobile number' }),
+        JSON.stringify({ error: 'Please provide a valid email address AND a valid mobile number' }),
         { status: 400 }
       );
     }
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest) {
     const adminMailOptions = {
       from: smtpUser,
       to: contactEmailRecipient,
-      subject: `📬 New Contact Form Submission from ${name}`,
+      subject: `📬 New Contact Form Submission`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333; border-bottom: 2px solid #ef4444; padding-bottom: 10px;">
@@ -100,8 +101,8 @@ export async function POST(req: NextRequest) {
           
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email || 'Not provided'}</p>
-            <p><strong>Mobile:</strong> ${mobile || 'Not provided'}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Mobile:</strong> ${mobile}</p>
             <p><strong>Message:</strong></p>
             <p style="background: white; padding: 10px; border-left: 4px solid #ef4444;">
               ${message.replace(/\n/g, '<br />')}
@@ -110,25 +111,26 @@ export async function POST(req: NextRequest) {
 
           <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; font-size: 12px; color: #666;">
             <p>📅 Received at: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
-            <p>✅ Status: Successfully saved to MongoDB</p>
+            <p>✅ Status: ${dbSaveSuccess ? 'Saved to MongoDB' : 'Not saved to DB'}</p>
           </div>
 
           <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
           <p style="color: #999; font-size: 12px;">
-            This is an automated message. Please reply to ${email || 'the user'} directly to respond.
+            This is an automated message. Reply to ${email || 'the user (no email provided)'} to respond.
           </p>
         </div>
       `,
     };
 
     // ========== EMAIL TEMPLATE FOR USER ==========
-    const userMailOptions = {
-      from: smtpUser,
-      to: email,
-      subject: '✅ We received your message!',
-      html: `
+    const userMailOptions = email
+      ? {
+          from: smtpUser,
+          to: email,
+          subject: '✅ We received your message!',
+          html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Thank you for reaching out, ${name}!</h2>
+          <h2 style="color: #333;">Thank you for reaching out${name ? ', ' + name : ''}!</h2>
           
           <p>We've received your message and will get back to you as soon as possible.</p>
           
@@ -151,7 +153,8 @@ export async function POST(req: NextRequest) {
           </p>
         </div>
       `,
-    };
+        }
+      : null;
 
     try {
       // Send email to admin
@@ -159,8 +162,8 @@ export async function POST(req: NextRequest) {
       console.log('✅ Admin notification email sent');
 
       // Send confirmation email to user (only if email provided)
-      if (emailValid) {
-        await transporter.sendMail(userMailOptions);
+      if (emailValid && userMailOptions) {
+        await transporter.sendMail(userMailOptions as any);
         console.log('✅ User confirmation email sent');
       }
 

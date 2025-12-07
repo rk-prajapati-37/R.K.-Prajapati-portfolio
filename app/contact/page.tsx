@@ -11,41 +11,28 @@ export default function ContactPage() {
     e.preventDefault();
     setStatus(null);
 
-    // Validation
-      // Validation: name and message required; either valid email OR valid mobile required
-      if (!form.name || !form.message) {
-        setStatus({ ok: false, msg: "Name and message are required." });
-        return;
-      }
+    // Validation: name, relatedTo, and message required; both email and mobile must be valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const mobileClean = form.mobile ? form.mobile.replace(/\s|-/g, "") : "";
+    const mobileValid = mobileClean && /^\d{7,15}$/.test(mobileClean);
+    const emailValid = form.email && emailRegex.test(form.email);
 
-    if (form.name.trim().length < 2) {
-      setStatus({ ok: false, msg: "Name must be at least 2 characters." });
+    if (!form.name || form.name.trim().length < 2) {
+      setStatus({ ok: false, msg: "Please enter your name (min 2 characters)." });
       return;
     }
 
-    // Email validation
-      // At least one contact: valid email OR valid mobile
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const mobileClean = form.mobile ? form.mobile.replace(/\s|-/g, "") : "";
-      const mobileValid = mobileClean && /^\d{7,15}$/.test(mobileClean);
-      const emailValid = form.email && emailRegex.test(form.email);
+    // relatedTo removed per request
 
-      if (!emailValid && !mobileValid) {
-        setStatus({ ok: false, msg: "Please provide a valid email address or mobile number." });
-        return;
-      }
-
-    if (form.message.trim().length < 10) {
+    if (!form.message || form.message.trim().length < 10) {
       setStatus({ ok: false, msg: "Message must be at least 10 characters." });
       return;
     }
 
-    // Phone validation (optional but if provided, must be valid)
-      // Phone validation (if provided)
-      if (form.mobile && !/^\d{7,15}$/.test(mobileClean)) {
-        setStatus({ ok: false, msg: "Please enter a valid phone number." });
-        return;
-      }
+    if (!emailValid || !mobileValid) {
+      setStatus({ ok: false, msg: "Please provide a valid email address AND a valid mobile number." });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -71,7 +58,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br  pt-12 pb-8 px-6 md:px-10">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-center text-3xl sm:text-4xl font-bold text-gray-800 mb-8">GET IN TOUCH</h2>
+        <h2 className="text-center text-3xl sm:text-4xl font-bold text-gray-800 mt-12 mb-12">GET IN TOUCH</h2>
 
         {/* Contacts Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
