@@ -1,11 +1,12 @@
 import nodemailer from 'nodemailer';
 import type { NextRequest } from 'next/server';
+import { MongoClient } from 'mongodb';
 
 /**
  * POST /api/contact
  * Handles contact form submissions:
  * 1. Validates form data
- * 2. Saves to MongoDB (via backend API)
+ * 2. Saves to MongoDB (direct connection or via backend API)
  * 3. Sends email notification to admin
  */
 export async function POST(req: NextRequest) {
@@ -34,25 +35,60 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ========== SAVE TO DATABASE ==========
+    // ========== SAVE TO DATABASE (Direct MongoDB or Backend) ==========
     let dbSaveSuccess = false;
-    try {
-      const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
-      const backendRes = await fetch(`${backendUrl}/api/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+    const mongoUri = process.env.MONGODB_URI;
 
-      if (backendRes.ok) {
-        dbSaveSuccess = true;
-        console.log('✅ Contact saved to MongoDB');
-      } else {
-        console.error('❌ Backend save failed:', await backendRes.text());
+    // Try direct MongoDB connection first (if MONGODB_URI is available)
+    if (mongoUri) {
+      try {
+        const client = new MongoClient(mongoUri, { maxPoolSize: 1 });
+        await client.connect();
+        const db = client.db('portfolioDB');
+        const contactsCollection = db.collection('contacts');
+
+        const contactData = {
+          name,
+          email,
+          mobile,
+          message,
+          createdAt: new Date().toISOString(),
+          source: 'contact-form',
+        };
+
+        const result = await contactsCollection.insertOne(contactData);
+        await client.close();
+
+        if (result.insertedId) {
+          dbSaveSuccess = true;
+          console.log('✅ Contact saved directly to MongoDB:', result.insertedId);
+        }
+      } catch (mongoErr: any) {
+        console.error('⚠️ Direct MongoDB save failed:', mongoErr?.message);
+        // Fall back to backend if available
       }
-    } catch (backendErr) {
-      console.error('⚠️ Backend connection error:', backendErr);
-      // Continue anyway - try to send email
+    }
+
+    // Fall back to backend API if direct save failed
+    if (!dbSaveSuccess && process.env.BACKEND_URL) {
+      try {
+        const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+        const backendRes = await fetch(`${backendUrl}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        if (backendRes.ok) {
+          dbSaveSuccess = true;
+          console.log('✅ Contact saved to MongoDB');
+        } else {
+          console.error('❌ Backend save failed:', await backendRes.text());
+        }
+      } catch (backendErr) {
+        console.error('⚠️ Backend connection error:', backendErr);
+        // Continue anyway - try to send email
+      }
     }
 
     // ========== SEND EMAIL NOTIFICATION ==========
