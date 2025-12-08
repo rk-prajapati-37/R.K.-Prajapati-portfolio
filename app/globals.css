@@ -16,9 +16,12 @@
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Light theme overrides (rarely used since layout uses dark mode) */
+/* Light theme overrides via system preference */
 @media (prefers-color-scheme: light){
   :root{
     --bg: #f9fafb;
@@ -31,15 +34,15 @@
   }
 }
 
-/* Theme toggle via attribute: set `data-theme="light"` on <html> to force light theme */
+/* Theme toggle via attribute: set `data-theme="light"` on <html> to force light theme (overrides system preference) */
 html[data-theme="light"]{
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --muted: #6b7280;
-  --text: #0f1724;
-  --accent: #c00;
-  --card-border: rgba(0,0,0,0.06);
-  --card-shadow: 0 4px 18px rgba(2,6,23,0.06);
+  --bg: #f9fafb !important;
+  --surface: #ffffff !important;
+  --muted: #6b7280 !important;
+  --text: #0f1724 !important;
+  --accent: #c00 !important;
+  --card-border: rgba(0,0,0,0.06) !important;
+  --card-shadow: 0 4px 18px rgba(2,6,23,0.06) !important;
 }
 
 /* Base element styles */
@@ -51,6 +54,7 @@ body{
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  transition: background var(--transition-base), color var(--transition-base);
 }
 
 /* Prevent content from being hidden beneath the fixed navbar (navbar height = 6rem) */
@@ -74,15 +78,35 @@ html.modal-open .min-h-screen{
 }
 
 /* Headings */
-h1,h2,h3,h4{color:var(--text);margin:0 0 0.5rem 0;font-weight:600}
+h1,h2,h3,h4{color:var(--text);margin:0 0 0.5rem 0;font-weight:600;transition: color var(--transition-base);}
 h1{font-size:2rem}
 h2{font-size:1.5rem}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border-radius:0.5rem;background:var(--accent);color:white;font-weight:600}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  padding:0.5rem 0.75rem;
+  border-radius:0.5rem;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+  transition: all var(--transition-fast);
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(239,68,68,0.3)}
 
 /* Card style */
-.card{background:var(--surface);border-radius:var(--radius);padding:1rem;border:1px solid var(--card-border);box-shadow:var(--card-shadow);color:var(--text)}
+.card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:1rem;
+  border:1px solid var(--card-border);
+  box-shadow:var(--card-shadow);
+  color:var(--text);
+  transition: all var(--transition-base);
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.15)}
 
 .certificate-card{border:1px solid rgba(0,0,0,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
 .certificate-card .portable-text{line-height:1.5}
@@ -117,6 +141,16 @@ html:not([data-theme="light"]) .form-control{
   background-color: rgba(255,255,255,0.02) !important;
   color: var(--text) !important;
   border: 1px solid rgba(255,255,255,0.04) !important;
+  transition: all var(--transition-fast) !important;
+}
+
+html:not([data-theme="light"]) input:focus,
+html:not([data-theme="light"]) textarea:focus,
+html:not([data-theme="light"]) select:focus,
+html:not([data-theme="light"]) .form-control:focus{
+  background-color: rgba(255,255,255,0.05) !important;
+  border-color: rgba(239,68,68,0.5) !important;
+  outline: none !important;
 }
 
 /* Ensure utility text color overrides are readable in dark mode */
@@ -131,19 +165,33 @@ html:not([data-theme="light"]) .text-gray-600{
 .prose a,
 .card a,
 .portable-text a,
-.site-container a{color:var(--accent);text-decoration:none}
+.site-container a{
+  color:var(--accent);
+  text-decoration:none;
+  transition: opacity var(--transition-fast), text-decoration var(--transition-fast);
+}
 .prose a:hover,
 .card a:hover,
 .portable-text a:hover,
-.site-container a:hover{text-decoration:underline}
+.site-container a:hover{
+  text-decoration:underline;
+  opacity:0.8;
+}
 
 /* Ensure anchor links inside button-like elements inherit the visual color (e.g. text-white) */
 .btn a, .btn, .btn *{ color: inherit !important }
 .px-8.text-white, .bg-gray-800.text-white, .bg-red-600.text-white { color: white !important }
 
 /* Smooth page transitions (for Motion fallback) */
-.page-fade{opacity:0;transform:translateY(6px);transition:opacity 300ms ease, transform 300ms ease}
-.page-fade.page-enter{opacity:1;transform:translateY(0)}
+.page-fade{
+  opacity:0;
+  transform:translateY(6px);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+.page-fade.page-enter{
+  opacity:1;
+  transform:translateY(0);
+}
 
 /* Small responsive tweaks */
 @media (max-width:640px){
