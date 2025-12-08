@@ -27,10 +27,13 @@ type Project = {
   socialLinks?: SocialLink[];
 };
 
+type FrameType = 'mobile' | 'tablet' | 'mac' | 'laptop';
+
 export default function ProjectDetailClientFixed({ project, error }: { project: Project | null; error: string | null; }) {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [allImages, setAllImages] = useState<string[]>([]);
+  const [frameType, setFrameType] = useState<FrameType>('mac');
   const modalRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -56,10 +59,59 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
   }
 
   const buildImages = () => [project?.imageUrl, ...(project?.extraImages || [])].filter(Boolean) as string[];
-  const openGallery = (image?: string) => { const imgs = buildImages(); setAllImages(imgs); setSelectedImage(image ?? imgs[0] ?? null); };
+
+  // Helper function to preload image and determine aspect ratio, then set frameType and selectedImage
+  const selectImage = (src: string) => {
+    const img = new Image();
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      let newFrameType: FrameType;
+
+      // Determine frame type based on aspect ratio
+      if (aspectRatio < 1) {
+        // Portrait: use mobile (9:16 ≈ 0.56)
+        newFrameType = 'mobile';
+      } else if (aspectRatio < 1.3) {
+        // Nearly square or slightly wider: use tablet (4:3 ≈ 1.33)
+        newFrameType = 'tablet';
+      } else if (aspectRatio < 1.8) {
+        // Landscape: use laptop/desktop (16:9 ≈ 1.78)
+        newFrameType = 'laptop';
+      } else {
+        // Very wide: use mac
+        newFrameType = 'mac';
+      }
+
+      setFrameType(newFrameType);
+      setSelectedImage(src);
+    };
+    img.onerror = () => {
+      // Fallback to mac if image fails to load
+      setFrameType('mac');
+      setSelectedImage(src);
+    };
+    img.src = src;
+  };
+
+  const openGallery = (image?: string) => {
+    const imgs = buildImages();
+    setAllImages(imgs);
+    const imageToSelect = image ?? imgs[0] ?? null;
+    if (imageToSelect) {
+      selectImage(imageToSelect);
+    }
+  };
   const currentImageIndex = selectedImage ? allImages.indexOf(selectedImage) : -1;
-  const goToNext = () => { if (currentImageIndex >= 0 && currentImageIndex < allImages.length - 1) setSelectedImage(allImages[currentImageIndex + 1]); };
-  const goToPrev = () => { if (currentImageIndex > 0) setSelectedImage(allImages[currentImageIndex - 1]); };
+  const goToNext = () => {
+    if (currentImageIndex >= 0 && currentImageIndex < allImages.length - 1) {
+      selectImage(allImages[currentImageIndex + 1]);
+    }
+  };
+  const goToPrev = () => {
+    if (currentImageIndex > 0) {
+      selectImage(allImages[currentImageIndex - 1]);
+    }
+  };
 
   // Convert common video links to embeddable URLs (YouTube / Vimeo). If already embed, return as-is.
   const getEmbedUrl = (url?: string | null) => {
@@ -227,17 +279,68 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
                 ✕
               </button>
 
-              {/* Image Container */}
-              <div ref={modalRef} className="w-full bg-black/40 rounded-xl overflow-hidden backdrop-blur-sm">
-                <img 
-                  src={selectedImage} 
-                  alt="Gallery view" 
-                  className="w-full h-auto max-h-[80vh] object-contain"
-                  onError={(e) => {
-                    console.error("Image failed to load:", selectedImage);
-                    (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
-                  }}
-                />
+              {/* Image Container with dynamic device frame based on frameType */}
+              <div ref={modalRef} className="w-full rounded-xl overflow-hidden">
+                {frameType === 'mobile' && (
+                  <div className="device-frame device-frame--mobile device-frame--mobile-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {frameType === 'tablet' && (
+                  <div className="device-frame device-frame--tablet device-frame--tablet-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {frameType === 'laptop' && (
+                  <div className="device-frame device-frame--laptop device-frame--laptop-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {frameType === 'mac' && (
+                  <div className="device-frame device-frame--mac device-frame--mac-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Controls */}
@@ -271,4 +374,6 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
       </AnimatePresence>
     </div>
   );
-}
+    }
+
+

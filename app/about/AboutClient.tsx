@@ -111,7 +111,10 @@ export default function AboutClient({
           <div className="pt-4 flex flex-wrap items-center gap-5">
             <a
               href="/RohitPrajapatiCV.pdf"
-              download
+              download="RohitPrajapatiCV.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Download Rohit K. Prajapati CV"
               className="inline-block bg-white border rounded-full px-6 py-3 shadow-md hover:shadow-lg"
             >
               Download CV
