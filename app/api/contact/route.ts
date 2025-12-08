@@ -1,12 +1,12 @@
 import nodemailer from 'nodemailer';
 import type { NextRequest } from 'next/server';
-import { MongoClient } from 'mongodb';
+import { getMongoDb } from '@/lib/mongoClient';
 
 /**
  * POST /api/contact
  * Handles contact form submissions:
  * 1. Validates form data
- * 2. Saves to MongoDB (direct connection or via backend API)
+ * 2. Saves to MongoDB (using connection pool)
  * 3. Sends email notification to admin
  */
 export async function POST(req: NextRequest) {
@@ -35,16 +35,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ========== SAVE TO DATABASE (Direct MongoDB or Backend) ==========
+    // ========== SAVE TO DATABASE (Direct MongoDB with Connection Pool) ==========
     let dbSaveSuccess = false;
     const mongoUri = process.env.MONGODB_URI;
 
     // Try direct MongoDB connection first (if MONGODB_URI is available)
+    // Uses connection pooling to avoid overhead on subsequent requests
     if (mongoUri) {
       try {
-        const client = new MongoClient(mongoUri, { maxPoolSize: 1 });
-        await client.connect();
-        const db = client.db('portfolioDB');
+        const db = await getMongoDb();
         const contactsCollection = db.collection('contacts');
 
         const contactData = {
@@ -57,7 +56,6 @@ export async function POST(req: NextRequest) {
         };
 
         const result = await contactsCollection.insertOne(contactData);
-        await client.close();
 
         if (result.insertedId) {
           dbSaveSuccess = true;
