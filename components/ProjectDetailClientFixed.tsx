@@ -58,6 +58,17 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
     );
   }
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    try {
+      const [day, month, year] = dateStr.split('/');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const buildImages = () => [project?.imageUrl, ...(project?.extraImages || [])].filter(Boolean) as string[];
 
   // Helper function to preload image and determine aspect ratio, then set frameType and selectedImage
@@ -222,6 +233,47 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
               <PortableTextClient value={project.description || "No description available."} />
             </div>
           </div>
+
+          {/* Project Details */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg">
+              {project.clientName && (
+                <div>
+                  <span className="text-lg text-gray-800"><strong>Client -</strong> {project.clientName}</span>
+                </div>
+              )}
+              {project.date && (
+                <div>
+                  <span className="text-lg text-gray-800"><strong>Project Date -</strong> {formatDate(project.date)}</span>
+                </div>
+              )}
+            </div>
+            {project.techStack && project.techStack.length > 0 && (
+              <div className="bg-gray-50 p-4 rounded-lg mt-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Tech Stack</h3>
+                <div className="flex flex-wrap gap-2">
+                  {project.techStack.map((tech, i) => (
+                    <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {project.video && (
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold mb-4">Demo Video</h3>
+              <div className="aspect-video">
+                <iframe
+                  src={project.video.replace('watch?v=', 'embed/')}
+                  className="w-full h-full rounded-xl"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-4 flex-wrap mb-6 items-center">
             <div className="flex gap-4 flex-wrap">

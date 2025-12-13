@@ -70,13 +70,13 @@ export default function ProjectsGridClient({
         {/* Category Filter */}
         {allCategories.length > 0 && (
           <div className="mb-12">
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex gap-3 px-2 overflow-x-auto no-scrollbar justify-start">
               {/* All Projects Button */}
               <motion.button
                 onClick={() => handleCategoryFilter(null)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`px-6 py-2 rounded-full font-semibold transition ${
+                className={`shrink-0 px-6 py-2 rounded-full font-semibold transition ${
                   selectedCategory === null
                     ? "bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg"
                     : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"
@@ -92,7 +92,7 @@ export default function ProjectsGridClient({
                   onClick={() => handleCategoryFilter(category)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`px-6 py-2 rounded-full font-semibold transition ${
+                  className={`shrink-0 px-6 py-2 rounded-full font-semibold transition ${
                     selectedCategory === category
                       ? "bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg"
                       : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"

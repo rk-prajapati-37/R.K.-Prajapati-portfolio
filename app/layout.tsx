@@ -27,7 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 const isLight = theme === 'light' || (theme === null && !prefersDark);
                 if (isLight) {
-                  document.documentElement.setAttribute('data-theme', 'light');
+                  document.documentElement.classList.remove('dark');
+                } else {
+                  document.documentElement.classList.add('dark');
                 }
               } catch (e) {}
             `,

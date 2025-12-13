@@ -16,9 +16,9 @@ type Project = {
 export default async function Projects({
   searchParams,
 }: {
-  searchParams?: { category?: string };
+  searchParams?: Promise<{ category?: string }>;
 }) {
-  const params = searchParams || {};
+  const params = (await searchParams) || {};
 
   const selectedCategory = params.category ? decodeURIComponent(params.category) : null;
 

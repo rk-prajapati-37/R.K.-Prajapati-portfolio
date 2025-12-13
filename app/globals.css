@@ -4,13 +4,13 @@
 
 /* Design tokens - single source for color, spacing and typography */
 :root{
-  --bg: #0f1724; /* dark navy */
-  --surface: #0b1220;
-  --muted: #94a3b8;
-  --text: #e6eef8;
-  --accent: #ef4444; /* red-500 */
-  --card-border: rgba(255,255,255,0.04);
-  --card-shadow: 0 4px 18px rgba(2,6,23,0.6);
+  --bg: #f9fafb; /* light bg */
+  --surface: #ffffff;
+  --muted: #6b7280;
+  --text: #0f1724;
+  --accent: #c00;
+  --card-border: rgba(0,0,0,0.06);
+  --card-shadow: 0 4px 18px rgba(2,6,23,0.06);
   --radius: 0.75rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -21,28 +21,14 @@
   --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Light theme overrides via system preference */
-@media (prefers-color-scheme: light){
-  :root{
-    --bg: #f9fafb;
-    --surface: #ffffff;
-    --muted: #6b7280;
-    --text: #0f1724;
-    --accent: #c00;
-    --card-border: rgba(0,0,0,0.06);
-    --card-shadow: 0 4px 18px rgba(2,6,23,0.06);
-  }
-}
-
-/* Theme toggle via attribute: set `data-theme="light"` on <html> to force light theme (overrides system preference) */
-html[data-theme="light"]{
-  --bg: #f9fafb !important;
-  --surface: #ffffff !important;
-  --muted: #6b7280 !important;
-  --text: #0f1724 !important;
-  --accent: #c00 !important;
-  --card-border: rgba(0,0,0,0.06) !important;
-  --card-shadow: 0 4px 18px rgba(2,6,23,0.06) !important;
+.dark{
+  --bg: #0f1724; /* dark navy */
+  --surface: #0b1220;
+  --muted: #94a3b8;
+  --text: #e6eef8;
+  --accent: #ef4444; /* red-500 */
+  --card-border: rgba(255,255,255,0.04);
+  --card-shadow: 0 4px 18px rgba(2,6,23,0.6);
 }
 
 /* Base element styles */
@@ -76,6 +62,9 @@ html.modal-open .min-h-screen{
   pointer-events: none;
   user-select: none;
 }
+
+/* Ensure full-screen fixed modals are centered (common pattern: element has both classes `fixed` and `inset-0`) */
+.fixed.inset-0{display:flex;align-items:center;justify-content:center}
 
 /* Headings */
 h1,h2,h3,h4{color:var(--text);margin:0 0 0.5rem 0;font-weight:600;transition: color var(--transition-base);}
@@ -120,44 +109,83 @@ h2{font-size:1.5rem}
 
 /* Dark-mode overrides: prevent Tailwind's utility classes from producing
    bright white blocks when the site is in dark theme. Scope to when the
-   document is NOT set to `data-theme="light"` so light theme remains
-   unaffected. Use !important sparingly to override utility classes. */
-html:not([data-theme="light"]) .bg-white,
-html:not([data-theme="light"]) .bg-gray-50,
-html:not([data-theme="light"]) .card,
-html:not([data-theme="light"]) .shadow-2xl,
-html:not([data-theme="light"]) .shadow-lg{
+   document has class `dark` so light theme remains unaffected. Use !important sparingly to override utility classes. */
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-gray-200,
+.dark .bg-gray-300,
+.dark .bg-gray-400,
+.dark .bg-gray-500,
+.dark .card,
+.dark .shadow-2xl,
+.dark .shadow-lg{
   background-color: var(--surface) !important;
   color: var(--text) !important;
   border-color: var(--card-border) !important;
   box-shadow: var(--card-shadow) !important;
 }
 
+.dark .bg-red-50{
+  background-color: rgba(239,68,68,0.1) !important;
+}
+
+html:not([data-theme="light"]) .text-red-700{
+  color: #ef4444 !important;
+}
+
+html:not([data-theme="light"]) .border-red-200{
+  border-color: rgba(239,68,68,0.3) !important;
+}
+
 /* Form controls (inputs, textarea) often use white backgrounds — make them dark and readable */
-html:not([data-theme="light"]) input,
-html:not([data-theme="light"]) textarea,
-html:not([data-theme="light"]) select,
-html:not([data-theme="light"]) .form-control{
+.dark input,
+.dark textarea,
+.dark select,
+.dark .form-control{
   background-color: rgba(255,255,255,0.02) !important;
   color: var(--text) !important;
   border: 1px solid rgba(255,255,255,0.04) !important;
   transition: all var(--transition-fast) !important;
 }
 
-html:not([data-theme="light"]) input:focus,
-html:not([data-theme="light"]) textarea:focus,
-html:not([data-theme="light"]) select:focus,
-html:not([data-theme="light"]) .form-control:focus{
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus,
+.dark .form-control:focus{
   background-color: rgba(255,255,255,0.05) !important;
   border-color: rgba(239,68,68,0.5) !important;
   outline: none !important;
 }
 
 /* Ensure utility text color overrides are readable in dark mode */
-html:not([data-theme="light"]) .text-gray-800,
-html:not([data-theme="light"]) .text-gray-700,
-html:not([data-theme="light"]) .text-gray-600{
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-gray-600,
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-gray-300,
+.dark .text-gray-200,
+.dark .text-gray-100,
+.dark .text-gray-50{
   color: var(--muted) !important;
+}
+
+.dark .text-red-700{
+  color: #ef4444 !important;
+}
+
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-gray-400,
+.dark .border-gray-500,
+.dark .border-gray-600,
+.dark .border-gray-700{
+  border-color: var(--card-border) !important;
+}
+
+.dark .border-red-200{
+  border-color: rgba(239,68,68,0.3) !important;
 }
 
 /* Accessible link style (scoped for content areas only) */
@@ -221,23 +249,23 @@ html:not([data-theme="light"]) .text-gray-600{
 .device-frame--laptop:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:-18px;width:90%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:8px}
 
 /* MacBook-like frame (use for gallery modal) */
-.device-frame--mac{width:100%;max-width:980px;border-radius:12px;padding:22px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 18px 60px rgba(2,6,23,0.6)}
+.device-frame--mac{width:100%;max-width:980px;border-radius:12px;padding:22px;background:linear-gradient(#e7e7e7,#7a7a7a);box-shadow:0 18px 60px #ffffff99}
 .device-frame--mac .device-screen{border-radius:10px;overflow:auto;background:var(--surface);}
 .device-frame--mac:before{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);top:8px;width:14px;height:14px;background:rgba(255,255,255,0.06);border-radius:9999px}
 .device-frame--mac:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:10px;width:78%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px}
 
 /* Image-based Mac frame (use a PNG/SVG bezel in /public/images/) */
-.device-frame--mac-image{position:relative;padding:var(--mac-pad-top,60px) var(--mac-pad-sides,56px) var(--mac-pad-bottom,80px);border-radius:0;background-color:transparent}
-.device-frame--mac-image .device-screen{background:transparent;border-radius:6px;position:relative;z-index:10}
+.device-frame--mac-image{position:relative;padding:var(--mac-pad-top,12px) var(--mac-pad-sides,12px) var(--mac-pad-bottom,18px);border-radius:0;background-color:transparent}
+.device-frame--mac-image .device-screen{background:transparent;border-radius:6px;position:relative;z-index:10;border:20px solid #000;overflow:hidden}
 .device-frame--mac-image .device-screen{display:flex;align-items:center;justify-content:center}
 .device-frame--mac .device-screen{max-height:calc(90vh - 120px)}
-.device-frame--mac-image .device-screen img{max-width:100%;max-height:calc(90vh - 200px);width:auto;object-fit:contain;transition:transform .25s ease}
+.device-frame--mac-image .device-screen img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
 .project-modal-image{cursor:grab;touch-action: none}
 .project-modal-image:active{cursor:grabbing}
 .project-modal-image[style*="translate"]{will-change: transform}
 .zoom-indicator{position:absolute;right:10px;top:10px;background:rgba(0,0,0,0.6);color:#fff;padding:6px 10px;border-radius:999px;font-weight:600;z-index:70}
 .project-modal-image[style*="scale(2)"]{ /* basic panning support placeholder */ pointer-events: auto }
-.device-frame--mac-image::after{content:'';position:absolute;inset:0;display:block;background-image:url('/images/device-mac.png');background-repeat:no-repeat;background-size:contain;background-position:center;border-radius:0;z-index:20;pointer-events:none}
+.device-frame--mac-image::after{content:'';position:absolute;inset:0;display:block;background-image:none;background-repeat:no-repeat;background-size:contain;background-position:center;border-radius:0;z-index:20;pointer-events:none}
 
 /* If you have an iMac-style bezel (taller top & chin), use a different image and tweak padding */
 .device-frame--mac-image--imac{position:relative;padding:54px 38px 90px}
@@ -299,23 +327,23 @@ html:not([data-theme="light"]) .text-gray-600{
 .device-frame--laptop:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:-18px;width:90%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:8px}
 
 /* MacBook-like frame (use for gallery modal) */
-.device-frame--mac{width:100%;max-width:980px;border-radius:12px;padding:22px;background:linear-gradient(180deg,#0b1220,#0f1724);box-shadow:0 18px 60px rgba(2,6,23,0.6)}
+.device-frame--mac{width:100%;max-width:980px;border-radius:12px;padding:22px;background:linear-gradient(#e7e7e7,#7a7a7a);box-shadow:0 18px 60px #ffffff99}
 .device-frame--mac .device-screen{border-radius:10px;overflow:auto;background:var(--surface);}
 .device-frame--mac:before{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);top:8px;width:14px;height:14px;background:rgba(255,255,255,0.06);border-radius:9999px}
 .device-frame--mac:after{content:'';display:block;position:absolute;left:50%;transform:translateX(-50%);bottom:10px;width:78%;height:36px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px}
 
 /* Image-based Mac frame (use a PNG/SVG bezel in /public/images/) */
-.device-frame--mac-image{position:relative;padding:var(--mac-pad-top,60px) var(--mac-pad-sides,56px) var(--mac-pad-bottom,80px);border-radius:0;background-color:transparent}
-.device-frame--mac-image .device-screen{background:transparent;border-radius:6px;position:relative;z-index:10}
+.device-frame--mac-image{position:relative;padding:var(--mac-pad-top,12px) var(--mac-pad-sides,12px) var(--mac-pad-bottom,18px);border-radius:0;background-color:transparent}
+.device-frame--mac-image .device-screen{background:transparent;border-radius:6px;position:relative;z-index:10;border:20px solid #000;overflow:hidden}
 .device-frame--mac-image .device-screen{display:flex;align-items:center;justify-content:center}
 .device-frame--mac .device-screen{max-height:calc(90vh - 120px)}
-.device-frame--mac-image .device-screen img{max-width:100%;max-height:calc(90vh - 200px);width:auto;object-fit:contain;transition:transform .25s ease}
+.device-frame--mac-image .device-screen img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
 .project-modal-image{cursor:grab;touch-action: none}
 .project-modal-image:active{cursor:grabbing}
 .project-modal-image[style*="translate"]{will-change: transform}
 .zoom-indicator{position:absolute;right:10px;top:10px;background:rgba(0,0,0,0.6);color:#fff;padding:6px 10px;border-radius:999px;font-weight:600;z-index:70}
 .project-modal-image[style*="scale(2)"]{ /* basic panning support placeholder */ pointer-events: auto }
-.device-frame--mac-image::after{content:'';position:absolute;inset:0;display:block;background-image:url('/images/device-mac.png');background-repeat:no-repeat;background-size:contain;background-position:center;border-radius:0;z-index:20;pointer-events:none}
+.device-frame--mac-image::after{content:'';position:absolute;inset:0;display:block;background-image:none;background-repeat:no-repeat;background-size:contain;background-position:center;border-radius:0;z-index:20;pointer-events:none}
 
 /* If you have an iMac-style bezel (taller top & chin), use a different image and tweak padding */
 .device-frame--mac-image--imac{position:relative;padding:54px 38px 90px}

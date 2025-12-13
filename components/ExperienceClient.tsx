@@ -133,67 +133,49 @@ export default function ExperienceClient({
             variants={item}
             className="card rounded-lg shadow-md p-6 border-l-4 border-red-600 hover:shadow-lg transition min-h-0"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
+            <div>
                 <h3 className="text-lg font-semibold text-gray-800">
                   {exp.position}
                 </h3>
 
-                {exp.company && (
-                  <div className="mt-1">
-                    {companyUrl ? (
-                      <a
-                        href={companyUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-gray-800 hover:underline"
-                      >
-                        {exp.company}
-                      </a>
-                    ) : (
-                      <p className="text-sm font-medium text-gray-800">
-                        {exp.company}
-                      </p>
+                <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  {exp.logo && (
+                    <img
+                      src={exp.logo}
+                      alt={`${exp.company} logo`}
+                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full bg-white p-1 border flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    {exp.company && (
+                      <div className="text-base sm:text-lg font-semibold text-gray-800 leading-tight">
+                        {companyUrl ? (
+                          <a
+                            href={companyUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            {exp.company}
+                          </a>
+                        ) : (
+                          <span>{exp.company}</span>
+                        )}
+                      </div>
                     )}
+                    <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs sm:text-sm text-gray-500">
+                      <span className="truncate">{exp.location}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="truncate">
+                        {formatDate(exp.startDate)} -{" "}
+                        {exp.isCurrent ? "Present" : formatDate(exp.endDate || "")}
+                      </span>
+                    </div>
                   </div>
-                )}
-
-                <div className="mt-2 flex items-center gap-3">
-  {exp.logo && (
-    <img
-      src={exp.logo}
-      alt={`${exp.company} logo`}
-      className="w-8 h-8 object-contain rounded-full bg-white p-1 border"
-    />
-  )}
-
-  {exp.company && (
-    companyUrl ? (
-      <a
-        href={companyUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm font-medium text-gray-800 hover:underline"
-      >
-        {exp.company}
-      </a>
-    ) : (
-      <p className="text-sm font-medium text-gray-800">
-        {exp.company}
-      </p>
-    )
-  )}
-</div>
-
-
-                <p className="text-sm text-gray-500 mt-1">{exp.location}</p>
-                <p className="text-sm text-gray-500">
-                  {formatDate(exp.startDate)} -{" "}
-                  {exp.isCurrent ? "Present" : formatDate(exp.endDate || "")}
-                </p>
+                </div>
 
                 {descValue && (
-                  <div className="mt-3 text-gray-700">
+                  <div className="mt-4 text-gray-700">
                     <div
                       className="max-w-none"
                       style={
@@ -245,7 +227,6 @@ export default function ExperienceClient({
                   </div>
                 )}
               </div>
-            </div>
           </motion.div>
         );
       })}

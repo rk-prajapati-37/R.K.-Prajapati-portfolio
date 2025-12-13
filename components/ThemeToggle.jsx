@@ -12,10 +12,10 @@ export default function ThemeToggle() {
     const shouldBeLight = stored === "light" || (stored === null && !prefersDark);
     
     if (shouldBeLight) {
-      document.documentElement.setAttribute("data-theme", "light");
+      document.documentElement.classList.remove("dark");
       setIsLight(true);
     } else {
-      document.documentElement.removeAttribute("data-theme");
+      document.documentElement.classList.add("dark");
       setIsLight(false);
     }
     setMounted(true);
@@ -25,10 +25,10 @@ export default function ThemeToggle() {
     const next = !isLight;
     setIsLight(next);
     if (next) {
-      document.documentElement.setAttribute("data-theme", "light");
+      document.documentElement.classList.remove("dark");
       window.localStorage.setItem("theme", "light");
     } else {
-      document.documentElement.removeAttribute("data-theme");
+      document.documentElement.classList.add("dark");
       window.localStorage.setItem("theme", "dark");
     }
   };
