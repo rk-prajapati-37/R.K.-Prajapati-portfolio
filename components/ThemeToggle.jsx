@@ -1,61 +1,59 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-export default function ThemeToggle() {
-  const [isLight, setIsLight] = useState(false);
-  const [mounted, setMounted] = useState(false);
+export default function ThemeToggle({ showLabel = false }) {
+  const [isLight, setIsLight] = useState(true);
+  const [mounted, setMounted] = useState(true);
 
   useEffect(() => {
-    // Set initial theme from localStorage or system preference
+    // initialize from localStorage or system preference
     const stored = typeof window !== "undefined" ? window.localStorage.getItem("theme") : null;
-    const prefersDark = typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldBeLight = stored === "light" || (stored === null && !prefersDark);
-    
-    if (shouldBeLight) {
-      document.documentElement.classList.remove("dark");
-      setIsLight(true);
-    } else {
-      document.documentElement.classList.add("dark");
-      setIsLight(false);
-    }
+    const prefersDark = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initialLight = stored === "light" || (stored === null && !prefersDark);
+    setIsLight(initialLight);
     setMounted(true);
   }, []);
 
-  const toggle = () => {
-    const next = !isLight;
-    setIsLight(next);
-    if (next) {
-      document.documentElement.classList.remove("dark");
-      window.localStorage.setItem("theme", "light");
-    } else {
-      document.documentElement.classList.add("dark");
-      window.localStorage.setItem("theme", "dark");
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      if (isLight) {
+        document.documentElement.classList.remove("dark");
+        window.localStorage.setItem("theme", "light");
+      } else {
+        document.documentElement.classList.add("dark");
+        window.localStorage.setItem("theme", "dark");
+      }
+    } catch (e) {
+      // ignore
     }
-  };
+  }, [isLight, mounted]);
 
-  if (!mounted) return <div className="ml-4 w-9 h-9" />; // Prevent hydration mismatch
+  const toggle = () => setIsLight((v) => !v);
+
+  const bg = isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
+  const border = isLight ? 'rgba(2,6,23,0.2)' : 'rgba(255,255,255,0.2)';
+  const iconColor = isLight ? 'var(--text)' : 'var(--accent)';
 
   return (
     <button
-      aria-label="Toggle theme"
       onClick={toggle}
-      className={`ml-4 p-2 rounded-md text-sm flex items-center justify-center transition-all duration-200 ${
-        isLight
-          ? "bg-yellow-400 hover:bg-yellow-500 border-2 border-yellow-500"
-          : "bg-gray-700 hover:bg-gray-600 border-2 border-gray-600"
-      }`}
-      title={isLight ? 'Light theme' : 'Dark theme'}
+      aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
+      title={isLight ? "Switch to dark mode" : "Switch to light mode"}
+      className="flex items-center gap-2 p-2 rounded-md transition"
+      style={{ color: iconColor, background: bg, border: `1px solid ${border}`, padding: '8px', borderRadius: 8 }}
     >
       {isLight ? (
-        // Sun icon - dark color for light mode
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 4.5a.75.75 0 01.75-.75h0A.75.75 0 0111.5 4.5V5a.75.75 0 01-1.5 0v-.5zM10 15.5a.75.75 0 01.75.75v.25a.75.75 0 01-1.5 0v-.25a.75.75 0 01.75-.75zM4.5 10a.75.75 0 01-.75-.75h-.25a.75.75 0 010-1.5h.25A.75.75 0 014.5 10zM15.5 10a.75.75 0 01.75-.75h.25a.75.75 0 010 1.5h-.25A.75.75 0 0115.5 10zM6.22 6.22a.75.75 0 01.53-.22.75.75 0 01.53 1.28l-.18.18a.75.75 0 11-1.06-1.06l.18-.18zM13.72 13.72a.75.75 0 01.53-.22.75.75 0 01.53 1.28l-.18.18a.75.75 0 11-1.06-1.06l.18-.18zM6.22 13.78a.75.75 0 010-1.06l.18-.18a.75.75 0 111.06 1.06l-.18.18a.75.75 0 01-1.06 0zM13.72 6.28a.75.75 0 010-1.06l.18-.18a.75.75 0 111.06 1.06l-.18.18a.75.75 0 01-1.06 0zM10 7.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+          <path d="M21.752 15.002A9 9 0 0 1 9 2.248 7 7 0 1 0 21.752 15.002z" />
         </svg>
       ) : (
-        // Moon icon - white color for dark mode
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M17.293 13.293A8 8 0 116.707 2.707a6 6 0 1010.586 10.586z" />
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+          <path d="M6.76 4.84l-1.8-1.79L3.17 4.84l1.79 1.8 1.8-1.8zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.03 1.05l1.79-1.79-1.79-1.79-1.8 1.79 1.8 1.79zM20 11v2h3v-2h-3zM4.22 19.78l1.79-1.79-1.79-1.79-1.79 1.79 1.79 1.79zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm6.36-2.36l1.79 1.79 1.79-1.79-1.79-1.79-1.79 1.79z" />
         </svg>
+      )}
+      {showLabel && (
+        <span className="hidden sm:inline text-sm font-medium">Dark / Light</span>
       )}
     </button>
   );

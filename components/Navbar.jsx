@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useRef } from "react";
 import Link from "next/link";
+import AnimatedLogo from "./AnimatedLogo";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -10,15 +12,16 @@ export default function Navbar() {
   return (
     <nav style={{ background: 'var(--surface)', color: 'var(--text)' }} className="fixed top-0 left-0 w-full h-24 shadow-md z-50">
       <div className="site-container flex justify-between items-center h-24">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-            RK
-          </div>
-          <div className="hidden sm:flex flex-col text-lg font-semibold">
-            <span>R.K Prajapati</span>
-            <span className="text-[var(--muted)] text-sm">Web Designer &amp; Developer</span>
-          </div>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
+            <AnimatedLogo size={80} />
+            <div className="hidden sm:flex flex-col font-semibold">
+               <span className="text-base border-b border-gray-300 ">R.K Prajapati</span>
+              <span className="text-[var(--muted)] text-sm ">Web Designer &amp; Developer</span>
+            </div>
+          </Link>
+          {/* desktop: theme toggle removed — icon stays after mobile menu button */}
+        </div>
         <div className="hidden md:flex space-x-6 items-center">
           <Link href="/" className="hover:underline">Home</Link>
 
@@ -53,25 +56,31 @@ export default function Navbar() {
           <Link href="/blog">Blog</Link>
           <Link href="/testimonials">Testimonials</Link>
           <Link href="/contact">Contact</Link>
+          {/* theme icon (desktop) */}
+          <ThemeToggle />
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
           <button
-          aria-label="Toggle menu"
-          className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2"
-          style={{ color: 'var(--text)' }}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
+            aria-label="Toggle menu"
+            className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2"
+            style={{ color: 'var(--text)' }}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
+          {/* mobile theme icon placed after the menu button */}
+          <div className="ml-2">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 

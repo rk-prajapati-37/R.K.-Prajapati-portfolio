@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import BlogSection from "@/components/BlogSection";
 
 export default function HomePage() {
   return (
@@ -53,9 +52,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* Blog Section */}
-      <BlogSection />
     </div>
   );
 }

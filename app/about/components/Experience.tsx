@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { experienceData } from "../data/experienceData";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import PortableTextClient from "@/components/PortableTextClient";
+import PortableTextClient from "@/components/PortableTextClientFixed";
 
 
 
