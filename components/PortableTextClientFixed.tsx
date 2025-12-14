@@ -39,6 +39,8 @@ function toPlainText(value: any): string {
   return parts.join("\n\n");
 }
 
+export { toPlainText };
+
 function toPlainWords(value: any, wordCount = 30): string {
   const text = toPlainText(value || "");
   if (!text) return "";
@@ -132,6 +134,26 @@ export default function PortableTextClientFixed({
           >
             {children}
           </a>
+        );
+      },
+    },
+    types: {
+      image: ({ value }: any) => {
+        const { asset, alt, caption } = value;
+        return (
+          <figure className="my-6">
+            <img
+              src={asset?.url}
+              alt={alt || "Blog image"}
+              className="w-full h-auto rounded-lg shadow-md"
+              loading="lazy"
+            />
+            {caption && (
+              <figcaption className="text-sm text-gray-600 mt-2 text-center italic">
+                {caption}
+              </figcaption>
+            )}
+          </figure>
         );
       },
     },

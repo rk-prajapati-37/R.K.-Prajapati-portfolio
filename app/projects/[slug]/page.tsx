@@ -34,12 +34,14 @@ export default async function ProjectDetail({
   }
 
   let project: Project | null = null;
+  let nextProject: { title: string; slug: string } | null = null;
+  let prevProject: { title: string; slug: string } | null = null;
   let error: string | null = null;
 
   try {
     project = await client.fetch(
       `*[_type == "project" && slug.current == $slug][0]{
-        title, description, github, demo, techStack, category,
+        title, description, details, github, demo, techStack, category,
         clientName, date, video,
         "imageUrl": image.asset->url,
         "extraImages": extraImages[].asset->url,
@@ -50,6 +52,18 @@ export default async function ProjectDetail({
       }`,
       { slug }
     );
+
+    // Fetch all projects for navigation
+    const allProjects = await client.fetch(`*[_type == "project"] | order(date desc){ title, "slug": slug.current }`);
+    const currentIndex = allProjects.findIndex((p: any) => p.slug === slug);
+    if (currentIndex !== -1) {
+      if (currentIndex > 0) {
+        prevProject = allProjects[currentIndex - 1];
+      }
+      if (currentIndex < allProjects.length - 1) {
+        nextProject = allProjects[currentIndex + 1];
+      }
+    }
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load project";
   }
@@ -58,5 +72,5 @@ export default async function ProjectDetail({
     notFound();
   }
 
-  return <ProjectDetailClient project={project} error={error} />;
+  return <ProjectDetailClient project={project} nextProject={nextProject} prevProject={prevProject} error={error} />;
 }

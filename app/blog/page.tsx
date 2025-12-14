@@ -1,61 +1,203 @@
+"use client";
+
+import { client } from "../../lib/sanityClient";
 import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-export default async function BlogList() {
-  // Avoid importing or initializing the Sanity client at module-eval time
-  // because deployment/build environments may not have env vars configured yet.
-  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
+type Blog = {
+  _id: string;
+  title: string;
+  excerpt?: string;
+  slug: { current: string };
+  date: string;
+  coverImage?: {
+    asset?: {
+      url?: string;
+      metadata?: {
+        dimensions?: {
+          height?: number;
+          width?: number;
+        };
+      };
+    };
+    hotspot?: any;
+    crop?: any;
+  };
+  category?: string[];
+  tags?: string[];
+  author?: string;
+};
 
-  if (!projectId) {
-    // Render a helpful message during build/dev when the env vars are missing.
+export default function BlogPage() {
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchBlogs() {
+      try {
+        const data = await client.fetch(`
+          *[_type == "blog"] | order(date desc) {
+            _id,
+            title,
+            excerpt,
+            slug,
+            date,
+            coverImage {
+              asset -> {
+                url,
+                metadata {
+                  dimensions {
+                    height,
+                    width
+                  }
+                }
+              },
+              hotspot,
+              crop
+            },
+            category,
+            tags,
+            author
+          }
+        `);
+        setBlogs(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load blogs');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBlogs();
+  }, []);
+
+  if (loading) {
     return (
-      <div className="max-w-5xl mx-auto py-16 px-6">
-        <h1 className="text-4xl font-bold mb-8">Blog</h1>
-        <div className="p-6 bg-yellow-50 border-l-4 border-yellow-400">
-          <p className="text-lg text-yellow-800">
-            Sanity is not configured: <strong>NEXT_PUBLIC_SANITY_PROJECT_ID</strong> is missing.
-          </p>
-          <p className="mt-2 text-sm text-gray-600">
-            Add the environment variables <code>NEXT_PUBLIC_SANITY_PROJECT_ID</code> and
-            <code> NEXT_PUBLIC_SANITY_DATASET</code> to your local <code>.env.local</code> and to
-            your deployment (Vercel) settings, then rebuild the site.
-          </p>
+      <div className="min-h-screen bg-gradient-to-br py-16">
+        <div className="max-w-6xl mx-auto px-6 md:px-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading blogs...</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Dynamically import the Sanity client only after we've verified env vars.
-  const { client } = await import("@/lib/sanityClient");
-
-  const blogs = await client.fetch(`
-    *[_type == "blog"]{
-      title,
-      slug,
-      excerpt,
-      "coverImage": coverImage.asset->url
-    }
-  `);
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br py-16">
+        <div className="max-w-6xl mx-auto px-6 md:px-10">
+          <div className="text-center text-red-600">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Blogs</h1>
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-5xl mx-auto py-16 px-6">
-      <h1 className="text-4xl font-bold mb-8">Blog</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {blogs.map((blog: any) => (
-          <Link key={blog.slug.current} href={`/blog/${blog.slug.current}`}>
-            <div className="border rounded-lg overflow-hidden hover:shadow-lg transition">
-              <img
-                src={blog.coverImage}
-                alt={blog.title}
-                className="h-64 w-full object-cover"
-              />
-              <div className="p-4">
-                <h2 className="text-2xl font-semibold mb-2">{blog.title}</h2>
-                <p className="text-gray-600">{blog.excerpt}</p>
-              </div>
-            </div>
-          </Link>
-        ))}
+    <div className="min-h-screen bg-gradient-to-br py-16">
+      <div className="max-w-6xl mx-auto px-6 md:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-5xl font-bold text-gray-800 mb-4">Blog</h1>
+          <p className="text-gray-600 text-lg">Insights, tutorials, and thoughts on web development</p>
+        </motion.div>
+
+        {blogs.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-gray-600 text-lg">No blogs published yet. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogs.map((blog, index) => (
+              <motion.article
+                key={blog._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              >
+                <Link href={`/blog/${blog.slug.current}`}>
+                  {blog.coverImage?.asset?.url && (
+                    <div className="relative h-48 overflow-hidden">
+                      <Image
+                        src={blog.coverImage.asset.url}
+                        alt={blog.title}
+                        fill
+                        className="object-cover hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-6">
+                    {/* Categories */}
+                    {blog.category && blog.category.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {blog.category.slice(0, 2).map((category, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <h2 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-red-600 transition-colors">
+                      {blog.title}
+                    </h2>
+
+                    {blog.excerpt && (
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                        {blog.excerpt}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <span>
+                        {new Date(blog.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                      {blog.author && (
+                        <span className="text-red-600 font-medium">
+                          {blog.author}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Tags */}
+                    {blog.tags && blog.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {blog.tags.slice(0, 3).map((tag, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              </motion.article>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import PortableTextClient from "./PortableTextClientFixed";
+import Link from "next/link";
+import PortableTextClient, { toPlainText } from "./PortableTextClientFixed";
 import ProjectSocialLinks from "./ProjectSocialLinks";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +14,8 @@ type SocialLink = {
 
 type Project = {
   title?: string;
-  description?: any;
+  description?: string;
+  details?: any;
   github?: string;
   demo?: string;
   techStack?: string[];
@@ -27,10 +29,13 @@ type Project = {
   socialLinks?: SocialLink[];
 };
 
-export default function ProjectDetailClientFixed({ project, error }: { project: Project | null; error: string | null; }) {
+type FrameType = 'mobile' | 'tablet' | 'mac' | 'laptop';
+
+export default function ProjectDetailClientFixed({ project, nextProject, prevProject, error }: { project: Project | null; nextProject?: { title: string; slug: string } | null; prevProject?: { title: string; slug: string } | null; error: string | null; }) {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [allImages, setAllImages] = useState<string[]>([]);
+  const [frameType, setFrameType] = useState<FrameType>('mac');
   const modalRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -55,11 +60,71 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
     );
   }
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    try {
+      const [day, month, year] = dateStr.split('/');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const buildImages = () => [project?.imageUrl, ...(project?.extraImages || [])].filter(Boolean) as string[];
-  const openGallery = (image?: string) => { const imgs = buildImages(); setAllImages(imgs); setSelectedImage(image ?? imgs[0] ?? null); };
+
+  // Helper function to preload image and determine aspect ratio, then set frameType and selectedImage
+  const selectImage = (src: string) => {
+    const img = new Image();
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      let newFrameType: FrameType;
+
+      // Determine frame type based on aspect ratio
+      if (aspectRatio < 1) {
+        // Portrait: use mobile (9:16 ≈ 0.56)
+        newFrameType = 'mobile';
+      } else if (aspectRatio < 1.3) {
+        // Nearly square or slightly wider: use tablet (4:3 ≈ 1.33)
+        newFrameType = 'tablet';
+      } else if (aspectRatio < 1.8) {
+        // Landscape: use laptop/desktop (16:9 ≈ 1.78)
+        newFrameType = 'laptop';
+      } else {
+        // Very wide: use mac
+        newFrameType = 'mac';
+      }
+
+      setFrameType(newFrameType);
+      setSelectedImage(src);
+    };
+    img.onerror = () => {
+      // Fallback to mac if image fails to load
+      setFrameType('mac');
+      setSelectedImage(src);
+    };
+    img.src = src;
+  };
+
+  const openGallery = (image?: string) => {
+    const imgs = buildImages();
+    setAllImages(imgs);
+    const imageToSelect = image ?? imgs[0] ?? null;
+    if (imageToSelect) {
+      selectImage(imageToSelect);
+    }
+  };
   const currentImageIndex = selectedImage ? allImages.indexOf(selectedImage) : -1;
-  const goToNext = () => { if (currentImageIndex >= 0 && currentImageIndex < allImages.length - 1) setSelectedImage(allImages[currentImageIndex + 1]); };
-  const goToPrev = () => { if (currentImageIndex > 0) setSelectedImage(allImages[currentImageIndex - 1]); };
+  const goToNext = () => {
+    if (currentImageIndex >= 0 && currentImageIndex < allImages.length - 1) {
+      selectImage(allImages[currentImageIndex + 1]);
+    }
+  };
+  const goToPrev = () => {
+    if (currentImageIndex > 0) {
+      selectImage(allImages[currentImageIndex - 1]);
+    }
+  };
 
   // Convert common video links to embeddable URLs (YouTube / Vimeo). If already embed, return as-is.
   const getEmbedUrl = (url?: string | null) => {
@@ -165,16 +230,70 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
           )}
 
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-4">Detailed Info</h2>
-            <div className="text-gray-700 text-lg leading-relaxed border-l-4 border-red-500 pl-6">
-              <PortableTextClient value={project.description || "No description available."} />
+            <h2 className="text-2xl font-bold mb-4">Project Description</h2>
+            <div className="text-gray-700 text-lg leading-relaxed">
+              <p>{project.description || "No description available."}</p>
             </div>
           </div>
+
+          {/* Project Details */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg">
+              {project.clientName && (
+                <div>
+                  <span className="text-lg text-gray-800"><strong>Client -</strong> {project.clientName}</span>
+                </div>
+              )}
+              {project.date && (
+                <div>
+                  <span className="text-lg text-gray-800"><strong>Project Date -</strong> {formatDate(project.date)}</span>
+                </div>
+              )}
+            </div>
+            {project.techStack && project.techStack.length > 0 && (
+              <div className="bg-gray-50 p-4 rounded-lg mt-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Tech Stack</h3>
+                <div className="flex flex-wrap gap-2">
+                  {project.techStack.map((tech, i) => (
+                    <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-4">Detailed Info</h2>
+            <div className="text-gray-700 text-lg leading-relaxed border-l-4 border-red-500 pl-6">
+              {Array.isArray(project.details) ? (
+                <PortableTextClient value={project.details} />
+              ) : (
+                <div className="portable-text">
+                  {project.details || "Use rich text here (headings, paragraphs, lists)."}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {project.video && (
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold mb-4">Demo Video</h3>
+              <div className="aspect-video">
+                <iframe
+                  src={project.video.replace('watch?v=', 'embed/')}
+                  className="w-full h-full rounded-xl"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-4 flex-wrap mb-6 items-center">
             <div className="flex gap-4 flex-wrap">
               {project.github && (<a href={project.github} target="_blank" rel="noreferrer" className="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-900 transition">GitHub</a>)}
-              {project.demo && (<a href={project.demo} target="_blank" rel="noreferrer" className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition">Open Demo</a>)}
+              {project.demo && (<a href={project.demo} target="_blank" rel="noreferrer" className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition">Live Project Link</a>)}
             </div>
             
             {/* Social Links */}
@@ -195,6 +314,33 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition bg-black/25"><button onClick={(e) => { e.stopPropagation(); openGallery(img); }} className="text-white bg-black/50 px-3 py-1 rounded">View</button></div>
                   </motion.div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Project Navigation */}
+          {(nextProject || prevProject) && (
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <div className="flex justify-between items-center">
+                {prevProject && (
+                  <Link href={`/projects/${prevProject.slug}`} className="flex items-center gap-3 text-gray-600 hover:text-red-600 transition">
+                    <span className="text-2xl">←</span>
+                    <div>
+                      <div className="text-sm font-medium">Previous Project</div>
+                      <div className="text-lg font-semibold">{prevProject.title}</div>
+                    </div>
+                  </Link>
+                )}
+                <div className="flex-1"></div>
+                {nextProject && (
+                  <Link href={`/projects/${nextProject.slug}`} className="flex items-center gap-3 text-gray-600 hover:text-red-600 transition">
+                    <div className="text-right">
+                      <div className="text-sm font-medium">Next Project</div>
+                      <div className="text-lg font-semibold">{nextProject.title}</div>
+                    </div>
+                    <span className="text-2xl">→</span>
+                  </Link>
+                )}
               </div>
             </div>
           )}
@@ -227,17 +373,68 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
                 ✕
               </button>
 
-              {/* Image Container */}
-              <div ref={modalRef} className="w-full bg-black/40 rounded-xl overflow-hidden backdrop-blur-sm">
-                <img 
-                  src={selectedImage} 
-                  alt="Gallery view" 
-                  className="w-full h-auto max-h-[80vh] object-contain"
-                  onError={(e) => {
-                    console.error("Image failed to load:", selectedImage);
-                    (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
-                  }}
-                />
+              {/* Image Container with dynamic device frame based on frameType */}
+              <div ref={modalRef} className="w-full rounded-xl overflow-hidden">
+                {frameType === 'mobile' && (
+                  <div className="device-frame device-frame--mobile device-frame--mobile-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {frameType === 'tablet' && (
+                  <div className="device-frame device-frame--tablet device-frame--tablet-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {frameType === 'laptop' && (
+                  <div className="device-frame device-frame--laptop device-frame--laptop-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {frameType === 'mac' && (
+                  <div className="device-frame device-frame--mac device-frame--mac-image w-full">
+                    <div className="device-screen">
+                      <img
+                        src={selectedImage}
+                        alt="Gallery view"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error("Image failed to load:", selectedImage);
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Controls */}
@@ -271,4 +468,6 @@ export default function ProjectDetailClientFixed({ project, error }: { project: 
       </AnimatePresence>
     </div>
   );
-}
+    }
+
+

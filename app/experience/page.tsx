@@ -7,7 +7,7 @@ export const revalidate = 60;
 export default async function ExperiencePage() {
   let experiences: any[] = [];
   try {
-    experiences = await client.fetch(`*[_type == "experience"] | order(order asc){ _id, position, company, location, startDate, endDate, isCurrent, "logo": logo.asset->url, description, order }`);
+    experiences = await client.fetch(`*[_type == "experience"] | order(order asc){ _id, position, company, location, startDate, endDate, isCurrent, "logo": logo.asset->url, description, companyUrl, order }`);
   } catch (err) {
     console.error("Failed to fetch experiences:", err);
   }
