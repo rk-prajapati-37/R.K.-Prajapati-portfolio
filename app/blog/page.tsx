@@ -1,5 +1,6 @@
 "use client";
 
+import { client } from "../../lib/sanityClient";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -23,45 +24,30 @@ export default function BlogPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Temporary static data until Sanity blog schema is set up
-    const staticBlogs: Blog[] = [
-      {
-        _id: "1",
-        title: "Getting Started with Next.js 14",
-        excerpt: "Learn how to build modern web applications with Next.js 14, including the new app router and server components.",
-        slug: { current: "getting-started-nextjs-14" },
-        date: "2024-01-15",
-        coverImage: "/images/project1.jpg",
-        category: ["Web Development", "React"],
-        tags: ["nextjs", "react", "javascript"],
-        author: "R.K. Prajapati"
-      },
-      {
-        _id: "2",
-        title: "Building Responsive UIs with Tailwind CSS",
-        excerpt: "Discover the power of utility-first CSS with Tailwind CSS and how it can speed up your development process.",
-        slug: { current: "responsive-ui-tailwind-css" },
-        date: "2024-01-10",
-        coverImage: "/images/project1.jpg",
-        category: ["CSS", "Frontend"],
-        tags: ["tailwind", "css", "responsive"],
-        author: "R.K. Prajapati"
-      },
-      {
-        _id: "3",
-        title: "The Future of Web Development",
-        excerpt: "Exploring upcoming trends and technologies that will shape the future of web development.",
-        slug: { current: "future-web-development" },
-        date: "2024-01-05",
-        coverImage: "/images/project1.jpg",
-        category: ["Technology", "Trends"],
-        tags: ["webdev", "future", "technology"],
-        author: "R.K. Prajapati"
+    async function fetchBlogs() {
+      try {
+        const data = await client.fetch(`
+          *[_type == "blog"] | order(date desc) {
+            _id,
+            title,
+            excerpt,
+            slug,
+            date,
+            "coverImage": coverImage.asset->url,
+            category,
+            tags,
+            author
+          }
+        `);
+        setBlogs(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load blogs');
+      } finally {
+        setLoading(false);
       }
-    ];
+    }
 
-    setBlogs(staticBlogs);
-    setLoading(false);
+    fetchBlogs();
   }, []);
 
   if (loading) {
