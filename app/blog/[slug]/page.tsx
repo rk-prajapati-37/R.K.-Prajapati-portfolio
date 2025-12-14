@@ -9,7 +9,19 @@ type Blog = {
   category?: string[];
   tags?: string[];
   date: string;
-  coverImage?: string;
+  coverImage?: {
+    asset?: {
+      url?: string;
+      metadata?: {
+        dimensions?: {
+          height?: number;
+          width?: number;
+        };
+      };
+    };
+    hotspot?: any;
+    crop?: any;
+  };
   slug?: string;
   author: string;
 };
@@ -50,7 +62,19 @@ export default async function SingleBlogPage({
         category,
         tags,
         date,
-        "coverImage": coverImage.asset->url,
+        coverImage {
+          asset -> {
+            url,
+            metadata {
+              dimensions {
+                height,
+                width
+              }
+            }
+          },
+          hotspot,
+          crop
+        },
         "slug": slug.current,
         author
       }`,

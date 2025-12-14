@@ -12,7 +12,19 @@ type Blog = {
   category?: string[];
   tags?: string[];
   date: string;
-  coverImage?: string;
+  coverImage?: {
+    asset?: {
+      url?: string;
+      metadata?: {
+        dimensions?: {
+          height?: number;
+          width?: number;
+        };
+      };
+    };
+    hotspot?: any;
+    crop?: any;
+  };
   slug?: string;
   author: string;
 };
@@ -54,7 +66,7 @@ export default function BlogContentClient({
     );
   }
 
-  const buildImages = () => [blog?.coverImage].filter(Boolean) as string[];
+  const buildImages = () => [blog?.coverImage?.asset?.url].filter(Boolean) as string[];
 
   const selectImage = (src: string) => {
     const img = new Image();
@@ -106,9 +118,9 @@ export default function BlogContentClient({
   return (
     <div className="min-h-screen bg-gradient-to-br py-12">
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-6xl mx-auto">
-        {blog.coverImage && (
-          <motion.div className="relative mb-6 rounded-2xl overflow-hidden shadow-lg cursor-pointer" whileHover={{ scale: 1.02 }} onClick={() => openGallery(blog.coverImage!)}>
-            <img src={blog.coverImage} alt={blog.title} className="w-full h-96 object-cover" />
+        {blog.coverImage?.asset?.url && (
+          <motion.div className="relative mb-6 rounded-2xl overflow-hidden shadow-lg cursor-pointer" whileHover={{ scale: 1.02 }} onClick={() => openGallery(blog.coverImage!.asset!.url!)}>
+            <img src={blog.coverImage.asset.url} alt={blog.title} className="w-full h-96 object-cover" />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition"><span className="text-white text-lg font-semibold bg-black/50 px-4 py-2 rounded">Click to view</span></div>
           </motion.div>
         )}

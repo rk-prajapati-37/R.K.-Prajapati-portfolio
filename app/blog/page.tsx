@@ -12,7 +12,19 @@ type Blog = {
   excerpt?: string;
   slug: { current: string };
   date: string;
-  coverImage?: string;
+  coverImage?: {
+    asset?: {
+      url?: string;
+      metadata?: {
+        dimensions?: {
+          height?: number;
+          width?: number;
+        };
+      };
+    };
+    hotspot?: any;
+    crop?: any;
+  };
   category?: string[];
   tags?: string[];
   author?: string;
@@ -33,7 +45,19 @@ export default function BlogPage() {
             excerpt,
             slug,
             date,
-            "coverImage": coverImage.asset->url,
+            coverImage {
+              asset -> {
+                url,
+                metadata {
+                  dimensions {
+                    height,
+                    width
+                  }
+                }
+              },
+              hotspot,
+              crop
+            },
             category,
             tags,
             author
@@ -104,10 +128,10 @@ export default function BlogPage() {
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
                 <Link href={`/blog/${blog.slug.current}`}>
-                  {blog.coverImage && (
+                  {blog.coverImage?.asset?.url && (
                     <div className="relative h-48 overflow-hidden">
                       <Image
-                        src={blog.coverImage}
+                        src={blog.coverImage.asset.url}
                         alt={blog.title}
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-300"
