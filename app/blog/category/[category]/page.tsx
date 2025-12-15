@@ -1,11 +1,11 @@
 "use client";
 
-import { client } from "../../lib/sanityClient";
+import { client } from "@/lib/sanityClient";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 type Blog = {
   _id: string;
@@ -31,50 +31,48 @@ type Blog = {
   author?: string;
 };
 
-export default function BlogPage() {
+export default function CategoryBlogPage() {
+  const { category } = useParams();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     async function fetchBlogs() {
-      try {
-        const data = await client.fetch(`
-          *[_type == "blog"] | order(date desc) {
-            _id,
-            title,
-            excerpt,
-            slug,
-            date,
-            coverImage {
-              asset -> {
-                url,
-                metadata {
-                  dimensions {
-                    height,
-                    width
-                  }
+      const data = await client.fetch(
+        `
+        *[_type == "blog" && $category in category] | order(date desc) {
+          _id,
+          title,
+          excerpt,
+          slug,
+          date,
+          coverImage {
+            asset -> {
+              url,
+              metadata {
+                dimensions {
+                  height,
+                  width
                 }
-              },
-              hotspot,
-              crop
+              }
             },
-            category,
-            tags,
-            author
-          }
-        `);
-        setBlogs(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load blogs');
-      } finally {
-        setLoading(false);
-      }
+            hotspot,
+            crop
+          },
+          category,
+          tags,
+          author
+        }
+        `,
+        { category }
+      );
+
+      setBlogs(data);
+      setLoading(false);
     }
 
     fetchBlogs();
-  }, []);
+  }, [category]);
 
   if (loading) {
     return (
@@ -89,38 +87,22 @@ export default function BlogPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br py-16">
-        <div className="max-w-6xl mx-auto px-6 md:px-10">
-          <div className="text-center text-red-600">
-            <h1 className="text-2xl font-bold mb-4">Error Loading Blogs</h1>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br py-16 flex items-center justify-center px-6 md:px-10">
-      <div className="max-w-6xl w-full">
+    <div className="min-h-screen bg-gradient-to-br py-16">
+      <div className="max-w-6xl mx-auto px-6 md:px-10">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">BLOG</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-            Latest Posts
-          </h1>
-          <p className="text-gray-600 text-lg mt-2">Insights, tutorials, and thoughts on web development</p>
+          <h1 className="text-5xl font-bold text-gray-800 mb-4">Category: {String(category).toUpperCase()}</h1>
+          <p className="text-gray-600 text-lg">Blogs in the {String(category)} category</p>
         </motion.div>
 
         {blogs.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-600 text-lg">No blogs published yet. Check back soon!</p>
+            <p className="text-gray-600 text-lg">No blogs found in this category.</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -134,7 +116,7 @@ export default function BlogPage() {
               >
                 <Link href={`/blog/${blog.slug.current}`}>
                   {blog.coverImage?.asset?.url && (
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-48 overflow-hidden rounded-lg">
                       <Image
                         src={blog.coverImage.asset.url}
                         alt={blog.title}
@@ -145,26 +127,19 @@ export default function BlogPage() {
                   )}
 
                   <div className="p-6">
-                    
-                  {/* Categories */}
-{blog.category && blog.category.length > 0 && (
-  <div className="flex flex-wrap gap-2 mb-3">
-    {blog.category.slice(0, 2).map((category, i) => (
-      <span
-        key={i}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          router.push(`/blog/category/${category.toLowerCase()}`);
-        }}
-        className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium hover:bg-red-100 cursor-pointer transition"
-      >
-        {category}
-      </span>
-    ))}
-  </div>
-)}
-
+                    {/* Categories */}
+                    {blog.category && blog.category.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {blog.category.slice(0, 2).map((category, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     <h2 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-red-600 transition-colors">
                       {blog.title}
@@ -210,6 +185,20 @@ export default function BlogPage() {
             ))}
           </div>
         )}
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="text-center mt-12"
+        >
+          <Link
+            href="/blog"
+            className="inline-block bg-red-600 text-white px-8 py-3 rounded-full font-medium hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl"
+          >
+            ← Back to All Blogs
+          </Link>
+        </motion.div>
       </div>
     </div>
   );

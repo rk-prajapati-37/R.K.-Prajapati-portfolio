@@ -39,33 +39,35 @@ export default function BlogSection() {
     async function fetchBlogs() {
       try {
         const data = await client.fetch(`
-          *[_type == "blog"] | order(date desc)[0...3] {
-            _id,
-            title,
-            excerpt,
-            slug,
-            date,
-            coverImage {
-              asset -> {
-                url,
-                metadata {
-                  dimensions {
-                    height,
-                    width
-                  }
-                }
-              },
-              hotspot,
-              crop
-            },
-            categories[]->{
-              title,
-              slug
-            },
-            tags,
-            author
+  *[_type == "blog"]
+  | order(coalesce(date, _createdAt) desc)[0...3] {
+    _id,
+    title,
+    excerpt,
+    slug,
+    date,
+    coverImage {
+      asset -> {
+        url,
+        metadata {
+          dimensions {
+            height,
+            width
           }
-        `);
+        }
+      },
+      hotspot,
+      crop
+    },
+    categories[]->{
+      title,
+      slug
+    },
+    tags,
+    author
+  }
+`);
+
         setBlogs(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load blogs');

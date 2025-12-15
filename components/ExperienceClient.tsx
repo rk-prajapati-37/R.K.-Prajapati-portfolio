@@ -114,13 +114,25 @@ export default function ExperienceClient({
   };
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.2 }}
-      className="space-y-4"
-    >
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center mb-12"
+      >
+        <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">EXPERIENCE</p>
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
+          My Experience
+        </h1>
+      </motion.div>
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        className="space-y-4"
+      >
       {sortedExperiences.map((exp) => {
         const isExpanded = expandedId === exp._id;
         const companyUrl = (exp as any).companyUrl;
@@ -231,5 +243,6 @@ export default function ExperienceClient({
         );
       })}
     </motion.div>
+    </>
   );
 }

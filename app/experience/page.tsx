@@ -13,9 +13,8 @@ export default async function ExperiencePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  pt-12 pb-8 px-6 md:px-10">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">Experience</h2>
+    <div className="min-h-screen bg-gradient-to-br py-16 flex items-center justify-center px-6 md:px-10">
+      <div className="max-w-6xl w-full">
         <ExperienceClient experiences={experiences} />
       </div>
     </div>

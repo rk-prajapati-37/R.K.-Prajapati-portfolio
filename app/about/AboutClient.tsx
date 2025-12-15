@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import SkillsGridClient from "@/components/SkillsGridClient";
 import ExperienceClient from "@/components/ExperienceClient";
 import EducationClient from "@/components/EducationClientFixed";
@@ -64,15 +65,55 @@ export default function AboutClient({
     <div className="min-h-screen bg-gradient-to-br py-12 text-gray-800 pt-12 pb-8 px-6 md:px-10">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-10 items-start">
         {/* Left Profile Section */}
-        <div className="md:w-1/3 flex justify-center">
-          <div className="bg-white p-3 shadow-xl rounded-[30px]">
+        <div className="md:w-1/3 flex flex-col items-center">
+          <div className="bg-white p-4 shadow-xl rounded-[35px_0] mb-6" style={{
+            '--tw-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+            padding: '15px'
+          } as React.CSSProperties}>
             <Image
-              src="/profile.svg"
-              width={400}
-              height={400}
-              alt="Profile"
-              className="rounded-[20px] object-cover"
+              src="/Rohit_K_Prajapati.jpg"
+              width={420}
+              height={420}
+              alt="Rohit K. Prajapati"
+              className="rounded-[35px_0] object-cover"
             />
+          </div>
+
+          {/* Social Links */}
+          <div className="flex gap-4">
+            <a
+              href="https://www.facebook.com/profile.php?id=61558068947419"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-12 h-12 text-blue-600 rounded-full flex items-center justify-center hover:text-blue-700 hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl border border-gray-200"
+            >
+              <FaFacebookF className="text-lg" />
+            </a>
+            <a
+              href="https://twitter.com/prajapa54879726"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-12 h-12 text-blue-400 rounded-full flex items-center justify-center hover:text-blue-500 hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl border border-gray-200"
+            >
+              <FaTwitter className="text-lg" />
+            </a>
+            <a
+              href="https://www.instagram.com/r.k.prajapati0307/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-12 h-12 text-pink-500 rounded-full flex items-center justify-center hover:text-pink-600 hover:bg-pink-50 transition-all shadow-lg hover:shadow-xl border border-gray-200"
+            >
+              <FaInstagram className="text-lg" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/r-k-prajapati-2a5b4b169/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-12 h-12 text-blue-700 rounded-full flex items-center justify-center hover:text-blue-800 hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl border border-gray-200"
+            >
+              <FaLinkedinIn className="text-lg" />
+            </a>
           </div>
         </div>
 

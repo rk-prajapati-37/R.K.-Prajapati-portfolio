@@ -103,13 +103,25 @@ export default function EducationClientFixed({
   };
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.2 }}
-      className="space-y-6"
-    >
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center mb-12"
+      >
+        <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">EDUCATION</p>
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
+          My Education
+        </h1>
+      </motion.div>
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        className="space-y-6"
+      >
       {sorted.map((edu) => {
         const isExpanded = expandedId === edu._id;
         const desc =
@@ -173,5 +185,6 @@ export default function EducationClientFixed({
         );
       })}
     </motion.div>
+    </>
   );
 }

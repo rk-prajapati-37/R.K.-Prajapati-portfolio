@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", mobile: "", message: "" });
@@ -56,9 +57,19 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  pt-12 pb-8 px-6 md:px-10">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-center text-3xl sm:text-4xl font-bold text-gray-800 mt-12 mb-12">GET IN TOUCH</h2>
+    <div className="min-h-screen bg-gradient-to-br py-16 flex items-center justify-center px-6 md:px-10">
+      <div className="max-w-6xl w-full">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">CONTACT</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
+            GET IN TOUCH
+          </h1>
+        </motion.div>
 
         {/* Contacts Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
