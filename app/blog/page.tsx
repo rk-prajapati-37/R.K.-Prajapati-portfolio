@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import HireMeCTA from "@/components/HireMeCTA";
 
 type Blog = {
   _id: string;
@@ -103,19 +104,19 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-16 flex items-center justify-center px-6 md:px-10">
-      <div className="max-w-6xl w-full">
+    <div className="min-h-screen bg-gradient-to-br py-16">
+      <div className="max-w-6xl mx-auto px-6 md:px-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
           <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">BLOG</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             Latest Posts
           </h1>
-          <p className="text-gray-600 text-lg mt-2">Insights, tutorials, and thoughts on web development</p>
+          <p className="text-gray-600 text-lg">Insights, tutorials, and thoughts on web development</p>
         </motion.div>
 
         {blogs.length === 0 ? (
@@ -123,7 +124,7 @@ export default function BlogPage() {
             <p className="text-gray-600 text-lg">No blogs published yet. Check back soon!</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {blogs.map((blog, index) => (
               <motion.article
                 key={blog._id}
@@ -145,26 +146,24 @@ export default function BlogPage() {
                   )}
 
                   <div className="p-6">
-                    
-                  {/* Categories */}
-{blog.category && blog.category.length > 0 && (
-  <div className="flex flex-wrap gap-2 mb-3">
-    {blog.category.slice(0, 2).map((category, i) => (
-      <span
-        key={i}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          router.push(`/blog/category/${category.toLowerCase()}`);
-        }}
-        className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium hover:bg-red-100 cursor-pointer transition"
-      >
-        {category}
-      </span>
-    ))}
-  </div>
-)}
-
+                    {/* Categories */}
+                    {blog.category && blog.category.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {blog.category.slice(0, 2).map((category, i) => (
+                          <span
+                            key={i}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              router.push(`/blog/category/${category.toLowerCase()}`);
+                            }}
+                            className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium hover:bg-red-100 cursor-pointer transition"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     <h2 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 hover:text-red-600 transition-colors">
                       {blog.title}
@@ -210,6 +209,11 @@ export default function BlogPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Hire Me CTA - Moved to the very end */}
+      <div className="mt-16">
+        <HireMeCTA text="Need a similar solution for your business?" />
       </div>
     </div>
   );

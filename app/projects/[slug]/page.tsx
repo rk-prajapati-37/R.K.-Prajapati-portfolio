@@ -1,11 +1,37 @@
 ﻿import { client } from "../../../lib/sanityClient";
 import ProjectDetailClient from "@/components/ProjectDetailClientFixed";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
 type SocialLink = {
   platform: string;
   url: string;
 };
+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const { slug } = await params;
+
+  const project = await client.fetch(
+    `*[_type=="project" && slug.current==$slug][0]{
+      title,
+      description,
+      seoTitle,
+      seoDescription
+    }`,
+    { slug }
+  );
+
+  return {
+    title: project?.seoTitle || project?.title,
+    description: project?.seoDescription || project?.description,
+  };
+}
 
 type Project = {
   title?: string;
@@ -24,9 +50,7 @@ type Project = {
 
 export default async function ProjectDetail({
   params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+}: Props) {
   const { slug } = await params;
 
   if (!slug) {

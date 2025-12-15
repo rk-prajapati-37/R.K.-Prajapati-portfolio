@@ -2,11 +2,16 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import LayoutMotion from "../components/LayoutMotion";
+import WhatsAppFloat from "../components/WhatsAppFloat";
 import "./globals.css";
 
 export const metadata = {
-  title: "My Portfolio",
-  description: "Personal Portfolio built with Next.js + Sanity + Tailwind",
+  title: {
+    default: "R K Prajapati | Full Stack Developer",
+    template: "%s | R K Prajapati",
+  },
+  description:
+    "Professional Next.js & React Developer available for freelance projects.",
 };
 
 const pageAnimation = {
@@ -42,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </LayoutMotion>
         <Footer />
+        <WhatsAppFloat />
       </body>
     </html>
   );

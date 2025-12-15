@@ -9,6 +9,7 @@ import SkillsGridClient from "@/components/SkillsGridClient";
 import ExperienceClient from "@/components/ExperienceClient";
 import EducationClient from "@/components/EducationClientFixed";
 import CertificateClient from "@/components/CertificateClient";
+import HireMeCTA from "@/components/HireMeCTA";
 
 interface AboutClientProps {
   skills: Array<{ _id: string; name: string; level: string; percent?: number; icon?: string }>;
@@ -24,13 +25,13 @@ export default function AboutClient({
   certificates,
 }: AboutClientProps) {
   const [activeTab, setActiveTab] = useState<
-    "experience" | "skills" | "education" | "certificates"
+    "experience" | "education" | "certificates"
   >("experience");
 
   const pathname = usePathname();
 
   useEffect(() => {
-    const valid = ["experience", "skills", "education", "certificates"];
+    const valid = ["experience", "education", "certificates"];
 
     const setFromHash = () => {
       if (typeof window === "undefined") return;
@@ -179,82 +180,150 @@ export default function AboutClient({
         </div>
       </div>
 
-      {/* Tabs Section */}
-      <div className="max-w-6xl mx-auto mt-16">
-        <div className="flex justify-center mb-8">
-          <div className="flex gap-4 px-2 md:space-x-6 overflow-x-auto no-scrollbar">
-            {["experience", "skills", "education", "certificates"].map((tab) => {
-              const label = tab.charAt(0).toUpperCase() + tab.slice(1);
-              const isActive = activeTab === tab;
+      {/* Skills Showcase Section - Full Width with Light Background */}
+      <div className="w-full bg-gray-50 dark:bg-gray-900 py-16 mt-16 transition-colors duration-300 block" id="skills-section">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8 md:mb-12"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-2">
+              Technical Skills
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 text-base md:text-lg px-4">
+              Technologies and tools I specialize in
+            </p>
+          </motion.div>
 
-              const baseClass = `shrink-0 inline-block px-6 py-2 rounded-full text-sm font-medium transition ${
-                isActive
-                  ? "bg-red-600 text-white shadow"
-                  : "bg-white border border-gray-300 hover:bg-gray-100"
-              }`;
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-full"
+          >
+            {skills && skills.length > 0 ? (
+              <SkillsGridClient skills={skills} columns={3} />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">Skills loading or no skills available</p>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </div>
 
-              if (pathname === "/about" || pathname === "/about/") {
+      {/* Enhanced Tabs Section */}
+      <div className="max-w-6xl mx-auto mt-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+            Professional Details
+          </h2>
+          <p className="text-gray-600 text-lg">
+            Explore my experience, education, and certifications
+          </p>
+        </motion.div>
+
+        <div className="flex justify-center mb-12">
+          <div className="bg-white rounded-full p-2 shadow-lg border border-gray-200 overflow-x-auto">
+            <div className="flex gap-1 md:gap-4 min-w-max">
+              {[
+                { key: "experience", label: "Experience", icon: "💼" },
+                { key: "education", label: "Education", icon: "🎓" },
+                { key: "certificates", label: "Certificates", icon: "🏆" }
+              ].map((tab) => {
+                const isActive = activeTab === tab.key;
+
+                const baseClass = `flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                  isActive
+                    ? "bg-red-600 text-white shadow-lg transform scale-105"
+                    : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                }`;
+
+                if (pathname === "/about" || pathname === "/about/") {
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab.key as any);
+
+                        if (typeof window !== "undefined") {
+                          window.history.replaceState(null, "", `#${tab.key}`);
+
+                          setTimeout(() => {
+                            const el = document.getElementById(tab.key);
+                            if (el) {
+                              el.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }
+                          }, 80);
+                        }
+                      }}
+                      className={baseClass}
+                    >
+                      <span className="text-sm md:text-base">{tab.icon}</span>
+                      <span className="inline">{tab.label}</span>
+                    </button>
+                  );
+                }
+
                 return (
-                 <button
-  key={tab}
-  type="button"
-  onClick={() => {
-    setActiveTab(tab as any);
-
-    if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", `#${tab}`);
-
-      // tab content par scroll karao
-      setTimeout(() => {
-        const el = document.getElementById(tab);
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 80);
-    }
-  }}
-  className={baseClass}
->
-  {label}
-</button>
-
+                  <Link key={tab.key} href={`/${tab.key}`} scroll={true} className={baseClass}>
+                    <span className="text-sm md:text-base">{tab.icon}</span>
+                    <span className="hidden xs:inline md:inline">{tab.label}</span>
+                  </Link>
                 );
-              }
-
-              return (
-                <Link key={tab} href={`/${tab}`} scroll={true} className={baseClass}>
-                  {label}
-                </Link>
-              );
-            })}
+              })}
+            </div>
           </div>
         </div>
 
         {/* Tab Content */}
         {activeTab === "experience" && experiences.length > 0 && (
-          <motion.div id="experience" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div
+            id="experience"
+            className="scroll-mt-24"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <ExperienceClient experiences={experiences} />
           </motion.div>
         )}
 
-        {activeTab === "skills" && (
-          <motion.div id="skills" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <SkillsGridClient skills={skills} />
-          </motion.div>
-        )}
-
         {activeTab === "education" && educations.length > 0 && (
-          <motion.div id="education" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div
+            id="education"
+            className="scroll-mt-24"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <EducationClient educations={educations} />
           </motion.div>
         )}
 
         {activeTab === "certificates" && certificates.length > 0 && (
-          <motion.div id="certificates" className="scroll-mt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div
+            id="certificates"
+            className="scroll-mt-24"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <CertificateClient certificates={certificates} />
           </motion.div>
         )}
       </div>
+
+      {/* Hire Me CTA */}
+      <HireMeCTA text="Looking for a reliable freelance developer?" />
     </div>
   );
 }

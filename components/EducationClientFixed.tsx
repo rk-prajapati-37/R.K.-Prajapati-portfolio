@@ -111,9 +111,12 @@ export default function EducationClientFixed({
         className="text-center mb-12"
       >
         <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">EDUCATION</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-          My Education
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
+          Academic Background
         </h1>
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          My educational journey and qualifications that shaped my career
+        </p>
       </motion.div>
       <motion.div
         variants={container}

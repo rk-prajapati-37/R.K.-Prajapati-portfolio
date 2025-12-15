@@ -10,11 +10,14 @@ export default function Navbar() {
   const aboutRef = useRef(null);
 
   return (
-    <nav style={{ background: 'var(--surface)', color: 'var(--text)' }} className="fixed top-0 left-0 w-full h-24 shadow-md z-50">
-      <div className="site-container flex justify-between items-center h-24">
+    <nav
+      className="fixed top-0 left-0 w-full h-[96px] shadow-md z-50"
+      style={{ background: "var(--surface)", color: "var(--text)" }}
+    >
+      <div className="site-container flex justify-between items-center h-[96px]">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3">
-            <AnimatedLogo size={80} />
+            <AnimatedLogo />
             <div className="hidden sm:flex flex-col font-semibold">
                <span className="text-base border-b border-gray-300 ">R.K Prajapati</span>
               <span className="text-[var(--muted)] text-sm ">Web Designer &amp; Developer</span>
@@ -23,10 +26,9 @@ export default function Navbar() {
           {/* desktop: theme toggle removed — icon stays after mobile menu button */}
         </div>
         <div className="hidden md:flex space-x-6 items-center">
-          <Link href="/" className="hover:underline">Home</Link>
+          <Link href="/" className="text-red-600 hover:text-red-700 font-medium">Home</Link>
 
           {/* About dropdown (hover + focus) */}
-          {/* About dropdown (hover + focus) - JS backed to avoid disappearing when moving cursor */}
           <div
             className="relative"
             ref={aboutRef}
@@ -34,14 +36,13 @@ export default function Navbar() {
             onMouseLeave={() => setAboutOpen(false)}
             onFocus={() => setAboutOpen(true)}
             onBlur={(e) => {
-              // close only when focus leaves the whole wrapper
               const related = e.relatedTarget;
               if (!aboutRef.current) return;
               if (related && aboutRef.current.contains(related)) return;
               setAboutOpen(false);
             }}
           >
-            <Link href="/about" className="px-3 py-1 rounded-md hover:bg-gray-800 focus:outline-none cursor-pointer">About</Link>
+            <Link href="/about" className="px-3 py-1 rounded-md text-red-600 hover:text-red-700 focus:outline-none cursor-pointer">About</Link>
             <div className={`absolute right-0 mt-2 w-48 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg ${aboutOpen ? 'block' : 'hidden'}`}>
               <div className="py-2">
                 <Link href="/experience" className="block px-4 py-2 hover:bg-white/3">Experience</Link>
@@ -52,11 +53,10 @@ export default function Navbar() {
             </div>
           </div>
 
-          <Link href="/projects">Projects</Link>
-          <Link href="/blog">Blog</Link>
-          <Link href="/testimonials">Testimonials</Link>
-          <Link href="/contact">Contact</Link>
-          {/* theme icon (desktop) */}
+          <Link href="/projects" className="text-red-600 hover:text-red-700 font-medium">Projects</Link>
+          <Link href="/blog" className="text-red-600 hover:text-red-700 font-medium">Blog</Link>
+          <Link href="/testimonials" className="text-red-600 hover:text-red-700 font-medium">Testimonials</Link>
+          <Link href="/contact" className="text-red-600 hover:text-red-700 font-medium">Contact</Link>
           <ThemeToggle />
         </div>
 

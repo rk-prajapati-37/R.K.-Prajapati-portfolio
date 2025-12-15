@@ -156,15 +156,18 @@ export default function CertificateClient({
         className="text-center mb-12"
       >
         <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">CERTIFICATES</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-          My Certifications
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
+          Professional Certifications
         </h1>
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          Recognitions and credentials that validate my expertise
+        </p>
       </motion.div>
       <motion.div
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
+        // viewport={{ once: true, amount: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
         {sortedCerts.map((cert) => {

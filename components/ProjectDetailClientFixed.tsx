@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import PortableTextClient, { toPlainText } from "./PortableTextClientFixed";
 import ProjectSocialLinks from "./ProjectSocialLinks";
+import HireMeCTA from "./HireMeCTA";
 import { useRouter } from "next/navigation";
 
 type SocialLink = {
@@ -317,6 +318,9 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
               </div>
             </div>
           )}
+
+          {/* Hire Me CTA */}
+          <HireMeCTA text="Want a similar project?" />
 
           {/* Project Navigation */}
           {(nextProject || prevProject) && (

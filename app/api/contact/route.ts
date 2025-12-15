@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import type { NextRequest } from 'next/server';
 import { getMongoDb } from '@/lib/mongoClient';
+import { sanityServerClient } from '@/lib/sanityServer';
 
 /**
  * POST /api/contact
@@ -14,7 +15,62 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, email, mobile, message } = body;
 
-    // ========== VALIDATION ==========
+    // Check if simplified mode is requested (optional query param)
+    const url = new URL(req.url);
+    const simplified = url.searchParams.get('simplified') === 'true';
+
+    if (simplified) {
+      // ========== SIMPLIFIED VALIDATION ==========
+      if (!name || !email || !message) {
+        return new Response(
+          JSON.stringify({ error: "Required fields missing" }),
+          { status: 400 }
+        );
+      }
+
+      // ========== SAVE TO SANITY (Simplified) ==========
+      const sanityResult = await sanityServerClient.create({
+        _type: "contact",
+        name,
+        email,
+        mobile,
+        message,
+        createdAt: new Date().toISOString(),
+        source: "contact-form",
+      });
+
+      console.log("✅ Saved to Sanity:", sanityResult._id);
+
+      // ========== EMAIL (Simplified) ==========
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT || 587),
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: process.env.CONTACT_EMAIL_RECIPIENT,
+        subject: "New Contact Message",
+        html: `
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Mobile:</b> ${mobile}</p>
+          <p>${message}</p>
+        `,
+      });
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        { status: 200 }
+      );
+    }
+
+    // ========== ORIGINAL COMPLEX VALIDATION ==========
     if (!name || !message) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields: name and message' }),
@@ -33,6 +89,30 @@ export async function POST(req: NextRequest) {
         JSON.stringify({ error: 'Please provide a valid email address AND a valid mobile number' }),
         { status: 400 }
       );
+    }
+
+    // ========== SAVE TO SANITY ==========
+    let sanitySaveSuccess = false;
+
+    try {
+      const sanityDoc = {
+        _type: "contact",
+        name,
+        email,
+        mobile,
+        message,
+        createdAt: new Date().toISOString(),
+        source: "contact-form",
+      };
+
+      const result = await sanityServerClient.create(sanityDoc);
+
+      if (result?._id) {
+        sanitySaveSuccess = true;
+        console.log("✅ Contact saved to Sanity:", result._id);
+      }
+    } catch (sanityErr: any) {
+      console.error("⚠️ Sanity save failed:", sanityErr?.message);
     }
 
     // ========== SAVE TO DATABASE (Direct MongoDB with Connection Pool) ==========
@@ -211,8 +291,8 @@ export async function POST(req: NextRequest) {
     } catch (emailErr) {
       console.error('⚠️ Email sending failed:', emailErr);
 
-      // Even if email fails, if DB saved, return success
-      if (dbSaveSuccess) {
+      // Return success if at least one save method worked
+      if (sanitySaveSuccess || dbSaveSuccess) {
         return new Response(
           JSON.stringify({
             message: 'Message saved! (Email notification failed, but we have your details)',

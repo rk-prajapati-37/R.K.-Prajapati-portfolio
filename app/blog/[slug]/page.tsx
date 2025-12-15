@@ -1,6 +1,38 @@
 import { client } from "../../../lib/sanityClient";
 import BlogContentClient from "@/components/BlogContentClient";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+// ✅ SEO METADATA
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const { slug } = await params;
+
+  const blog = await client.fetch(
+    `*[_type=="blog" && slug.current==$slug][0]{
+      title,
+      excerpt,
+      seoTitle,
+      seoDescription
+    }`,
+    { slug }
+  );
+
+  return {
+    title: blog?.seoTitle || blog?.title,
+    description: blog?.seoDescription || blog?.excerpt,
+    openGraph: {
+      title: blog?.seoTitle || blog?.title,
+      description: blog?.seoDescription || blog?.excerpt,
+      type: "article",
+    },
+  };
+}
 
 type Blog = {
   title: string;
@@ -28,11 +60,8 @@ type Blog = {
 
 export default async function SingleBlogPage({
   params,
-}: {
-  params: Promise<{ slug?: string }>;
-}) {
-  const resolvedParams = await params;
-  const slug = resolvedParams?.slug;
+}: Props) {
+  const { slug } = await params;
 
   if (!slug) {
     notFound();

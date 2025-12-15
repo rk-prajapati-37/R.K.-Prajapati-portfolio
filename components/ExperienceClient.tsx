@@ -1,8 +1,10 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClientFixed";
+import HireMeCTA from "./HireMeCTA";
 
 type Experience = {
   _id: string;
@@ -122,9 +124,12 @@ export default function ExperienceClient({
         className="text-center mb-12"
       >
         <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">EXPERIENCE</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-          My Experience
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
+          Professional Journey
         </h1>
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          A timeline of my career growth and key achievements in web development
+        </p>
       </motion.div>
       <motion.div
         variants={container}
@@ -238,11 +243,27 @@ export default function ExperienceClient({
                     </div>
                   </div>
                 )}
+
+                {/* Freelancer CTA */}
+                {exp.position && exp.position.toLowerCase().includes('freelance') && (
+                  <div className="mt-6">
+                    <p className="text-gray-600">
+                      I help startups and businesses build fast, scalable websites.
+                    </p>
+                    <Link
+                      href="/services"
+                      className="inline-block mt-4 bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition font-semibold"
+                    >
+                      View My Services
+                    </Link>
+                  </div>
+                )}
               </div>
           </motion.div>
         );
       })}
     </motion.div>
+    <HireMeCTA text="I am open to freelance and remote projects." />
     </>
   );
 }
