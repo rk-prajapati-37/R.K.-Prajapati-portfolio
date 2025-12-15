@@ -5,35 +5,25 @@ const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 
 let client: SanityClient;
 
-// Only create the client if projectId is available
-// This prevents build-time errors when env vars are missing
 try {
-  if (projectId) {
-    client = createClient({
-      projectId,
-      dataset,
-      apiVersion: "2023-05-03",
-      useCdn: false,
-      token: process.env.SANITY_API_TOKEN
-    });
-  } else {
+  if (!projectId) {
     throw new Error("NEXT_PUBLIC_SANITY_PROJECT_ID not set");
   }
+
+  client = createClient({
+    projectId,
+    dataset,
+    apiVersion: "2023-05-03",
+    useCdn: true, // ✅ CDN ON (IMPORTANT)
+  });
 } catch (error) {
-  // Create a mock client that warns when used but doesn't crash at module load
   console.warn(
-    "⚠️  Sanity client not configured. Set NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET in .env.local and restart the dev server to enable content fetching."
+    "⚠️ Sanity client not configured correctly. Returning empty data."
   );
 
-  // Provide a safe mock implementation so server components won't crash during development
-  // when env vars are not present. This returns an empty array for queries so pages
-  // that expect lists (skills, experiences etc.) receive empty results instead of throwing.
   client = {
-    fetch: async (_query: string) => {
-      return [] as any;
-    }
+    fetch: async () => [],
   } as unknown as SanityClient;
 }
 
 export { client };
-
