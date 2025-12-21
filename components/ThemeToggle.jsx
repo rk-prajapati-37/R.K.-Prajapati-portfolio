@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 export default function ThemeToggle({ showLabel = false }) {
   const [isLight, setIsLight] = useState(true);
-  const [mounted, setMounted] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // initialize from localStorage or system preference
@@ -29,32 +29,34 @@ export default function ThemeToggle({ showLabel = false }) {
     }
   }, [isLight, mounted]);
 
-  const toggle = () => setIsLight((v) => !v);
+  const toggle = () => {
+    console.log('Toggling theme, current isLight:', isLight);
+    setIsLight((v) => !v);
+  };
 
-  const bg = isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
-  const border = isLight ? 'rgba(2,6,23,0.2)' : 'rgba(255,255,255,0.2)';
-  const iconColor = isLight ? 'var(--text)' : 'var(--accent)';
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <button
+        className="flex items-center gap-2 p-2 rounded-md transition opacity-0"
+        style={{ width: '40px', height: '40px' }}
+      >
+        <div className="w-5 h-5 bg-gray-300 rounded animate-pulse"></div>
+      </button>
+    );
+  }
 
   return (
     <button
       onClick={toggle}
       aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
       title={isLight ? "Switch to dark mode" : "Switch to light mode"}
-      className="flex items-center gap-2 p-2 rounded-md transition"
-      style={{ color: iconColor, background: bg, border: `1px solid ${border}`, padding: '8px', borderRadius: 8 }}
+      className="flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200 hover:opacity-80"
+      style={{ backgroundColor: 'var(--text)', color: 'var(--surface)' }}
     >
-      {isLight ? (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-          <path d="M21.752 15.002A9 9 0 0 1 9 2.248 7 7 0 1 0 21.752 15.002z" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-          <path d="M6.76 4.84l-1.8-1.79L3.17 4.84l1.79 1.8 1.8-1.8zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.03 1.05l1.79-1.79-1.79-1.79-1.8 1.79 1.8 1.79zM20 11v2h3v-2h-3zM4.22 19.78l1.79-1.79-1.79-1.79-1.79 1.79 1.79 1.79zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm6.36-2.36l1.79 1.79 1.79-1.79-1.79-1.79-1.79 1.79z" />
-        </svg>
-      )}
-      {showLabel && (
-        <span className="hidden sm:inline text-sm font-medium">Dark / Light</span>
-      )}
+      <span className="text-lg">
+        {isLight ? "🌙" : "☀️"}
+      </span>
     </button>
   );
 }

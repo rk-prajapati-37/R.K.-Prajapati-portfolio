@@ -119,9 +119,19 @@ export default function BlogContentClient({
     <div className="min-h-screen bg-gradient-to-br py-12">
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-6xl mx-auto">
         {blog.coverImage?.asset?.url && (
-          <motion.div className="relative mb-6 rounded-2xl overflow-hidden shadow-lg cursor-pointer" whileHover={{ scale: 1.02 }} onClick={() => openGallery(blog.coverImage!.asset!.url!)}>
-            <img src={blog.coverImage.asset.url} alt={blog.title} className="w-full h-96 object-cover" />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition"><span className="text-white text-lg font-semibold bg-black/50 px-4 py-2 rounded">Click to view</span></div>
+          <motion.div className="relative mb-8 rounded-2xl overflow-hidden shadow-2xl cursor-pointer group" whileHover={{ scale: 1.03, y: -5 }} transition={{ duration: 0.3 }} onClick={() => openGallery(blog.coverImage!.asset!.url!)}>
+            <img 
+              src={blog.coverImage.asset.url} 
+              alt={blog.title} 
+              className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px] object-cover transition-transform duration-300 group-hover:scale-105" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <span className="text-white text-xl font-semibold bg-black/60 px-6 py-3 rounded-full backdrop-blur-sm border border-white/20">Click to enlarge</span>
+            </div>
+            <div className="absolute bottom-4 left-4 right-4">
+              <h2 className="text-white text-2xl font-bold drop-shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">{blog.title}</h2>
+            </div>
           </motion.div>
         )}
 
