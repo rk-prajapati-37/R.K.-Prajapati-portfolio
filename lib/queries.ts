@@ -18,3 +18,24 @@ export async function getAllProjects() {
     { ...options, next: { tags: ['projects'] } }
   );
 }
+
+export async function getFeaturedProjects(limit: number = 6) {
+  return client.fetch(
+    `*[_type == "project"] | order(_createdAt desc)[0...${limit}]{
+      _id,
+      title,
+      description,
+      techStack,
+      category,
+      github,
+      demo,
+      clientProblem,
+      solution,
+      results,
+      "slug": slug.current,
+      "imageUrl": image.asset->url
+    }`,
+    {},
+    { ...options, next: { tags: ['projects'] } }
+  );
+}

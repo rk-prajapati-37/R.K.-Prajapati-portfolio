@@ -1,0 +1,7 @@
+# Resume Placeholder
+
+This is a placeholder for the resume PDF file.
+
+Please replace this file with your actual resume PDF named "resume-rohit-prajapati.pdf" in the public folder.
+
+The resume download link in the navbar expects this file to exist.

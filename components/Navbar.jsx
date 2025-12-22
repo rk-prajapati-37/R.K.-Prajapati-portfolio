@@ -57,6 +57,13 @@ export default function Navbar() {
           <Link href="/blog" className="text-red-600 hover:text-red-700 font-medium">Blog</Link>
           <Link href="/testimonials" className="text-red-600 hover:text-red-700 font-medium">Testimonials</Link>
           <Link href="/contact" className="text-red-600 hover:text-red-700 font-medium">Contact</Link>
+          <a
+            href="/RohitPrajapatiCV.pdf"
+            download="Rohit-Prajapati-Resume.pdf"
+            className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition font-medium"
+          >
+            📄 Resume
+          </a>
           <ThemeToggle />
         </div>
 
@@ -102,6 +109,14 @@ export default function Navbar() {
           <Link href="/blog" onClick={() => setOpen(false)} className="block">Blog</Link>
           <Link href="/testimonials" onClick={() => setOpen(false)} className="block">Testimonials</Link>
           <Link href="/contact" onClick={() => setOpen(false)} className="block">Contact</Link>
+          <a
+            href="/RohitPrajapatiCV.pdf"
+            download="Rohit-Prajapati-Resume.pdf"
+            onClick={() => setOpen(false)}
+            className="block bg-red-600 text-white px-4 py-2 rounded-full text-center hover:bg-red-700 transition font-medium"
+          >
+            📄 Download Resume
+          </a>
         </div>
       </div>
     </nav>

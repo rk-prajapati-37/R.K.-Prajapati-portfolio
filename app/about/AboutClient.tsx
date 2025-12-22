@@ -157,7 +157,7 @@ export default function AboutClient({
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Download Rohit K. Prajapati CV"
-              className="inline-block bg-white border rounded-full px-6 py-3 shadow-md hover:shadow-lg"
+              className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition font-medium"
             >
               Download CV
             </a>

@@ -28,6 +28,9 @@ type Project = {
   clientName?: string;
   slug?: string;
   socialLinks?: SocialLink[];
+  clientProblem?: string;
+  solution?: string;
+  results?: string;
 };
 
 type FrameType = 'mobile' | 'tablet' | 'mac' | 'laptop';
@@ -264,6 +267,34 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
               </div>
             )}
           </div>
+
+          {/* Case Study Sections */}
+          {project.clientProblem && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-red-600">Client Problem</h2>
+              <div className="bg-red-50 p-6 rounded-xl border-l-4 border-red-500">
+                <p className="text-gray-700 text-lg leading-relaxed">{project.clientProblem}</p>
+              </div>
+            </div>
+          )}
+
+          {project.solution && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-blue-600">My Solution</h2>
+              <div className="bg-blue-50 p-6 rounded-xl border-l-4 border-blue-500">
+                <p className="text-gray-700 text-lg leading-relaxed">{project.solution}</p>
+              </div>
+            </div>
+          )}
+
+          {project.results && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-green-600">Results & Impact</h2>
+              <div className="bg-green-50 p-6 rounded-xl border-l-4 border-green-500">
+                <p className="text-gray-700 text-lg leading-relaxed">{project.results}</p>
+              </div>
+            </div>
+          )}
 
           <div className="mb-6">
             <h2 className="text-2xl font-bold mb-4">Detailed Info</h2>

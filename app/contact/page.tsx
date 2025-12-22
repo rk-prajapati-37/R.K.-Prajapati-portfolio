@@ -76,8 +76,8 @@ export default function ContactPage() {
           <div className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center text-center">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
               {/* Phone icon */}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5.75A2.75 2.75 0 015.75 3h1.5A2.75 2.75 0 0010 5.75v1.5A2.75 2.75 0 017.25 10H6a.75.75 0 00-.75.75v1.5c0 1.24.5 2.42 1.38 3.29L9.5 18.5a3 3 0 003.54.44l1.2-.8A3 3 0 0016.5 17l.75-.75A2.75 2.75 0 0020 13.5V12a.75.75 0 00-.75-.75H18a2.75 2.75 0 01-2.75-2.75V6.25A2.75 2.75 0 0016.25 3h1.5A2.75 2.75 0 0020.5 6.25v1.5" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
             <h4 className="font-semibold text-gray-700 mb-1">Phone</h4>
