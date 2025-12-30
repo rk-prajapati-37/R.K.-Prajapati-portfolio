@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import LayoutMotion from "../components/LayoutMotion";
 import WhatsAppFloat from "../components/WhatsAppFloat";
+import BackgroundAnimation from "../components/BackgroundAnimation";
 import "./globals.css";
 
 export const metadata = {
@@ -78,7 +79,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body>
+      <body className="min-h-screen relative">
+        <BackgroundAnimation />
         <Navbar />
         <LayoutMotion>
           {children}

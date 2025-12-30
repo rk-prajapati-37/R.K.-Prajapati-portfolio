@@ -9,6 +9,13 @@ import HireMeCTA from "@/components/HireMeCTA";
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
 
+  // Function to truncate text to 20-25 words
+  const truncateText = (text: string, maxWords: number = 22) => {
+    const words = text.split(' ');
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(' ') + '...';
+  };
+
   useEffect(() => {
     const SERVICES_QUERY = `
       *[_type == "service"] | order(_createdAt asc) {
@@ -17,6 +24,7 @@ export default function ServicesPage() {
         startingPrice,
         deliveryTime,
         shortDescription,
+        description,
         features,
         whatsappText,
         "slug": slug.current,
@@ -49,7 +57,7 @@ export default function ServicesPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             My Services
           </h1>
-          <p className="text-gray-600 text-lg">Professional services I offer to help bring your ideas to life</p>
+          <p className="text-gray-600 text-lg">Expert web development services to bring your digital vision to life</p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
@@ -65,8 +73,8 @@ export default function ServicesPage() {
                 {service.title}
               </h2>
 
-              <p className="text-gray-600 mb-3">
-                {service.shortDescription}
+              <p className="text-gray-600 mb-3 text-sm leading-relaxed">
+                {truncateText(service.description || service.shortDescription)}
               </p>
 
               <p className="text-red-600 font-semibold mb-2">
@@ -110,10 +118,10 @@ export default function ServicesPage() {
                 </div>
               )}
 
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-3 mt-4">
                 <Link
                   href={`/services/${service.slug}`}
-                  className="inline-block bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition"
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition text-center text-sm font-medium"
                 >
                   View Details
                 </Link>
@@ -123,7 +131,7 @@ export default function ServicesPage() {
                     href={`https://wa.me/918082068480?text=${encodeURIComponent(service.whatsappText)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition"
+                    className="flex-1 bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition text-center text-sm font-medium"
                   >
                     💬 WhatsApp
                   </a>

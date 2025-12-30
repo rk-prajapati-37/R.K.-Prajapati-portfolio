@@ -5,11 +5,21 @@ import { useState, useEffect } from "react";
 
 const colors = ['red', 'blue', 'green', 'purple', 'yellow', 'pink', 'indigo', 'teal', 'orange', 'cyan'];
 
+interface Shape {
+  id: number;
+  size: number;
+  color: string;
+  x: number;
+  y: number;
+  delay: number;
+  duration: number;
+}
+
 export default function BackgroundAnimation() {
-  const [shapes, setShapes] = useState([]);
+  const [shapes, setShapes] = useState<Shape[]>([]);
 
   useEffect(() => {
-    const generatedShapes = Array.from({ length: 20 }, (_, i) => ({
+    const generatedShapes: Shape[] = Array.from({ length: 20 }, (_, i) => ({
       id: i,
       size: Math.random() * 20 + 10, // 10-30px
       color: `bg-${colors[Math.floor(Math.random() * 10)]}-300`,

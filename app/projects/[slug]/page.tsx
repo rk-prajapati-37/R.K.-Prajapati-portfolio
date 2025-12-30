@@ -46,6 +46,9 @@ type Project = {
   date?: string;
   clientName?: string;
   socialLinks?: SocialLink[];
+  clientProblem?: string;
+  solution?: string;
+  results?: string;
 };
 
 export default async function ProjectDetail({
@@ -66,7 +69,7 @@ export default async function ProjectDetail({
     project = await client.fetch(
       `*[_type == "project" && slug.current == $slug][0]{
         title, description, details, github, demo, techStack, category,
-        clientName, date, video,
+        clientName, date, video, clientProblem, solution, results,
         "imageUrl": image.asset->url,
         "extraImages": extraImages[].asset->url,
         socialLinks[] {
