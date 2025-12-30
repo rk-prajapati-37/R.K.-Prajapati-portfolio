@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PortableTextClient from "./PortableTextClientFixed";
 
 type Blog = {
@@ -46,6 +47,7 @@ export default function BlogContentClient({
   const [allImages, setAllImages] = useState<string[]>([]);
   const [frameType, setFrameType] = useState<FrameType>('mac');
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     console.log("Blog data received:", blog);
@@ -142,7 +144,11 @@ export default function BlogContentClient({
           {blog.category && blog.category.length > 0 && (
             <div className="flex flex-wrap gap-3 mb-6">
               {blog.category.map((cat, i) => (
-                <span key={i} className="px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-medium cursor-pointer hover:bg-red-100 transition">
+                <span 
+                  key={i} 
+                  onClick={() => router.push(`/blog/category/${cat.toLowerCase()}`)}
+                  className="px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-medium cursor-pointer hover:bg-red-100 transition"
+                >
                   {cat}
                 </span>
               ))}

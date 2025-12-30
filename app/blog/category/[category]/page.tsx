@@ -40,7 +40,7 @@ export default function CategoryBlogPage() {
     async function fetchBlogs() {
       const data = await client.fetch(
         `
-        *[_type == "blog" && $category in category] | order(date desc) {
+        *[_type == "blog" && count(category[lower(@) == lower($category)]) > 0] | order(date desc) {
           _id,
           title,
           excerpt,

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PortableText } from "@portabletext/react";
+import Image from "next/image";
 
 type Props = {
   value?: any;
@@ -140,16 +141,21 @@ export default function PortableTextClientFixed({
     types: {
       image: ({ value }: any) => {
         const { asset, alt, caption } = value;
+        const { width, height } = asset?.metadata?.dimensions || {};
         return (
-          <figure className="my-6">
-            <img
-              src={asset?.url}
-              alt={alt || "Blog image"}
-              className="w-full h-auto rounded-lg shadow-md"
-              loading="lazy"
-            />
+          <figure className="my-8 flex flex-col items-center">
+            <div className="relative w-full max-w-4xl">
+              <Image
+                src={asset?.url}
+                alt={alt || "Blog image"}
+                width={width || 800}
+                height={height || 600}
+                className="rounded-xl shadow-lg border border-gray-200 object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
             {caption && (
-              <figcaption className="text-sm text-gray-600 mt-2 text-center italic">
+              <figcaption className="text-sm text-gray-600 mt-3 text-center italic max-w-md">
                 {caption}
               </figcaption>
             )}

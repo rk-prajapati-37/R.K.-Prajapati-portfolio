@@ -170,7 +170,7 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-6xl mx-auto">
         {project.imageUrl && (
           <motion.div className="relative mb-6 rounded-2xl overflow-hidden shadow-lg cursor-pointer" whileHover={{ scale: 1.02 }} onClick={() => openGallery(project.imageUrl!)}>
-            <img src={project.imageUrl} alt={project.title || 'Project'} className="w-full h-96 object-cover" />
+            <img src={project.imageUrl} alt={project.title || 'Project'} className="w-full h-auto object-contain" />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition"><span className="text-white text-lg font-semibold bg-black/50 px-4 py-2 rounded">Click to view</span></div>
           </motion.div>
         )}

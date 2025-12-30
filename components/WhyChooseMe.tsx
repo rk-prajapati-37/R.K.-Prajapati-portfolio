@@ -23,6 +23,7 @@ export default function WhyChooseMe() {
       setLoading(false);
     }).catch((error) => {
       console.error('Error fetching stats:', error);
+      setStats([]); // Fallback to empty array
       setLoading(false);
     });
   }, []);

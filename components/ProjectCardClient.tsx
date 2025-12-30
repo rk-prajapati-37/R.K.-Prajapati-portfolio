@@ -82,13 +82,15 @@ export default function ProjectCardClient({ project }: { project: Project }) {
 
       {/* Content Container */}
       <div className="p-6 flex-grow flex flex-col">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">
+        <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-3">
           {project.title || "Untitled"}
         </h3>
-        <div className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
-          <div className="portable-text">
-            <PortableTextClient value={project.description || "No description"} />
-          </div>
+        <div className="text-gray-600 text-sm mb-4 flex-grow">
+          <PortableTextClient 
+            value={project.description || "No description"} 
+            truncate={false} 
+            className="line-clamp-3" 
+          />
         </div>
 
         {/* Tech Stack */}

@@ -11,7 +11,44 @@ export const metadata = {
     template: "%s | R K Prajapati",
   },
   description:
-    "Professional Next.js & React Developer available for freelance projects.",
+    "Professional Next.js & React Developer available for freelance projects. Specializing in modern web development, responsive design, and performance optimization.",
+  keywords: ["web developer", "full stack developer", "React", "Next.js", "freelancer", "web design", "JavaScript", "portfolio"],
+  authors: [{ name: "Rohit Prajapati" }],
+  creator: "Rohit Prajapati",
+  publisher: "R K Prajapati",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://rkprajapati.dev",
+    title: "R K Prajapati | Full Stack Developer",
+    description: "Professional Next.js & React Developer available for freelance projects. Specializing in modern web development, responsive design, and performance optimization.",
+    siteName: "R K Prajapati Portfolio",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "R K Prajapati - Full Stack Developer",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "R K Prajapati | Full Stack Developer",
+    description: "Professional Next.js & React Developer available for freelance projects.",
+    images: ["/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 const pageAnimation = {
