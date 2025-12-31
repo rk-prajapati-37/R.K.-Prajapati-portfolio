@@ -183,7 +183,7 @@ export default function CertificateClient({
                 onClick={(e) => handleCardClick(e, cert._id)}
                 aria-expanded={isExpanded}
                 aria-controls={`cert-desc-${cert._id}`}
-                className={`group rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-700/70 shadow-sm hover:shadow-xl transition-all transform hover:-translate-y-1 h-full flex flex-col gap-4 cursor-pointer ${
+                className={`group rounded-xl bg-white shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 h-full flex flex-col gap-4 cursor-pointer ${
                   isExpanded ? "ring-2 ring-red-500/80" : ""
                 }`}
               >

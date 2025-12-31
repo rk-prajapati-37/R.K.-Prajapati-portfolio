@@ -32,46 +32,58 @@ type Blog = {
 };
 
 export default function CategoryBlogPage() {
-  const { category } = useParams();
+  const params = useParams();
+  const categoryParam = params.category as string;
+  const category = decodeURIComponent(categoryParam);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchBlogs() {
-      const data = await client.fetch(
-        `
-        *[_type == "blog" && count(category[lower(@) == lower($category)]) > 0] | order(date desc) {
-          _id,
-          title,
-          excerpt,
-          slug,
-          date,
-          coverImage {
-            asset -> {
-              url,
-              metadata {
-                dimensions {
-                  height,
-                  width
+      try {
+        const data = await client.fetch(
+          `
+          *[_type == "blog" && (lower(category) == lower($category) || count(category[lower(@) == lower($category)]) > 0)] | order(date desc) {
+            _id,
+            title,
+            excerpt,
+            slug,
+            date,
+            coverImage {
+              asset -> {
+                url,
+                metadata {
+                  dimensions {
+                    height,
+                    width
+                  }
                 }
-              }
+              },
+              hotspot,
+              crop
             },
-            hotspot,
-            crop
-          },
-          category,
-          tags,
-          author
-        }
-        `,
-        { category }
-      );
+            category,
+            tags,
+            author
+          }
+          `,
+          { category }
+        );
 
-      setBlogs(data);
-      setLoading(false);
+        setBlogs(data);
+      } catch (error) {
+        console.error('Error fetching blogs for category:', category, error);
+        setBlogs([]);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    fetchBlogs();
+    if (category) {
+      fetchBlogs();
+    } else {
+      setLoading(false);
+    }
   }, [category]);
 
   if (loading) {
@@ -114,7 +126,7 @@ export default function CategoryBlogPage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
-                <Link href={`/blog/${blog.slug.current}`}>
+                <Link href={`/blog/${blog.slug.current}`} className="no-underline">
                   {blog.coverImage?.asset?.url && (
                     <div className="relative h-48 overflow-hidden rounded-lg">
                       <Image

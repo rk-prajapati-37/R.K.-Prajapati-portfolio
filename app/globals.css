@@ -284,8 +284,8 @@ html:not([data-theme="light"]) .border-red-200{
 .card a:hover,
 .portable-text a:hover,
 .site-container a:hover{
-  text-decoration:underline;
-  opacity:0.8;
+  text-decoration: none;
+  opacity: 0.8;
 }
 
 /* Ensure anchor links inside button-like elements inherit the visual color (e.g. text-white) */
@@ -455,3 +455,12 @@ html:not([data-theme="light"]) .border-red-200{
   overflow: visible !important;
 }
 /* End of globals.css */
+
+/* Remove underlines from all links */
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}

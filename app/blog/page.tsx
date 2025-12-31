@@ -133,7 +133,7 @@ export default function BlogPage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
-                <Link href={`/blog/${blog.slug.current}`}>
+                <Link href={`/blog/${blog.slug.current}`} className="no-underline">
                   {blog.coverImage?.asset?.url && (
                     <div className="relative h-48 overflow-hidden">
                       <Image
@@ -155,7 +155,7 @@ export default function BlogPage() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              router.push(`/blog/category/${category.toLowerCase()}`);
+                              router.push(`/blog/category/${encodeURIComponent(category.toLowerCase())}`);
                             }}
                             className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium hover:bg-red-100 cursor-pointer transition"
                           >

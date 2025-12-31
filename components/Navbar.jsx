@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import AnimatedLogo from "./AnimatedLogo";
 import ThemeToggle from "./ThemeToggle";
 
@@ -8,6 +9,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const aboutRef = useRef(null);
+  const pathname = usePathname();
 
   return (
     <nav
@@ -25,8 +27,8 @@ export default function Navbar() {
           </Link>
           {/* desktop: theme toggle removed — icon stays after mobile menu button */}
         </div>
-        <div className="hidden md:flex space-x-6 items-center">
-          <Link href="/" className="text-red-600 hover:text-red-700 font-medium">Home</Link>
+        <div className="hidden md:flex gap-2 items-center">
+          <Link href="/" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Home</Link>
 
           {/* About dropdown (hover + focus) */}
           <div
@@ -42,25 +44,25 @@ export default function Navbar() {
               setAboutOpen(false);
             }}
           >
-            <Link href="/about" className="px-3 py-1 rounded-md text-red-600 hover:text-red-700 focus:outline-none cursor-pointer">About</Link>
-            <div className={`absolute right-0 mt-2 w-48 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg ${aboutOpen ? 'block' : 'hidden'}`}>
-              <div className="py-2">
-                <Link href="/experience" className="block px-4 py-2 hover:bg-white/3">Experience</Link>
-                <Link href="/skills" className="block px-4 py-2 hover:bg-white/3">Skills</Link>
-                <Link href="/education" className="block px-4 py-2 hover:bg-white/3">Education</Link>
-                <Link href="/certificates" className="block px-4 py-2 hover:bg-white/3">Certificates</Link>
+            <Link href="/about" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/about' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>About</Link>
+            <div className={`absolute right-0 mt-2 w-56 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg ${aboutOpen ? 'block' : 'hidden'}`}>
+              <div className="py-4 space-y-2">
+                <Link href="/experience" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/experience' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Experience</Link>
+                <Link href="/skills" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/skills' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Skills</Link>
+                <Link href="/education" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/education' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Education</Link>
+                <Link href="/certificates" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/certificates' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Certificates</Link>
               </div>
             </div>
           </div>
 
-          <Link href="/projects" className="text-red-600 hover:text-red-700 font-medium">Projects</Link>
-          <Link href="/blog" className="text-red-600 hover:text-red-700 font-medium">Blog</Link>
-          <Link href="/testimonials" className="text-red-600 hover:text-red-700 font-medium">Testimonials</Link>
-          <Link href="/contact" className="text-red-600 hover:text-red-700 font-medium">Contact</Link>
+          <Link href="/projects" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/projects' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Projects</Link>
+          <Link href="/blog" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/blog' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Blog</Link>
+          <Link href="/testimonials" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/testimonials' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Testimonials</Link>
+          <Link href="/contact" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/contact' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Contact</Link>
           <a
             href="/RohitPrajapatiCV.pdf"
             download="Rohit-Prajapati-Resume.pdf"
-            className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition font-medium"
+            className="bg-gradient-to-r from-red-600 to-red-500 !text-white px-3 py-1.5 rounded-full hover:from-red-700 hover:to-red-600 transition font-semibold shadow-lg hover:no-underline"
           >
             📄 Resume
           </a>
