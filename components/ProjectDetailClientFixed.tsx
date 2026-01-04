@@ -221,7 +221,23 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
         )}
 
         <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-6 text-gray-800">{project.title || 'Untitled Project'}</h1>
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">{project.title || 'Untitled Project'}</h1>
+          </div>
+
+          <div className="flex gap-4 flex-wrap mb-6 items-center">
+            <div className="flex gap-4 flex-wrap">
+              {project.github && (<a href={project.github} target="_blank" rel="noreferrer" className="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-900 transition">GitHub</a>)}
+              {project.demo && (<a href={project.demo} target="_blank" rel="noreferrer" className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition">Live Project Link</a>)}
+            </div>
+            
+            {/* Social Links */}
+            {project.socialLinks && project.socialLinks.length > 0 && (
+              <div className="ml-auto">
+                <ProjectSocialLinks socialLinks={project.socialLinks} />
+              </div>
+            )}
+          </div>
 
           {project.category && (
             <div className="flex flex-wrap gap-3 mb-6">
@@ -321,20 +337,6 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
               </div>
             </div>
           )}
-
-          <div className="flex gap-4 flex-wrap mb-6 items-center">
-            <div className="flex gap-4 flex-wrap">
-              {project.github && (<a href={project.github} target="_blank" rel="noreferrer" className="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-900 transition">GitHub</a>)}
-              {project.demo && (<a href={project.demo} target="_blank" rel="noreferrer" className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition">Live Project Link</a>)}
-            </div>
-            
-            {/* Social Links */}
-            {project.socialLinks && project.socialLinks.length > 0 && (
-              <div className="ml-auto">
-                <ProjectSocialLinks socialLinks={project.socialLinks} />
-              </div>
-            )}
-          </div>
 
           {project.extraImages && project.extraImages.length > 0 && (
             <div>
