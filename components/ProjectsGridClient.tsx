@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import ProjectCardClient from "./ProjectCardClient";
@@ -29,12 +29,25 @@ export default function ProjectsGridClient({
   selectedCategory: string | null;
 }) {
   const router = useRouter();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleCategoryFilter = (category: string | null) => {
     if (category) {
       router.push(`/projects?category=${encodeURIComponent(category)}`);
     } else {
       router.push("/projects");
+    }
+  };
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
     }
   };
 
@@ -69,8 +82,19 @@ export default function ProjectsGridClient({
 
         {/* Category Filter */}
         {allCategories.length > 0 && (
-          <div className="mb-12">
-            <div className="flex gap-3 px-2 overflow-x-auto no-scrollbar justify-start">
+          <div className="mb-12 relative">
+            {/* Left Arrow Button - Hidden on mobile, visible on md and up */}
+            <button
+              onClick={scrollLeft}
+              className="hidden md:flex absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-full p-2 shadow-md hover:bg-gray-50 transition"
+              aria-label="Scroll categories left"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <div ref={scrollRef} className="flex gap-3 px-2 overflow-x-auto no-scrollbar justify-start md:px-12">
               {/* All Projects Button */}
               <motion.button
                 onClick={() => handleCategoryFilter(null)}
@@ -102,6 +126,17 @@ export default function ProjectsGridClient({
                 </motion.button>
               ))}
             </div>
+
+            {/* Right Arrow Button - Hidden on mobile, visible on md and up */}
+            <button
+              onClick={scrollRight}
+              className="hidden md:flex absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white border border-gray-200 rounded-full p-2 shadow-md hover:bg-gray-50 transition"
+              aria-label="Scroll categories right"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         )}
 
