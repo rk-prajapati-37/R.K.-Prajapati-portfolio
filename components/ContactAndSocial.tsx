@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { sanityServerClient } from '@/lib/sanityServerClient';
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaGithub, FaYoutube, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 
 interface FormData {
   name: string;
@@ -10,7 +12,45 @@ interface FormData {
   message: string;
 }
 
+interface SocialMedia {
+  _id: string;
+  platform: string;
+  url: string;
+  displayOrder: number;
+}
+
+const platformIcons: { [key: string]: React.ComponentType<any> } = {
+  facebook: FaFacebookF,
+  twitter: FaTwitter,
+  instagram: FaInstagram,
+  linkedin: FaLinkedinIn,
+  github: FaGithub,
+  youtube: FaYoutube,
+  tiktok: FaTiktok,
+  whatsapp: FaWhatsapp,
+};
+
+const platformColors: { [key: string]: string } = {
+  facebook: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+  twitter: 'text-blue-400 hover:text-blue-500 hover:bg-blue-50',
+  instagram: 'text-pink-500 hover:text-pink-600 hover:bg-pink-50',
+  linkedin: 'text-blue-700 hover:text-blue-800 hover:bg-blue-50',
+  github: 'text-gray-800 hover:text-gray-900 hover:bg-gray-50',
+  youtube: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+  tiktok: 'text-black hover:text-gray-700 hover:bg-gray-50',
+  whatsapp: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+};
+
+const socialLinksQuery = `*[_type == "socialMedia" && active == true] | order(displayOrder asc) {
+  _id,
+  platform,
+  url,
+  displayOrder
+}`;
+
 export default function ContactAndSocial() {
+  const [socialLinks, setSocialLinks] = useState<SocialMedia[]>([]);
+  const [loadingSocial, setLoadingSocial] = useState(true);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -19,6 +59,21 @@ export default function ContactAndSocial() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      try {
+        const data = await sanityServerClient.fetch(socialLinksQuery);
+        setSocialLinks(data.slice(0, 4)); // Top 4 platforms
+      } catch (error) {
+        console.error('Error fetching social links:', error);
+      } finally {
+        setLoadingSocial(false);
+      }
+    };
+
+    fetchSocialLinks();
+  }, []);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -135,71 +190,36 @@ export default function ContactAndSocial() {
         >
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">Follow Me On All Platforms</h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Facebook */}
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 hover:shadow-lg transition-shadow group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold flex-shrink-0">
-                f
-              </div>
-              <span className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition">Facebook</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-auto text-gray-400 group-hover:text-blue-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-
-            {/* LinkedIn */}
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 hover:shadow-lg transition-shadow group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center text-lg font-bold flex-shrink-0">
-                in
-              </div>
-              <span className="text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition">LinkedIn</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-auto text-gray-400 group-hover:text-blue-700 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-
-            {/* Instagram */}
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 hover:shadow-lg transition-shadow group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center text-lg font-bold flex-shrink-0">
-                📷
-              </div>
-              <span className="text-lg font-semibold text-gray-800 group-hover:text-pink-500 transition">Instagram</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-auto text-gray-400 group-hover:text-pink-500 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-
-            {/* YouTube */}
-            <a
-              href="https://youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 hover:shadow-lg transition-shadow group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
-                ▶
-              </div>
-              <span className="text-lg font-semibold text-gray-800 group-hover:text-red-600 transition">YouTube</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-auto text-gray-400 group-hover:text-red-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
+          {!loadingSocial && socialLinks.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {socialLinks.map((link) => {
+                const IconComponent = platformIcons[link.platform] || FaFacebookF;
+                const colorClass = platformColors[link.platform] || 'text-gray-600 hover:text-gray-700 hover:bg-gray-50';
+                
+                return (
+                  <a
+                    key={link._id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 hover:shadow-lg transition-shadow group cursor-pointer"
+                  >
+                    <div className={`w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 ${colorClass}`}>
+                      <IconComponent className="text-xl" />
+                    </div>
+                    <span className="text-lg font-semibold text-gray-800 group-hover:text-red-600 transition">
+                      {link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-auto text-gray-400 group-hover:text-red-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">Loading social platforms...</p>
+          )}
         </motion.div>
 
         {/* Contact Form */}
