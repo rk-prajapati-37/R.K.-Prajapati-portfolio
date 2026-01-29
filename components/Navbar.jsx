@@ -8,7 +8,9 @@ import ThemeToggle from "./ThemeToggle";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const aboutRef = useRef(null);
+  const contactRef = useRef(null);
   const pathname = usePathname();
 
   return (
@@ -58,7 +60,28 @@ export default function Navbar() {
           <Link href="/projects" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/projects' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Projects</Link>
           <Link href="/blog" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/blog' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Blog</Link>
           <Link href="/testimonials" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/testimonials' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Testimonials</Link>
-          <Link href="/contact" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/contact' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Contact</Link>
+          
+          {/* Contact dropdown with Social option */}
+          <div
+            className="relative"
+            ref={contactRef}
+            onMouseEnter={() => setContactOpen(true)}
+            onMouseLeave={() => setContactOpen(false)}
+            onFocus={() => setContactOpen(true)}
+            onBlur={(e) => {
+              const related = e.relatedTarget;
+              if (!contactRef.current) return;
+              if (related && contactRef.current.contains(related)) return;
+              setContactOpen(false);
+            }}
+          >
+            <Link href="/contact" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/contact' || pathname === '/social' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Contact</Link>
+            <div className={`absolute right-0 mt-2 w-56 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg ${contactOpen ? 'block' : 'hidden'}`}>
+              <div className="py-4 space-y-2">
+                <Link href="/social" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/social' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>🔗 Social Media</Link>
+              </div>
+            </div>
+          </div>
           <a
             href="/RohitPrajapatiCV.pdf"
             download="Rohit-Prajapati-Resume.pdf"
@@ -110,7 +133,13 @@ export default function Navbar() {
           <Link href="/projects" onClick={() => setOpen(false)} className="block">Projects</Link>
           <Link href="/blog" onClick={() => setOpen(false)} className="block">Blog</Link>
           <Link href="/testimonials" onClick={() => setOpen(false)} className="block">Testimonials</Link>
-          <Link href="/contact" onClick={() => setOpen(false)} className="block">Contact</Link>
+          
+          {/* Mobile Contact submenu - Social only */}
+          <div className="pt-2">
+            <div className="font-medium">Contact</div>
+            <Link href="/social" onClick={() => setOpen(false)} className="block pl-3 py-1">🔗 Social Media</Link>
+          </div>
+          
           <a
             href="/RohitPrajapatiCV.pdf"
             download="Rohit-Prajapati-Resume.pdf"
