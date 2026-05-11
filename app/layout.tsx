@@ -79,7 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="min-h-screen relative">
+      <body className="min-h-screen relative" suppressHydrationWarning={true}>
         <BackgroundAnimation />
         <Navbar />
         <LayoutMotion>

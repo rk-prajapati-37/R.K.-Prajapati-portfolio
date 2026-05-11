@@ -123,30 +123,18 @@ export default function AboutClient({
           <h4 className="text-red-600 uppercase tracking-wide font-semibold">Main Info</h4>
           <h1 className="text-4xl font-bold">About Me</h1>
 
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-lg max-w-none space-y-4">
             <p className="text-gray-700 leading-relaxed">
-              Hi there! I'm <strong>Rohit K. Prajapati</strong>, a{" "}
-              <strong>Front-End WordPress Developer</strong> with over{" "}
-              <strong>5+ years</strong> of experience. I have handled more than 10
-              WordPress websites including BoomLive, TheCore, IndiaSpend.
+              I'm a creative and detail-oriented <strong className="text-red-600">Web Designer & Frontend Developer</strong> with experience in building responsive and professional websites for businesses, startups, educational platforms, and personal brands.
             </p>
 
             <p className="text-gray-700 leading-relaxed">
-              Currently seeking a challenging role to further refine my skills, unleash
-              creativity, and contribute to a company's growth.
+              My expertise includes <strong className="text-red-600">WordPress development, Elementor Pro customization, frontend development, responsive UI design, and website optimization</strong>. I enjoy transforming ideas into clean, modern, and engaging digital experiences that help businesses grow online.
             </p>
 
-            <div className="mt-6">
-              <h3 className="text-xl font-bold text-red-600 mb-2">Ready to Collaborate:</h3>
-              <p className="text-gray-700">
-                If you're looking to enhance your online presence, I'm here to help. Visit
-                my{" "}
-                <a href="#portfolio" className="text-red-600 hover:text-red-700">
-                  portfolio
-                </a>{" "}
-                to get in touch, and let's work together.
-              </p>
-            </div>
+            <p className="text-gray-700 leading-relaxed">
+              I believe a great website should not only look attractive but also provide smooth performance, excellent user experience, and strong functionality across all devices.
+            </p>
           </div>
 
           {/* Buttons */}

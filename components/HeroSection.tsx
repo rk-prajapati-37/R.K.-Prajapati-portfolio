@@ -10,37 +10,29 @@ export default function HeroSection() {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10">
         {/* Left text */}
         <div className="md:w-2/3">
-          <p className="text-red-600 font-semibold mb-2">Hello!</p>
+          <p className="text-red-600 font-semibold mb-2">🚀 Web Designer • Frontend Developer • WordPress Expert</p>
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="text-5xl md:text-6xl font-bold leading-tight"
           >
-            I'm Rohit Prajapati
+            Building Modern, Responsive & High-Performance Websites
           </motion.h1>
-          <p className="text-red-600 mt-2">( Web Designer & Developer )</p>
+          <p className="text-red-600 mt-2">Hi, I'm R.K. Prajapati — passionate about creating visually appealing, user-friendly, and business-focused digital experiences.</p>
 
           <div className="mt-6 prose max-w-none text-gray-600">
             <p>
-              A passionate and seasoned web developer who holds a BSc in Computer
-              Science from Mumbai University. With a focus on creating clean,
-              responsive, and user-friendly websites, I bring a wealth of
-              experience and expertise in WordPress, HTML, CSS, PHP, and
-              JavaScript.
-            </p>
-            <h3 className="text-red-600 mt-6">Freelance Availability:</h3>
-            <p>
-              Having had the privilege of contributing to reputable
-              organizations, I am now excited to extend my services as a
-              freelance web developer. My career has been shaped by a
-              commitment to delivering high-quality, customized solutions.
+              I specialize in designing and developing modern websites using WordPress, Elementor, React, HTML, CSS, JavaScript, and Tailwind CSS. From business websites to landing pages and custom frontend solutions, I focus on delivering clean design, fast performance, and responsive user experiences.
             </p>
           </div>
 
-          <div className="mt-8">
-            <Link href="/about" className="inline-block bg-white border rounded-full px-6 py-3 shadow-md hover:shadow-lg">
-              <span className="text-red-600 font-medium">More about Me</span>
+          <div className="mt-8 flex gap-4">
+            <Link href="/projects" className="inline-block bg-red-600 text-white rounded-full px-6 py-3 shadow-md hover:shadow-lg hover:bg-red-700 transition">
+              <span className="font-medium">Explore My Work</span>
+            </Link>
+            <Link href="/contact" className="inline-block bg-white border border-red-600 rounded-full px-6 py-3 shadow-md hover:shadow-lg">
+              <span className="text-red-600 font-medium">Contact Me</span>
             </Link>
           </div>
         </div>
