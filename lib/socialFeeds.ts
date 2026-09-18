@@ -72,7 +72,12 @@ async function getYouTubeVideosViaApi(limit: number): Promise<FeedPost[]> {
   if (!res.ok) throw new Error(`YouTube API playlistItems ${res.status}: ${await res.text()}`);
   const json = await res.json();
   return (json.items || [])
-    .filter((it: any) => it.snippet?.resourceId?.videoId)
+    .filter(
+      (it: any) =>
+        it.snippet?.resourceId?.videoId &&
+        it.snippet.title !== "Private video" &&
+        it.snippet.title !== "Deleted video"
+    )
     .map((it: any) => {
       const videoId = it.snippet.resourceId.videoId;
       const thumb = it.snippet.thumbnails?.high?.url || it.snippet.thumbnails?.default?.url;
