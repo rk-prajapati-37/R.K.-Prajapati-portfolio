@@ -3,7 +3,7 @@ import type { SanityClient } from "next-sanity";
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
-const token = process.env.SANITY_AUTH_TOKEN; // Server-side token for write operations
+const token = process.env.SANITY_API_TOKEN; // Server-side token for write operations
 
 let sanityServerClient: SanityClient;
 
