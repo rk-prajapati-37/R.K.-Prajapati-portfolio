@@ -215,34 +215,46 @@ export default function ContactAndSocial() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mb-6"
         >
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">Follow Me On All Platforms</h2>
-          
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 mb-6">
+            Follow Me On All Platforms
+          </p>
+
           {!loadingSocial && socialLinks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {socialLinks.map((link) => {
-                const IconComponent = platformIcons[link.platform] || FaFacebookF;
-                const colorClass = platformColors[link.platform] || 'text-gray-600 hover:text-gray-700 hover:bg-gray-50';
-                
-                return (
-                  <a
-                    key={link._id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 hover:shadow-lg transition-shadow group cursor-pointer"
-                  >
-                    <div className={`w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-                      <IconComponent className="text-xl" />
-                    </div>
-                    <span className="text-lg font-semibold text-gray-800 group-hover:text-red-600 transition">
-                      {link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
-                    </span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-auto text-gray-400 group-hover:text-red-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </a>
-                );
-              })}
+            <div
+              className="relative overflow-hidden"
+              style={{
+                maskImage: "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)",
+                WebkitMaskImage: "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)",
+              }}
+            >
+              <motion.div
+                className="flex gap-4 w-max"
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
+              >
+                {[...socialLinks, ...socialLinks].map((link, i) => {
+                  const IconComponent = platformIcons[link.platform] || FaFacebookF;
+                  const colorClass = platformColors[link.platform] || 'text-gray-600 hover:text-gray-700 hover:bg-gray-50';
+
+                  return (
+                    <a
+                      key={`${link._id}-${i}`}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 inline-flex items-center gap-3 pl-3 pr-5 py-2.5 rounded-full border bg-white text-sm font-semibold whitespace-nowrap hover:border-red-400 hover:shadow-md transition group"
+                      style={{ borderColor: 'var(--card-border, #e5e7eb)' }}
+                    >
+                      <span className={`w-7 h-7 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 ${colorClass}`}>
+                        <IconComponent className="text-xs" />
+                      </span>
+                      <span className="text-gray-800 group-hover:text-red-600 transition">
+                        {link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
+                      </span>
+                    </a>
+                  );
+                })}
+              </motion.div>
             </div>
           ) : (
             <p className="text-center text-gray-500">Loading social platforms...</p>
