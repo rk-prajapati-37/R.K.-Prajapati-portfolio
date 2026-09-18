@@ -464,3 +464,92 @@ a {
 a:hover {
   text-decoration: none;
 }
+
+/* =========================================================
+   Motion / polish additions
+   ========================================================= */
+
+/* Lenis smooth-scroll recommended base styles */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* Gradient text used in the hero headline */
+.hero-gradient-text{
+  background: linear-gradient(90deg, #dc2626 0%, #f97316 50%, #dc2626 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 6s linear infinite;
+}
+@keyframes gradient-shift{
+  to { background-position: 200% center; }
+}
+
+/* Section headings: gradient text + underline that draws itself in on scroll */
+.section-title{
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(90deg, var(--text) 0%, var(--text) 55%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+  padding-bottom: 0.35rem;
+}
+.section-title::after{
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  height: 3px;
+  width: 56px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #dc2626, #f97316);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  animation: underline-draw 0.8s cubic-bezier(0.22,1,0.36,1) 0.35s forwards;
+}
+@keyframes underline-draw{ to { transform: translateX(-50%) scaleX(1); } }
+
+/* Buttons: light sweep on hover */
+.btn-shine{ position: relative; overflow: hidden; isolation: isolate; }
+.btn-shine::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.btn-shine:hover::before{ transform: translateX(120%); }
+
+/* Dark-mode: ensure gradient headline stays readable */
+.dark .section-title{
+  background: linear-gradient(90deg, var(--text) 0%, var(--text) 55%, #f87171 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .section-title::after{ transform: translateX(-50%) scaleX(1); }
+}
+
+/* Every inner page uses the same outer spacing so navigation feels consistent */
+.page-wrap{
+  padding: 1rem 1.5rem 4rem;
+}
+@media (min-width: 768px){
+  .page-wrap{ padding: 1.5rem 2.5rem 5rem; }
+}

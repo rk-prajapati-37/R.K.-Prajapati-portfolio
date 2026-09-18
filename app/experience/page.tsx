@@ -13,10 +13,15 @@ export default async function ExperiencePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-16 flex items-center justify-center px-6 md:px-10">
-      <div className="max-w-6xl w-full">
+    <div className="page-wrap">
+      <div className="max-w-6xl w-full mx-auto">
         <ExperienceClient experiences={experiences} />
       </div>
     </div>
   );
 }
+
+export const metadata = {
+  title: "Experience",
+  description: "My work history as a freelance web developer and WordPress specialist, including clients like IndiaSpend, BoomLive and India Food Network.",
+};

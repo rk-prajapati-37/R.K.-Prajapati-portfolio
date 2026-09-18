@@ -1,65 +1,69 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { motion, useMotionValue, useSpring, useMotionTemplate } from "framer-motion";
 
-const colors = ['bg-blue-300', 'bg-purple-300', 'bg-pink-300', 'bg-green-300', 'bg-yellow-300'];
-const shapeTypes = ['circle', 'square', 'triangle', 'star'] as const;
-
-interface Shape {
-  id: number;
-  size: number;
-  color: string;
-  x: number;
-  y: number;
-  delay: number;
-  duration: number;
-  shape: 'circle' | 'square' | 'triangle' | 'star';
-}
-
+/**
+ * Lightweight ambient background:
+ *  - 3 slow-drifting gradient blobs (pure radial gradients, no CSS blur filter:
+ *    large blur() filters render as faint rectangles on some Windows GPUs)
+ *  - a soft glow that follows the mouse
+ *  - a subtle dot grid for texture
+ *
+ * Replaces the previous 50-shape infinite animation, which was heavy on mobile.
+ */
 export default function BackgroundAnimation() {
-  const [shapes, setShapes] = useState<Shape[]>([]);
+  const mx = useMotionValue(-1000);
+  const my = useMotionValue(-1000);
+  const sx = useSpring(mx, { stiffness: 60, damping: 20, mass: 0.6 });
+  const sy = useSpring(my, { stiffness: 60, damping: 20, mass: 0.6 });
+  const glow = useMotionTemplate`radial-gradient(600px circle at ${sx}px ${sy}px, rgba(220,38,38,0.10), transparent 60%)`;
 
   useEffect(() => {
-    const generatedShapes: Shape[] = Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      size: Math.random() * 4 + 2, // 2-6px
-      color: colors[Math.floor(Math.random() * colors.length)],
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 5,
-      duration: Math.random() * 10 + 10, // 10-20s
-      shape: shapeTypes[Math.floor(Math.random() * shapeTypes.length)],
-    }));
-    setShapes(generatedShapes);
-  }, []);
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    const move = (e: MouseEvent) => {
+      mx.set(e.clientX);
+      my.set(e.clientY);
+    };
+    window.addEventListener("mousemove", move, { passive: true });
+    return () => window.removeEventListener("mousemove", move);
+  }, [mx, my]);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: -1 }}>
-      {shapes.map((shape) => (
-        <motion.div
-          key={shape.id}
-          className={`absolute ${shape.color} opacity-20 ${shape.shape === 'circle' ? 'rounded-full' : ''}`}
-          style={{
-            width: shape.size,
-            height: shape.size,
-            left: `${shape.x}%`,
-            top: `${shape.y}%`,
-            clipPath: shape.shape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : shape.shape === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' : undefined,
-          }}
-          animate={{
-            opacity: [0.3, 1, 0.3],
-            scale: [1, 1.2, 1],
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 2 + Math.random() * 3, // 2-5s
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: shape.delay,
-          }}
-        />
-      ))}
+    <div aria-hidden className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: -1 }}>
+      {/* dot grid */}
+      <div
+        className="absolute inset-0 opacity-[0.35] dark:opacity-[0.18]"
+        style={{
+          backgroundImage: "radial-gradient(rgba(120,120,140,0.25) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+        }}
+      />
+
+      {/* drifting blobs */}
+      <motion.div
+        className="absolute -top-56 -left-56 w-[760px] h-[760px] rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(220,38,38,0.20) 0%, rgba(220,38,38,0.08) 30%, transparent 62%)" }}
+        animate={{ x: [0, 80, -40, 0], y: [0, 60, 120, 0], scale: [1, 1.15, 0.95, 1] }}
+        transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute top-1/4 -right-64 w-[820px] h-[820px] rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(249,115,22,0.16) 0%, rgba(249,115,22,0.06) 30%, transparent 62%)" }}
+        animate={{ x: [0, -90, 30, 0], y: [0, -70, 50, 0], scale: [1, 0.9, 1.1, 1] }}
+        transition={{ duration: 30, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+      />
+      <motion.div
+        className="absolute -bottom-64 left-1/3 w-[720px] h-[720px] rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.05) 30%, transparent 62%)" }}
+        animate={{ x: [0, 60, -60, 0], y: [0, -80, -20, 0] }}
+        transition={{ duration: 34, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+      />
+
+      {/* mouse glow */}
+      <motion.div className="absolute inset-0" style={{ background: glow }} />
     </div>
   );
 }

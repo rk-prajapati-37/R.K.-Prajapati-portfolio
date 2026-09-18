@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PortableTextClient from "./PortableTextClientFixed";
+import PageHeader from "@/components/PageHeader";
 
 function toPlainText(value: any): string {
   if (!value) return "";
@@ -149,20 +150,12 @@ export default function CertificateClient({
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-12"
-      >
-        <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">CERTIFICATES</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-          Professional Certifications
-        </h1>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          Recognitions and credentials that validate my expertise
-        </p>
-      </motion.div>
+      <PageHeader
+        eyebrow="Certificates"
+        title="Professional Certifications"
+        subtitle="Recognitions and credentials that validate my expertise"
+        crumbs={[{ label: "About", href: "/about" }, { label: "Certificates" }]}
+      />
       <motion.div
         variants={container}
         initial="hidden"

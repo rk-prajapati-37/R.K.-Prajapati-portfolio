@@ -13,7 +13,7 @@ import { sanityServerClient } from '@/lib/sanityServer';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, mobile, message } = body;
+    const { name, email, mobile, message, projectType = '', budget = '' } = body;
 
     // Check if simplified mode is requested (optional query param)
     const url = new URL(req.url);
@@ -80,15 +80,14 @@ export async function POST(req: NextRequest) {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const mobileClean = mobile ? String(mobile).replace(/\s|-/g, '') : '';
-    const mobileValid = mobileClean && /^\d{7,15}$/.test(mobileClean);
-    const emailValid = email && emailRegex.test(String(email));
+    const mobileValid = !mobileClean || /^\d{7,15}$/.test(mobileClean); // mobile is optional
+    const emailValid = !!email && emailRegex.test(String(email));
 
-    // Require BOTH contact methods: email AND mobile
-    if (!emailValid || !mobileValid) {
-      return new Response(
-        JSON.stringify({ error: 'Please provide a valid email address AND a valid mobile number' }),
-        { status: 400 }
-      );
+    if (!emailValid) {
+      return new Response(JSON.stringify({ error: 'Please provide a valid email address' }), { status: 400 });
+    }
+    if (!mobileValid) {
+      return new Response(JSON.stringify({ error: 'Please provide a valid mobile number (digits only)' }), { status: 400 });
     }
 
     // ========== SAVE TO SANITY ==========
@@ -100,6 +99,8 @@ export async function POST(req: NextRequest) {
         name,
         email,
         mobile,
+        projectType,
+        budget,
         message,
         createdAt: new Date().toISOString(),
         source: "contact-form",
@@ -130,6 +131,8 @@ export async function POST(req: NextRequest) {
           name,
           email,
           mobile,
+          projectType,
+          budget,
           message,
           createdAt: new Date().toISOString(),
           source: 'contact-form',
@@ -206,7 +209,7 @@ export async function POST(req: NextRequest) {
     const adminMailOptions = {
       from: smtpUser,
       to: contactEmailRecipient,
-      subject: `📬 New Contact Form Submission`,
+      subject: `New enquiry${projectType ? ': ' + projectType : ''}${budget ? ' (' + budget + ')' : ''} - ${name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333; border-bottom: 2px solid #ef4444; padding-bottom: 10px;">
@@ -216,7 +219,9 @@ export async function POST(req: NextRequest) {
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Name:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Mobile:</strong> ${mobile}</p>
+            <p><strong>Mobile:</strong> ${mobile || '-'}</p>
+            <p><strong>Project type:</strong> ${projectType || '-'}</p>
+            <p><strong>Budget:</strong> ${budget || '-'}</p>
             <p><strong>Message:</strong></p>
             <p style="background: white; padding: 10px; border-left: 4px solid #ef4444;">
               ${message.replace(/\n/g, '<br />')}

@@ -12,8 +12,8 @@ export default async function Skills() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-16 flex items-center justify-center px-6 md:px-10">
-      <div className="max-w-6xl w-full">
+    <div className="page-wrap">
+      <div className="max-w-6xl w-full mx-auto">
         <SkillsHeaderClient />
 
         <div className="mt-6">
@@ -23,3 +23,8 @@ export default async function Skills() {
     </div>
   );
 }
+
+export const metadata = {
+  title: "Skills",
+  description: "Technologies and tools I use: WordPress, Elementor, React, Next.js, JavaScript, Tailwind CSS, Shopify and more.",
+};

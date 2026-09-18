@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { sanityServerClient } from '@/lib/sanityServerClient';
 import { motion } from 'framer-motion';
-import SocialPosts from '@/components/SocialPosts';
+import LiveSocialFeed from '@/components/LiveSocialFeed';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaGithub, FaYoutube, FaTiktok, FaWhatsapp } from 'react-icons/fa';
+import PageHeader from "@/components/PageHeader";
 
 interface SocialLink {
   _id: string;
@@ -62,23 +63,15 @@ export default function SocialMediaPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-12 text-gray-800 pt-12 pb-8 px-6 md:px-10">
+    <div className="page-wrap">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">SOCIAL MEDIA</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Stay Connected
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Follow me on social media for updates, projects, and daily insights
-          </p>
-        </motion.div>
+        <PageHeader
+          eyebrow="Social Media"
+          title="Stay Connected"
+          subtitle="Follow me on social media for updates, projects, and daily insights"
+          crumbs={[{ label: "Contact", href: "/contact" }, { label: "Social Media" }]}
+        />
 
         {/* Social Links Section First */}
         <motion.div
@@ -139,15 +132,9 @@ export default function SocialMediaPage() {
           )}
         </motion.div>
 
-        {/* Social Posts Section After */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full"
-        >
-          <SocialPosts />
-        </motion.div>
+        {/* Automatic feed from YouTube / Instagram / Facebook */}
+        <LiveSocialFeed limit={9} />
+
 
         {/* CTA Section */}
         <motion.div

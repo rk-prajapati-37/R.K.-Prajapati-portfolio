@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClientFixed";
+import PageHeader from "@/components/PageHeader";
 
 function toPlainText(value: any): string {
   if (!value) return "";
@@ -104,20 +105,12 @@ export default function EducationClientFixed({
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-12"
-      >
-        <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">EDUCATION</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-          Academic Background
-        </h1>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          My educational journey and qualifications that shaped my career
-        </p>
-      </motion.div>
+      <PageHeader
+        eyebrow="Education"
+        title="Academic Background"
+        subtitle="My educational journey and qualifications that shaped my career"
+        crumbs={[{ label: "About", href: "/about" }, { label: "Education" }]}
+      />
       <motion.div
         variants={container}
         initial="hidden"

@@ -68,3 +68,8 @@ export default async function Projects({
     />
   );
 }
+
+export const metadata = {
+  title: "Projects",
+  description: "Websites I have designed and built: business sites, landing pages, e-commerce and React web apps.",
+};

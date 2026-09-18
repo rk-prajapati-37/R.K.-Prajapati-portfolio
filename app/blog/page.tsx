@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import HireMeCTA from "@/components/HireMeCTA";
+import PageHeader from "@/components/PageHeader";
 
 type Blog = {
   _id: string;
@@ -79,8 +80,14 @@ export default function BlogPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br py-16">
-        <div className="max-w-6xl mx-auto px-6 md:px-10">
+      <div className="page-wrap">
+        <div className="max-w-6xl mx-auto">
+          <PageHeader
+          eyebrow="Blog"
+          title="Latest Posts"
+          subtitle="Insights, tutorials, and thoughts on web development"
+          crumbs={[{ label: "Blog" }]}
+        />
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading blogs...</p>
@@ -92,8 +99,14 @@ export default function BlogPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br py-16">
-        <div className="max-w-6xl mx-auto px-6 md:px-10">
+      <div className="page-wrap">
+        <div className="max-w-6xl mx-auto">
+          <PageHeader
+          eyebrow="Blog"
+          title="Latest Posts"
+          subtitle="Insights, tutorials, and thoughts on web development"
+          crumbs={[{ label: "Blog" }]}
+        />
           <div className="text-center text-red-600">
             <h1 className="text-2xl font-bold mb-4">Error Loading Blogs</h1>
             <p>{error}</p>
@@ -104,20 +117,14 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-16">
-      <div className="max-w-6xl mx-auto px-6 md:px-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">BLOG</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Latest Posts
-          </h1>
-          <p className="text-gray-600 text-lg">Insights, tutorials, and thoughts on web development</p>
-        </motion.div>
+    <div className="page-wrap">
+      <div className="max-w-6xl mx-auto">
+        <PageHeader
+          eyebrow="Blog"
+          title="Latest Posts"
+          subtitle="Insights, tutorials, and thoughts on web development"
+          crumbs={[{ label: "Blog" }]}
+        />
 
         {blogs.length === 0 ? (
           <div className="text-center py-16">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import PortableTextClient from "./PortableTextClientFixed";
 import HireMeCTA from "./HireMeCTA";
+import PageHeader from "@/components/PageHeader";
 
 type Experience = {
   _id: string;
@@ -117,20 +118,12 @@ export default function ExperienceClient({
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-12"
-      >
-        <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">EXPERIENCE</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
-          Professional Journey
-        </h1>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          A timeline of my career growth and key achievements in web development
-        </p>
-      </motion.div>
+      <PageHeader
+        eyebrow="Experience"
+        title="Professional Journey"
+        subtitle="A timeline of my career growth and key achievements in web development"
+        crumbs={[{ label: "About", href: "/about" }, { label: "Experience" }]}
+      />
       <motion.div
         variants={container}
         initial="hidden"

@@ -14,7 +14,7 @@ try {
     projectId,
     dataset,
     apiVersion: "2023-05-03",
-    useCdn: true, // ✅ CDN ON (IMPORTANT)
+    useCdn: process.env.NODE_ENV === "production", // fresh data in dev, CDN in production
   });
 } catch (error) {
   console.warn(

@@ -4,13 +4,29 @@ import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { sanityServerClient } from '@/lib/sanityServerClient';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaGithub, FaYoutube, FaTiktok, FaWhatsapp } from 'react-icons/fa';
+import PageHeader from '@/components/PageHeader';
+import LiveSocialFeed from '@/components/LiveSocialFeed';
 
 interface FormData {
   name: string;
   email: string;
   mobile: string;
+  projectType: string;
+  budget: string;
   message: string;
 }
+
+const PROJECT_TYPES = [
+  'Business / Company Website',
+  'Landing Page',
+  'E-commerce / Shopify Store',
+  'Portfolio / Personal Brand',
+  'Website Redesign',
+  'Website Maintenance / Fixes',
+  'Other',
+];
+
+const BUDGETS = ['Under ₹10,000', '₹10,000 – ₹25,000', '₹25,000 – ₹50,000', '₹50,000+', 'Not sure yet'];
 
 interface SocialMedia {
   _id: string;
@@ -55,9 +71,22 @@ export default function ContactAndSocial() {
     name: '',
     email: '',
     mobile: '',
+    projectType: '',
+    budget: '',
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // /contact?type=quote -> jump straight to the form
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const type = new URLSearchParams(window.location.search).get('type');
+    if (type === 'quote') {
+      setFormData(prev => ({ ...prev, message: prev.message || 'Hi Rohit, I would like a quote for my website. Here are the details: ' }));
+      setTimeout(() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+    }
+  }, []);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -75,7 +104,7 @@ export default function ContactAndSocial() {
     fetchSocialLinks();
   }, []);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -86,7 +115,8 @@ export default function ContactAndSocial() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
+    setErrorMsg(null);
+
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -98,35 +128,31 @@ export default function ContactAndSocial() {
 
       if (response.ok) {
         setSubmitted(true);
-        setFormData({ name: '', email: '', mobile: '', message: '' });
-        
-        setTimeout(() => setSubmitted(false), 3000);
+        setFormData({ name: '', email: '', mobile: '', projectType: '', budget: '', message: '' });
+
+        setTimeout(() => setSubmitted(false), 6000);
       } else {
-        console.error('Error submitting form');
+        const data = await response.json().catch(() => ({}));
+        setErrorMsg(data?.error || 'Something went wrong. Please try again or message me on WhatsApp.');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
+      setErrorMsg('Network error. Please try again or message me on WhatsApp.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen  from-white via-gray-50 to-gray-100 py-6 px-6 md:px-10">
+    <div className="page-wrap">
       <div className="max-w-6xl mx-auto">
         
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-8"
-        >
-          <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">CONTACT</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-            GET IN TOUCH
-          </h1>
-        </motion.div>
+        <PageHeader
+          eyebrow="Contact"
+          title="Get in Touch"
+          subtitle="Tell me about your project and I will reply with a quote and timeline."
+          crumbs={[{ label: "Contact" }]}
+        />
 
         {/* Contact Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -143,7 +169,7 @@ export default function ContactAndSocial() {
               </svg>
             </div>
             <h4 className="font-semibold text-gray-800 mb-1">Phone</h4>
-            <p className="text-sm text-gray-600">+91 8082 06 8480</p>
+            <a href="tel:+918082068480" className="text-sm text-gray-600 hover:text-red-600 transition-colors">+91 80820 68480</a>
           </motion.div>
 
           {/* Email Card */}
@@ -160,7 +186,7 @@ export default function ContactAndSocial() {
               </svg>
             </div>
             <h4 className="font-semibold text-gray-800 mb-1">Email</h4>
-            <p className="text-sm text-gray-600">r.k.prajapati0307@gmail.com</p>
+            <a href="mailto:r.k.prajapati0307@gmail.com" className="text-sm text-gray-600 hover:text-red-600 transition-colors break-all">r.k.prajapati0307@gmail.com</a>
           </motion.div>
 
           {/* Address Card */}
@@ -176,8 +202,9 @@ export default function ContactAndSocial() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21s8-4.5 8-10.5A8 8 0 004 10.5C4 16.5 12 21 12 21z" />
               </svg>
             </div>
-            <h4 className="font-semibold text-gray-800 mb-1">Address</h4>
-            <p className="text-sm text-gray-600 text-center">Siddhivinayak Chawl, Sabe Gaon, Diva (E) - 400612</p>
+            <h4 className="font-semibold text-gray-800 mb-1">Location</h4>
+            <p className="text-sm text-gray-600 text-center">Mumbai, Maharashtra, India</p>
+            <p className="text-xs text-gray-500 mt-1">Available for remote work worldwide</p>
           </motion.div>
         </div>
 
@@ -227,8 +254,18 @@ export default function ContactAndSocial() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="bg-white rounded-2xl shadow-lg p-8 md:p-12"
+          className="bg-white rounded-2xl shadow-lg p-8 md:p-12 scroll-mt-28"
+          id="contact-form"
         >
+          <h2 className="text-2xl font-bold text-gray-800 mb-1">Tell me about your project</h2>
+          <p className="text-sm text-gray-500 mb-6">Fill this in and I will reply with a rough quote and timeline, usually within a few hours.</p>
+
+          {errorMsg && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg" role="alert">
+              {errorMsg}
+            </div>
+          )}
+
           {submitted && (
             <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg animate-pulse">
               ✅ Thank you! Your message has been received. I'll get back to you soon!
@@ -277,6 +314,39 @@ export default function ContactAndSocial() {
               />
             </div>
 
+            {/* Project type + budget */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">What do you need?</label>
+                <select
+                  name="projectType"
+                  value={formData.projectType}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600 transition text-gray-800"
+                >
+                  <option value="">Select project type</option>
+                  {PROJECT_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Approximate budget</label>
+                <select
+                  name="budget"
+                  value={formData.budget}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600 transition text-gray-800"
+                >
+                  <option value="">Select budget (optional)</option>
+                  {BUDGETS.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Message */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Message</label>
@@ -285,7 +355,7 @@ export default function ContactAndSocial() {
                 value={formData.message}
                 onChange={handleInputChange}
                 required
-                placeholder="Message"
+                placeholder="Tell me about your business, what the website should do, and any deadline."
                 rows={6}
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:border-red-600 focus:outline-none focus:ring-1 focus:ring-red-600 transition text-gray-800 placeholder-gray-400 resize-none"
               />
@@ -304,6 +374,10 @@ export default function ContactAndSocial() {
           </form>
         </motion.div>
 
+        {/* Latest posts from my channels */}
+        <div className="mt-20">
+          <LiveSocialFeed limit={6} />
+        </div>
       </div>
     </div>
   );

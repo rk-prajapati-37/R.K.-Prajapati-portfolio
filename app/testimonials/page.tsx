@@ -31,3 +31,8 @@ export default async function Testimonials() {
 
   return <TestimonialsSliderClient testimonials={testimonials} error={error} />;
 }
+
+export const metadata = {
+  title: "Testimonials",
+  description: "What clients say about working with R.K. Prajapati on their websites.",
+};

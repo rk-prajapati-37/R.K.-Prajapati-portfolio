@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import ProjectCardClient from "./ProjectCardClient";
+import PageHeader from "@/components/PageHeader";
 
 type Project = {
   _id: string;
@@ -63,22 +64,14 @@ export default function ProjectsGridClient({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-16 flex items-center justify-center px-6 md:px-10">
-      <div className="max-w-6xl w-full">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <p className="font-semibold text-lg mb-2 text-red-600 uppercase tracking-wide">PROJECTS</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-            My Work
-          </h1>
-          <p className="text-gray-600 text-lg mt-2">
-            Explore my portfolio of web development and design work
-          </p>
-        </motion.div>
+    <div className="page-wrap">
+      <div className="max-w-6xl w-full mx-auto">
+        <PageHeader
+          eyebrow="Projects"
+          title="My Work"
+          subtitle="Explore my portfolio of web development and design work"
+          crumbs={[{ label: "Projects" }]}
+        />
 
         {/* Category Filter */}
         {allCategories.length > 0 && (

@@ -1,155 +1,174 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { FaWhatsapp } from "react-icons/fa";
 import AnimatedLogo from "./AnimatedLogo";
 import ThemeToggle from "./ThemeToggle";
+import ScrollProgress from "./motion/ScrollProgress";
+import { WHATSAPP_QUOTE_URL } from "@/lib/contactLinks";
+
+/**
+ * Simple, client-focused navigation:
+ * Home · Services · Work · About · Blog · Contact · [Get a Quote]
+ * Sub-pages (experience, skills, education, certificates, testimonials, social)
+ * still exist and are reachable from About / Contact, but are not in the menu.
+ */
+const LINKS = [
+  { href: "/", label: "Home", match: (p) => p === "/" },
+  { href: "/services", label: "Services", match: (p) => p.startsWith("/services") },
+  { href: "/projects", label: "Work", match: (p) => p.startsWith("/projects") },
+  {
+    href: "/about",
+    label: "About",
+    match: (p) => ["/about", "/experience", "/skills", "/education", "/certificates", "/testimonials"].some((r) => p.startsWith(r)),
+  },
+  { href: "/blog", label: "Blog", match: (p) => p.startsWith("/blog") },
+  { href: "/contact", label: "Contact", match: (p) => p.startsWith("/contact") || p.startsWith("/social") },
+];
+
+function NavLink({ href, active, children }) {
+  return (
+    <Link
+      href={href}
+      className={`relative px-3 py-1.5 rounded-full font-semibold transition hover:no-underline inline-block ${
+        active ? "!text-white" : "text-gray-700 border border-gray-200 hover:border-red-500"
+      }`}
+      style={active ? undefined : { background: "var(--surface)" }}
+    >
+      {active && (
+        <motion.span
+          layoutId="nav-active-pill"
+          className="absolute inset-0 rounded-full bg-gradient-to-r from-red-600 to-red-500 shadow-lg"
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+        />
+      )}
+      <span className="relative z-10">{children}</span>
+    </Link>
+  );
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
-  const aboutRef = useRef(null);
-  const contactRef = useRef(null);
-  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname() || "/";
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // close the mobile menu on navigation
+  useEffect(() => setOpen(false), [pathname]);
 
   return (
-    <nav
-      className="fixed top-0 left-0 w-full h-[96px] shadow-md z-50"
-      style={{ background: "var(--surface)", color: "var(--text)" }}
+    <motion.nav
+      className="fixed top-0 left-0 w-full z-50"
+      animate={{
+        height: scrolled ? 72 : 96,
+        boxShadow: scrolled ? "0 8px 30px rgba(2,6,23,0.12)" : "0 2px 8px rgba(2,6,23,0.06)",
+      }}
+      transition={{ type: "spring", stiffness: 260, damping: 30 }}
+      style={{
+        color: "var(--text)",
+        background: scrolled ? "color-mix(in srgb, var(--surface) 78%, transparent)" : "var(--surface)",
+        backdropFilter: scrolled ? "blur(14px) saturate(160%)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(14px) saturate(160%)" : "none",
+        borderBottom: "1px solid var(--card-border)",
+      }}
     >
-      <div className="site-container flex justify-between items-center h-[96px]">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3">
+      <ScrollProgress />
+      <div className="site-container flex justify-between items-center h-full !py-0">
+        <Link href="/" className="flex items-center gap-3" aria-label="R.K Prajapati – Home">
+          <motion.div animate={{ scale: scrolled ? 0.8 : 1 }} transition={{ type: "spring", stiffness: 260, damping: 26 }}>
             <AnimatedLogo />
-            <div className="hidden sm:flex flex-col font-semibold">
-               <span className="text-base border-b border-gray-300 ">R.K Prajapati</span>
-              <span className="text-[var(--muted)] text-sm ">Web Designer &amp; Developer</span>
-            </div>
-          </Link>
-          {/* desktop: theme toggle removed — icon stays after mobile menu button */}
-        </div>
+          </motion.div>
+          <div className="hidden sm:flex flex-col font-semibold">
+            <span className="text-base">R.K Prajapati</span>
+            <span className="text-[var(--muted)] text-xs hidden lg:block">Web Designer &amp; Developer</span>
+          </div>
+        </Link>
+
+        {/* desktop */}
         <div className="hidden md:flex gap-2 items-center">
-          <Link href="/" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Home</Link>
-
-          {/* About dropdown (hover + focus) */}
-          <div
-            className="relative"
-            ref={aboutRef}
-            onMouseEnter={() => setAboutOpen(true)}
-            onMouseLeave={() => setAboutOpen(false)}
-            onFocus={() => setAboutOpen(true)}
-            onBlur={(e) => {
-              const related = e.relatedTarget;
-              if (!aboutRef.current) return;
-              if (related && aboutRef.current.contains(related)) return;
-              setAboutOpen(false);
-            }}
+          {LINKS.map((l) => (
+            <NavLink key={l.href} href={l.href} active={l.match(pathname)}>
+              {l.label}
+            </NavLink>
+          ))}
+          <motion.a
+            href={WHATSAPP_QUOTE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-shine ml-1 inline-flex items-center gap-2 bg-green-600 !text-white px-4 py-2 rounded-full hover:bg-green-700 transition font-semibold shadow-lg hover:no-underline"
+            whileHover={{ scale: 1.06, y: -1 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Link href="/about" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/about' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>About</Link>
-            <div className={`absolute right-0 mt-2 w-56 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg ${aboutOpen ? 'block' : 'hidden'}`}>
-              <div className="py-4 space-y-2">
-                <Link href="/experience" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/experience' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Experience</Link>
-                <Link href="/skills" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/skills' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Skills</Link>
-                <Link href="/education" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/education' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Education</Link>
-                <Link href="/certificates" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/certificates' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Certificates</Link>
-              </div>
-            </div>
-          </div>
-
-          <Link href="/projects" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/projects' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Projects</Link>
-          <Link href="/blog" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/blog' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Blog</Link>
-          <Link href="/testimonials" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/testimonials' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Testimonials</Link>
-          
-          {/* Contact dropdown with Social option */}
-          <div
-            className="relative"
-            ref={contactRef}
-            onMouseEnter={() => setContactOpen(true)}
-            onMouseLeave={() => setContactOpen(false)}
-            onFocus={() => setContactOpen(true)}
-            onBlur={(e) => {
-              const related = e.relatedTarget;
-              if (!contactRef.current) return;
-              if (related && contactRef.current.contains(related)) return;
-              setContactOpen(false);
-            }}
-          >
-            <Link href="/contact" className={`px-3 py-1.5 rounded-full font-semibold transition hover:no-underline ${pathname === '/contact' || pathname === '/social' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>Contact</Link>
-            <div className={`absolute right-0 mt-2 w-56 bg-[var(--surface)] text-[var(--text)] rounded-md shadow-lg ${contactOpen ? 'block' : 'hidden'}`}>
-              <div className="py-4 space-y-2">
-                <Link href="/social" className={`block px-3 py-1.5 rounded-full font-semibold transition hover:no-underline text-center ${pathname === '/social' ? "bg-gradient-to-r from-red-600 to-red-500 !text-white shadow-lg" : "bg-white text-gray-700 border border-gray-200 hover:border-red-500"}`}>🔗 Social Media</Link>
-              </div>
-            </div>
-          </div>
-          <a
-            href="/RohitPrajapatiCV.pdf"
-            download="Rohit-Prajapati-Resume.pdf"
-            className="bg-gradient-to-r from-red-600 to-red-500 !text-white px-3 py-1.5 rounded-full hover:from-red-700 hover:to-red-600 transition font-semibold shadow-lg hover:no-underline"
-          >
-            📄 Resume
-          </a>
+            <FaWhatsapp aria-hidden /> Get a Quote
+          </motion.a>
           <ThemeToggle />
         </div>
 
+        {/* mobile controls */}
         <div className="flex items-center gap-2 md:hidden">
           <button
             aria-label="Toggle menu"
-            className="md:hidden p-2 rounded-md focus:outline-none focus:ring-2"
-            style={{ color: 'var(--text)' }}
+            aria-expanded={open}
+            className="p-2 rounded-md focus:outline-none focus:ring-2 relative w-10 h-10"
+            style={{ color: "var(--text)" }}
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
+            <motion.span className="absolute left-2 right-2 h-[2px] bg-current rounded" animate={open ? { rotate: 45, y: 0 } : { rotate: 0, y: -6 }} style={{ top: "50%" }} transition={{ duration: 0.25 }} />
+            <motion.span className="absolute left-2 right-2 h-[2px] bg-current rounded" animate={open ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }} style={{ top: "50%" }} transition={{ duration: 0.2 }} />
+            <motion.span className="absolute left-2 right-2 h-[2px] bg-current rounded" animate={open ? { rotate: -45, y: 0 } : { rotate: 0, y: 6 }} style={{ top: "50%" }} transition={{ duration: 0.25 }} />
           </button>
-          {/* mobile theme icon placed after the menu button */}
-          <div className="ml-2">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
       </div>
 
-      <div className={`${open ? "block" : "hidden"} md:hidden`}>
-        <div className="px-4 py-4 space-y-3" style={{ background: 'var(--surface)', color: 'var(--text)' }}>
-          <Link href="/" onClick={() => setOpen(false)} className="block">Home</Link>
-
-          {/* mobile About submenu */}
-          <div className="pt-2">
-            <div className="font-medium">About</div>
-            <Link href="/about" onClick={() => setOpen(false)} className="block pl-3 py-1">About (overview)</Link>
-            <Link href="/experience" onClick={() => setOpen(false)} className="block pl-3 py-1">Experience</Link>
-            <Link href="/skills" onClick={() => setOpen(false)} className="block pl-3 py-1">Skills</Link>
-            <Link href="/education" onClick={() => setOpen(false)} className="block pl-3 py-1">Education</Link>
-            <Link href="/certificates" onClick={() => setOpen(false)} className="block pl-3 py-1">Certificates</Link>
-          </div>
-
-          <Link href="/projects" onClick={() => setOpen(false)} className="block">Projects</Link>
-          <Link href="/blog" onClick={() => setOpen(false)} className="block">Blog</Link>
-          <Link href="/testimonials" onClick={() => setOpen(false)} className="block">Testimonials</Link>
-          
-          {/* Mobile Contact submenu - Social only */}
-          <div className="pt-2">
-            <div className="font-medium">Contact</div>
-            <Link href="/social" onClick={() => setOpen(false)} className="block pl-3 py-1">🔗 Social Media</Link>
-          </div>
-          
-          <a
-            href="/RohitPrajapatiCV.pdf"
-            download="Rohit-Prajapati-Resume.pdf"
-            onClick={() => setOpen(false)}
-            className="block bg-red-600 text-white px-4 py-2 rounded-full text-center hover:bg-red-700 transition font-medium"
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="md:hidden overflow-hidden shadow-xl"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            style={{ background: "var(--surface)", color: "var(--text)", borderTop: "1px solid var(--card-border)" }}
           >
-            📄 Download Resume
-          </a>
-        </div>
-      </div>
-    </nav>
+            <motion.div
+              className="px-4 py-4 space-y-2"
+              initial="hidden"
+              animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } } }}
+            >
+              {LINKS.map((l) => (
+                <motion.div key={l.href} variants={{ hidden: { opacity: 0, x: -12 }, show: { opacity: 1, x: 0 } }}>
+                  <Link
+                    href={l.href}
+                    className={`block py-2 px-3 rounded-lg font-medium ${l.match(pathname) ? "text-red-600 bg-red-50" : ""}`}
+                  >
+                    {l.label}
+                  </Link>
+                </motion.div>
+              ))}
+              <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="pt-2">
+                <a
+                  href={WHATSAPP_QUOTE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-green-600 !text-white px-4 py-3 rounded-full text-center hover:bg-green-700 transition font-semibold"
+                >
+                  <FaWhatsapp aria-hidden /> Get a Free Quote on WhatsApp
+                </a>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
   );
 }
