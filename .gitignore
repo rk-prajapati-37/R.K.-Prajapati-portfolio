@@ -47,3 +47,6 @@ next-env.d.ts
 tmp-capture/
 # generated site videos
 site-videos/
+
+.vercel
+.env*

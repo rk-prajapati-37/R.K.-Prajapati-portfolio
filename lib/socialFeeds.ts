@@ -39,36 +39,90 @@ const tag = (xml: string, name: string) => {
   return m ? decode(m[1]) : undefined;
 };
 
-/* ---------------- YouTube (RSS, free) ---------------- */
-export async function getYouTubeVideos(limit = 12): Promise<FeedPost[]> {
+/* ---------------- YouTube ----------------
+ * Preferred: YouTube Data API v3 (set YOUTUBE_API_KEY) — works reliably from any
+ * server, including Vercel serverless functions.
+ * Fallback: public RSS feed (no key needed) — but YouTube blocks/404s this from
+ * many cloud/datacenter IPs (including Vercel's), so it's not reliable in production.
+ */
+async function getYouTubeVideosViaApi(limit: number): Promise<FeedPost[]> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
   const channelId = process.env.YOUTUBE_CHANNEL_ID;
-  const playlistId = process.env.YOUTUBE_PLAYLIST_ID; // optional: only show videos from this playlist (e.g. "Website Design Portfolio")
-  if (!channelId && !playlistId) return [];
-  try {
-    const feedUrl = playlistId
-      ? `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
-      : `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
-    const res = await fetch(feedUrl, {
-      next: { revalidate: REVALIDATE_SECONDS },
-      headers: { "User-Agent": "Mozilla/5.0 (portfolio feed)" },
-    });
-    if (!res.ok) throw new Error(`YouTube RSS ${res.status}`);
-    const xml = await res.text();
-    const entries = xml.split("<entry>").slice(1);
-    return entries.slice(0, limit).map((e) => {
-      const videoId = tag(e, "yt:videoId") || "";
-      const thumb = e.match(/<media:thumbnail url="([^"]+)"/)?.[1];
+  let playlistId = process.env.YOUTUBE_PLAYLIST_ID;
+  if (!apiKey || (!channelId && !playlistId)) return [];
+
+  const opts = { next: { revalidate: REVALIDATE_SECONDS } };
+
+  if (!playlistId) {
+    // Resolve the channel's "uploads" playlist (1 quota unit) so we only ever need playlistItems.list.
+    const chRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`,
+      opts
+    );
+    if (!chRes.ok) throw new Error(`YouTube API channels ${chRes.status}: ${await chRes.text()}`);
+    const chJson = await chRes.json();
+    playlistId = chJson.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+    if (!playlistId) return [];
+  }
+
+  const res = await fetch(
+    `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${limit}&playlistId=${playlistId}&key=${apiKey}`,
+    opts
+  );
+  if (!res.ok) throw new Error(`YouTube API playlistItems ${res.status}: ${await res.text()}`);
+  const json = await res.json();
+  return (json.items || [])
+    .filter((it: any) => it.snippet?.resourceId?.videoId)
+    .map((it: any) => {
+      const videoId = it.snippet.resourceId.videoId;
+      const thumb = it.snippet.thumbnails?.high?.url || it.snippet.thumbnails?.default?.url;
       return {
         id: `yt-${videoId}`,
-        platform: "youtube",
-        title: tag(e, "title"),
-        text: tag(e, "media:description"),
+        platform: "youtube" as const,
+        title: it.snippet.title,
+        text: it.snippet.description,
         image: thumb || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
         url: `https://www.youtube.com/watch?v=${videoId}`,
-        date: tag(e, "published") || new Date().toISOString(),
+        date: it.snippet.publishedAt || new Date().toISOString(),
         isVideo: true,
       };
     });
+}
+
+async function getYouTubeVideosViaRss(limit: number): Promise<FeedPost[]> {
+  const channelId = process.env.YOUTUBE_CHANNEL_ID;
+  const playlistId = process.env.YOUTUBE_PLAYLIST_ID;
+  if (!channelId && !playlistId) return [];
+  const feedUrl = playlistId
+    ? `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
+    : `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+  const res = await fetch(feedUrl, {
+    next: { revalidate: REVALIDATE_SECONDS },
+    headers: { "User-Agent": "Mozilla/5.0 (portfolio feed)" },
+  });
+  if (!res.ok) throw new Error(`YouTube RSS ${res.status}`);
+  const xml = await res.text();
+  const entries = xml.split("<entry>").slice(1);
+  return entries.slice(0, limit).map((e) => {
+    const videoId = tag(e, "yt:videoId") || "";
+    const thumb = e.match(/<media:thumbnail url="([^"]+)"/)?.[1];
+    return {
+      id: `yt-${videoId}`,
+      platform: "youtube",
+      title: tag(e, "title"),
+      text: tag(e, "media:description"),
+      image: thumb || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      url: `https://www.youtube.com/watch?v=${videoId}`,
+      date: tag(e, "published") || new Date().toISOString(),
+      isVideo: true,
+    };
+  });
+}
+
+export async function getYouTubeVideos(limit = 12): Promise<FeedPost[]> {
+  try {
+    if (process.env.YOUTUBE_API_KEY) return await getYouTubeVideosViaApi(limit);
+    return await getYouTubeVideosViaRss(limit);
   } catch (err) {
     console.error("YouTube feed failed:", err);
     return [];
