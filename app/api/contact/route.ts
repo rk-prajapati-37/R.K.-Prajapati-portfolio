@@ -13,7 +13,12 @@ import { sanityServerClient } from '@/lib/sanityServer';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, mobile, message, projectType = '', budget = '' } = body;
+    const { name, email, mobile, message, projectType = '', budget = '', honeypot } = body;
+
+    // Bot filled the hidden honeypot field: pretend success, do nothing further.
+    if (honeypot) {
+      return new Response(JSON.stringify({ success: true }), { status: 200 });
+    }
 
     // Check if simplified mode is requested (optional query param)
     const url = new URL(req.url);

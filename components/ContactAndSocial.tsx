@@ -75,6 +75,7 @@ export default function ContactAndSocial() {
     budget: '',
     message: ''
   });
+  const [honeypot, setHoneypot] = useState(''); // hidden field: real users never fill this, bots often do
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -114,6 +115,15 @@ export default function ContactAndSocial() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (honeypot) {
+      // Bot filled the hidden field: pretend success, don't actually submit.
+      setSubmitted(true);
+      setFormData({ name: '', email: '', mobile: '', projectType: '', budget: '', message: '' });
+      setTimeout(() => setSubmitted(false), 6000);
+      return;
+    }
+
     setLoading(true);
     setErrorMsg(null);
 
@@ -123,7 +133,7 @@ export default function ContactAndSocial() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, honeypot })
       });
 
       if (response.ok) {
@@ -285,6 +295,18 @@ export default function ContactAndSocial() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Honeypot: hidden from real visitors, bots often auto-fill every field */}
+            <input
+              type="text"
+              name="company"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+            />
+
             {/* Name and Email Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
