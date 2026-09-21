@@ -116,6 +116,21 @@ export async function POST(req: NextRequest) {
       console.error("⚠️ Sanity save failed:", sanityErr?.message);
     }
 
+    // ========== SAVE TO GOOGLE SHEET (best-effort, never blocks the response) ==========
+    const sheetsWebhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+    if (sheetsWebhookUrl) {
+      try {
+        await fetch(sheetsWebhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, mobile, projectType, budget, message, createdAt: new Date().toISOString() }),
+        });
+        console.log("✅ Contact synced to Google Sheet");
+      } catch (sheetErr: any) {
+        console.error("⚠️ Google Sheet sync failed:", sheetErr?.message);
+      }
+    }
+
     // ========== SAVE TO DATABASE (Direct MongoDB with Connection Pool) ==========
     let dbSaveSuccess = false;
     const mongoUri = process.env.MONGODB_URI;
