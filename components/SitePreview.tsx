@@ -29,7 +29,7 @@ function panSeconds(url: string | undefined, frameRatio: number) {
   if (!d) return 6;
   const frames = d.h / d.w / frameRatio - 1; // how many extra "screens" of content
   if (frames <= 0.05) return 0;
-  return Math.min(16, Math.max(3, frames * 1.5));
+  return Math.min(60, Math.max(9, frames * 5));
 }
 
 function ScrollImage({ src, alt, seconds, enabled }: { src: string; alt: string; seconds: number; enabled: boolean }) {
