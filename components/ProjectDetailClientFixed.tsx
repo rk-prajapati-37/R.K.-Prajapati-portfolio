@@ -6,6 +6,7 @@ import Link from "next/link";
 import PortableTextClient, { toPlainText } from "./PortableTextClientFixed";
 import ProjectSocialLinks from "./ProjectSocialLinks";
 import HireMeCTA from "./HireMeCTA";
+import SitePreview, { type PreviewPage } from "./SitePreview";
 import { useRouter } from "next/navigation";
 
 type SocialLink = {
@@ -23,6 +24,7 @@ type Project = {
   category?: string[] | string;
   imageUrl?: string;
   extraImages?: string[];
+  pages?: PreviewPage[];
   video?: string;
   date?: string;
   clientName?: string;
@@ -336,6 +338,10 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
                 ></iframe>
               </div>
             </div>
+          )}
+
+          {project.pages && project.pages.length > 0 && (
+            <SitePreview pages={project.pages} demo={project.demo} title={project.title} />
           )}
 
           {project.extraImages && project.extraImages.length > 0 && (

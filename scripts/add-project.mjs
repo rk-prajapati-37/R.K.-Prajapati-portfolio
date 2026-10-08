@@ -8,6 +8,9 @@
  * Hero is a video/slider that captures blank? Take the main image from lower on the page:
  *   npm run add-project -- https://client-site.com --hero-offset 800     (pixels from the top)
  *
+ * Add another page of an existing site to its "Website Preview" (desktop + mobile, hover-scroll):
+ *   npm run add-project -- https://client-site.com/about --demo https://client-site.com --page About
+ *
  * If the project already exists in Sanity (same Live Demo URL), your title/description are KEPT and
  * only the new screenshots are added. Use --overwrite to replace the text as well.
  *
@@ -36,7 +39,7 @@ const flag = (name) => {
 const has = (name) => args.includes(`--${name}`);
 
 if (!url) {
-  console.error("Usage: npm run add-project -- <url> [--client NAME] [--category CAT] [--date 2024] [--title T] [--tech \"WordPress,Elementor\"] [--demo URL] [--dry-run] [--overwrite] [--hero-offset 800]");
+  console.error("Usage: npm run add-project -- <url> [--client NAME] [--category CAT] [--date 2024] [--title T] [--tech \"WordPress,Elementor\"] [--demo URL] [--dry-run] [--overwrite] [--hero-offset 800] [--page \"About\"]");
   process.exit(1);
 }
 
@@ -53,6 +56,7 @@ try {
     dryRun,
     overwrite: has("overwrite"),
     heroOffset: flag("hero-offset"),
+    pageName: flag("page"),
     log: (m) => console.log("•", m),
   });
 

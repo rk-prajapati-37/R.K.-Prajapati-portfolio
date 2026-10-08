@@ -42,6 +42,7 @@ type Project = {
   category?: string[];
   imageUrl?: string;
   extraImages?: string[];
+  pages?: { _key?: string; pageName?: string; description?: string; desktopUrl?: string; mobileUrl?: string }[];
   video?: string;
   date?: string;
   clientName?: string;
@@ -72,6 +73,7 @@ export default async function ProjectDetail({
         clientName, date, video, clientProblem, solution, results,
         "imageUrl": image.asset->url,
         "extraImages": extraImages[].asset->url,
+        "pages": pages[]{ _key, pageName, description, "desktopUrl": desktopImage.asset->url, "mobileUrl": mobileImage.asset->url },
         socialLinks[] {
           platform,
           url
