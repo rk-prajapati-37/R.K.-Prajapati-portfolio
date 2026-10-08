@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { FaDesktop, FaMobileAlt } from "react-icons/fa";
 
@@ -13,14 +13,22 @@ export type PreviewPage = {
 };
 
 type Device = "desktop" | "mobile";
+type Item = { key: string; name: string; description?: string; desktopUrl?: string; mobileUrl?: string };
 
 const DESKTOP_RATIO = 10 / 16; // frame height / width
 const MOBILE_RATIO = 19 / 9;
+// screenshots the capture tool added to "Extra Images" before the Website Preview field existed
+const AUTO_CAPTURED_KEY = /^(mobile|full|desktop)(-\d{4}-\d{2}-\d{2})?$/;
 
 // Sanity image URLs end with -<width>x<height>.<ext>
 function dims(url?: string) {
   const m = url?.match(/-(\d+)x(\d+)\.[a-z]+(?:\?|$)/i);
   return m ? { w: Number(m[1]), h: Number(m[2]) } : null;
+}
+
+function isMobileShot(url?: string) {
+  const d = dims(url);
+  return !!d && d.w <= 900 && d.h / d.w >= 1.5;
 }
 
 // how long the scroll from top to bottom should take (longer pages scroll for longer)
@@ -37,7 +45,7 @@ function ScrollImage({ src, alt, seconds, enabled }: { src: string; alt: string;
   const canPan = enabled && seconds > 0;
   return (
     <div
-      className="absolute inset-0 cursor-ns-resize"
+      className={`absolute inset-0 ${canPan ? "cursor-ns-resize" : ""}`}
       onMouseEnter={() => canPan && setActive(true)}
       onMouseLeave={() => setActive(false)}
       onClick={() => canPan && setActive((v) => !v)} // tap on touch screens
@@ -66,26 +74,60 @@ function hostOf(url?: string) {
   }
 }
 
-export default function SitePreview({ pages, demo, title }: { pages: PreviewPage[]; demo?: string; title?: string }) {
+export default function SitePreview({
+  pages,
+  extras,
+  demo,
+  title,
+}: {
+  pages?: PreviewPage[];
+  extras?: { _key?: string; url?: string }[];
+  demo?: string;
+  title?: string;
+}) {
   const reduce = useReducedMotion();
-  const usable = useMemo(() => (pages || []).filter((p) => p.desktopUrl || p.mobileUrl), [pages]);
-  const [pageIdx, setPageIdx] = useState(0);
-  const page = usable[Math.min(pageIdx, usable.length - 1)];
-  const [device, setDevice] = useState<Device>(page?.desktopUrl ? "desktop" : "mobile");
+  const frameRef = useRef<HTMLDivElement | null>(null);
 
-  // keep the device valid when switching pages that only have one view
+  const items: Item[] = useMemo(() => {
+    const out: Item[] = (pages || [])
+      .filter((p) => p.desktopUrl || p.mobileUrl)
+      .map((p, i) => ({ key: p._key || `page-${i}`, name: p.pageName || `Page ${i + 1}`, description: p.description, desktopUrl: p.desktopUrl, mobileUrl: p.mobileUrl }));
+    let n = 0;
+    for (const e of extras || []) {
+      if (!e.url || (e._key && AUTO_CAPTURED_KEY.test(e._key))) continue;
+      n += 1;
+      out.push({
+        key: `extra-${e._key || n}`,
+        name: `Screen ${n}`,
+        desktopUrl: isMobileShot(e.url) ? undefined : e.url,
+        mobileUrl: isMobileShot(e.url) ? e.url : undefined,
+      });
+    }
+    return out;
+  }, [pages, extras]);
+
+  const [sel, setSel] = useState(0);
+  const item = items[Math.min(sel, items.length - 1)];
+  const [device, setDevice] = useState<Device>(item?.desktopUrl ? "desktop" : "mobile");
+
+  // keep the device valid when switching to an item that only has one view
   useEffect(() => {
-    if (!page) return;
-    if (device === "desktop" && !page.desktopUrl) setDevice("mobile");
-    if (device === "mobile" && !page.mobileUrl) setDevice("desktop");
-  }, [page, device]);
+    if (!item) return;
+    if (device === "desktop" && !item.desktopUrl) setDevice("mobile");
+    if (device === "mobile" && !item.mobileUrl) setDevice("desktop");
+  }, [item, device]);
 
-  if (!usable.length || !page) return null;
+  if (!items.length || !item) return null;
 
-  const hasBoth = !!page.desktopUrl && !!page.mobileUrl;
-  const src = device === "desktop" ? page.desktopUrl! : page.mobileUrl!;
+  const hasBoth = !!item.desktopUrl && !!item.mobileUrl;
+  const src = device === "desktop" ? item.desktopUrl! : item.mobileUrl!;
   const seconds = panSeconds(src, device === "desktop" ? DESKTOP_RATIO : MOBILE_RATIO);
   const host = hostOf(demo);
+
+  const choose = (i: number) => {
+    setSel(i);
+    frameRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   return (
     <section className="mb-10" aria-label="Website preview">
@@ -123,28 +165,10 @@ export default function SitePreview({ pages, demo, title }: { pages: PreviewPage
         )}
       </div>
 
-      {usable.length > 1 && (
-        <div className="flex flex-wrap gap-2 mb-5" role="tablist" aria-label="Pages">
-          {usable.map((p, i) => (
-            <button
-              key={p._key || i}
-              role="tab"
-              aria-selected={i === pageIdx}
-              onClick={() => setPageIdx(i)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                i === pageIdx ? "bg-red-50 border-red-300 text-red-600" : "border-gray-200 text-gray-600 hover:border-red-300 hover:text-red-600"
-              }`}
-            >
-              {p.pageName || `Page ${i + 1}`}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="rounded-2xl bg-gradient-to-br from-red-50 via-gray-50 to-orange-50 p-4 sm:p-8">
+      <div ref={frameRef} className="rounded-2xl bg-gradient-to-br from-red-50 via-gray-50 to-orange-50 p-4 sm:p-8 scroll-mt-28">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={`${page._key || pageIdx}-${device}`}
+            key={`${item.key}-${device}`}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -163,22 +187,58 @@ export default function SitePreview({ pages, demo, title }: { pages: PreviewPage
                   <div className="flex-1 truncate rounded-md bg-white px-3 py-1 text-xs text-gray-500 text-center">{host || title || "website"}</div>
                 </div>
                 <div className="relative w-full overflow-hidden bg-white" style={{ aspectRatio: "16 / 10" }}>
-                  <ScrollImage src={src} alt={`${title || "Website"} – ${page.pageName || "page"} (desktop)`} seconds={seconds} enabled={!reduce} />
+                  <ScrollImage src={src} alt={`${title || "Website"} – ${item.name} (desktop)`} seconds={seconds} enabled={!reduce} />
                 </div>
               </div>
             ) : (
               <div className="relative rounded-[2.6rem] bg-gray-900 p-2.5 shadow-2xl ring-1 ring-black/20">
                 <span className="absolute top-3.5 left-1/2 -translate-x-1/2 z-10 h-1.5 w-16 rounded-full bg-gray-700" />
                 <div className="relative w-full overflow-hidden rounded-[2.1rem] bg-white" style={{ aspectRatio: "9 / 19" }}>
-                  <ScrollImage src={src} alt={`${title || "Website"} – ${page.pageName || "page"} (mobile)`} seconds={seconds} enabled={!reduce} />
+                  <ScrollImage src={src} alt={`${title || "Website"} – ${item.name} (mobile)`} seconds={seconds} enabled={!reduce} />
                 </div>
               </div>
             )}
           </motion.div>
         </AnimatePresence>
 
-        {page.description && <p className="mx-auto mt-6 max-w-2xl text-center text-gray-600">{page.description}</p>}
+        <p className="mt-5 text-center text-sm font-semibold text-gray-700">{item.name}</p>
+        {item.description && <p className="mx-auto mt-1 max-w-2xl text-center text-gray-600">{item.description}</p>}
       </div>
+
+      {items.length > 1 && (
+        <div className="mt-6">
+          <p className="text-sm text-gray-500 mb-3">Click a page to preview it above</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {items.map((it, i) => {
+              const thumb = it.desktopUrl || it.mobileUrl!;
+              const selected = i === sel;
+              return (
+                <motion.button
+                  key={it.key}
+                  type="button"
+                  onClick={() => choose(i)}
+                  whileHover={{ y: -3 }}
+                  aria-pressed={selected}
+                  className={`text-left rounded-xl overflow-hidden bg-white shadow-sm border transition-shadow hover:shadow-lg ${
+                    selected ? "ring-2 ring-red-500 border-red-300" : "border-gray-200"
+                  }`}
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                    <img src={thumb} alt={it.name} loading="lazy" decoding="async" className="w-full h-full object-cover object-top" />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 px-3 py-2.5">
+                    <span className={`truncate text-sm font-semibold ${selected ? "text-red-600" : "text-gray-800"}`}>{it.name}</span>
+                    <span className="flex shrink-0 gap-1.5 text-gray-400 text-xs">
+                      {it.desktopUrl && <FaDesktop aria-label="Desktop" />}
+                      {it.mobileUrl && <FaMobileAlt aria-label="Mobile" />}
+                    </span>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

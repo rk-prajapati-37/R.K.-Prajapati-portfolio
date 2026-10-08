@@ -41,7 +41,7 @@ type Project = {
   techStack?: string[];
   category?: string[];
   imageUrl?: string;
-  extraImages?: string[];
+  extraImages?: { _key?: string; url?: string }[];
   pages?: { _key?: string; pageName?: string; description?: string; desktopUrl?: string; mobileUrl?: string }[];
   video?: string;
   date?: string;
@@ -72,7 +72,7 @@ export default async function ProjectDetail({
         title, description, details, github, demo, techStack, category,
         clientName, date, video, clientProblem, solution, results,
         "imageUrl": image.asset->url,
-        "extraImages": extraImages[].asset->url,
+        "extraImages": extraImages[]{ _key, "url": asset->url },
         "pages": pages[]{ _key, pageName, description, "desktopUrl": desktopImage.asset->url, "mobileUrl": mobileImage.asset->url },
         socialLinks[] {
           platform,

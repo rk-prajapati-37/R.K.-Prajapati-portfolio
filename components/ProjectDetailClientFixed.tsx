@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import PortableTextClient, { toPlainText } from "./PortableTextClientFixed";
 import ProjectSocialLinks from "./ProjectSocialLinks";
@@ -23,7 +23,7 @@ type Project = {
   techStack?: string[];
   category?: string[] | string;
   imageUrl?: string;
-  extraImages?: string[];
+  extraImages?: { _key?: string; url?: string }[];
   pages?: PreviewPage[];
   video?: string;
   date?: string;
@@ -35,26 +35,8 @@ type Project = {
   results?: string;
 };
 
-type FrameType = 'mobile' | 'tablet' | 'mac' | 'laptop';
-
 export default function ProjectDetailClientFixed({ project, nextProject, prevProject, error }: { project: Project | null; nextProject?: { title: string; slug: string } | null; prevProject?: { title: string; slug: string } | null; error: string | null; }) {
   const router = useRouter();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [allImages, setAllImages] = useState<string[]>([]);
-  const [frameType, setFrameType] = useState<FrameType>('mac');
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (!selectedImage && !allImages.length) return;
-      if (e.key === "Escape") setSelectedImage(null);
-      if (e.key === "ArrowRight") goToNext();
-      if (e.key === "ArrowLeft") goToPrev();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [selectedImage, allImages]);
-
   if (error || !project) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8">
@@ -74,61 +56,6 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
       return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
     } catch {
       return dateStr;
-    }
-  };
-
-  const buildImages = () => [project?.imageUrl, ...(project?.extraImages || [])].filter(Boolean) as string[];
-
-  // Helper function to preload image and determine aspect ratio, then set frameType and selectedImage
-  const selectImage = (src: string) => {
-    const img = new Image();
-    img.onload = () => {
-      const aspectRatio = img.width / img.height;
-      let newFrameType: FrameType;
-
-      // Determine frame type based on aspect ratio
-      if (aspectRatio < 1) {
-        // Portrait: use mobile (9:16 ≈ 0.56)
-        newFrameType = 'mobile';
-      } else if (aspectRatio < 1.3) {
-        // Nearly square or slightly wider: use tablet (4:3 ≈ 1.33)
-        newFrameType = 'tablet';
-      } else if (aspectRatio < 1.8) {
-        // Landscape: use laptop/desktop (16:9 ≈ 1.78)
-        newFrameType = 'laptop';
-      } else {
-        // Very wide: use mac
-        newFrameType = 'mac';
-      }
-
-      setFrameType(newFrameType);
-      setSelectedImage(src);
-    };
-    img.onerror = () => {
-      // Fallback to mac if image fails to load
-      setFrameType('mac');
-      setSelectedImage(src);
-    };
-    img.src = src;
-  };
-
-  const openGallery = (image?: string) => {
-    const imgs = buildImages();
-    setAllImages(imgs);
-    const imageToSelect = image ?? imgs[0] ?? null;
-    if (imageToSelect) {
-      selectImage(imageToSelect);
-    }
-  };
-  const currentImageIndex = selectedImage ? allImages.indexOf(selectedImage) : -1;
-  const goToNext = () => {
-    if (currentImageIndex >= 0 && currentImageIndex < allImages.length - 1) {
-      selectImage(allImages[currentImageIndex + 1]);
-    }
-  };
-  const goToPrev = () => {
-    if (currentImageIndex > 0) {
-      selectImage(allImages[currentImageIndex - 1]);
     }
   };
 
@@ -171,10 +98,9 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
     <div className="min-h-screen bg-gradient-to-br py-12">
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-6xl mx-auto">
         {project.imageUrl && (
-          <motion.div className="relative mb-6 rounded-2xl overflow-hidden shadow-lg cursor-pointer" whileHover={{ scale: 1.02 }} onClick={() => openGallery(project.imageUrl!)}>
+          <div className="relative mb-6 rounded-2xl overflow-hidden shadow-lg">
             <img src={project.imageUrl} alt={project.title || 'Project'} className="w-full h-auto object-contain" />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition"><span className="text-white text-lg font-semibold bg-black/50 px-4 py-2 rounded">Click to view</span></div>
-          </motion.div>
+          </div>
         )}
 
         {/* Video preview inside device frames for mobile/tablet if project.video exists */}
@@ -340,23 +266,7 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
             </div>
           )}
 
-          {project.pages && project.pages.length > 0 && (
-            <SitePreview pages={project.pages} demo={project.demo} title={project.title} />
-          )}
-
-          {project.extraImages && project.extraImages.length > 0 && (
-            <div>
-              <h3 className="text-2xl font-bold mb-4">Website Layout</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {project.extraImages.map((img, i) => (
-                  <motion.div key={i} className="relative rounded-xl overflow-hidden shadow" whileHover={{ scale: 1.03 }} onClick={() => openGallery(img)}>
-                    <img src={img} alt={`Layout ${i + 1}`} className="w-full h-64 object-cover" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition bg-black/25"><button onClick={(e) => { e.stopPropagation(); openGallery(img); }} className="text-white bg-black/50 px-3 py-1 rounded">View</button></div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
+          <SitePreview pages={project.pages} extras={project.extraImages} demo={project.demo} title={project.title} />
 
           {/* Hire Me CTA */}
           <HireMeCTA text="Want a similar project?" />
@@ -390,125 +300,6 @@ export default function ProjectDetailClientFixed({ project, nextProject, prevPro
         </div>
       </motion.div>
 
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }} 
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" 
-            onClick={() => setSelectedImage(null)}
-          >
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.8, opacity: 0 }} 
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="relative max-w-5xl w-full flex flex-col items-center" 
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close button */}
-              <button 
-                onClick={() => setSelectedImage(null)} 
-                className="absolute -top-10 right-0 text-white/60 hover:text-white transition text-2xl z-10"
-                aria-label="Close gallery"
-              >
-                ✕
-              </button>
-
-              {/* Image Container with dynamic device frame based on frameType */}
-              <div ref={modalRef} className="w-full rounded-xl overflow-hidden">
-                {frameType === 'mobile' && (
-                  <div className="device-frame device-frame--mobile device-frame--mobile-image w-full">
-                    <div className="device-screen">
-                      <img
-                        src={selectedImage}
-                        alt="Gallery view"
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          console.error("Image failed to load:", selectedImage);
-                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                {frameType === 'tablet' && (
-                  <div className="device-frame device-frame--tablet device-frame--tablet-image w-full">
-                    <div className="device-screen">
-                      <img
-                        src={selectedImage}
-                        alt="Gallery view"
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          console.error("Image failed to load:", selectedImage);
-                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                {frameType === 'laptop' && (
-                  <div className="device-frame device-frame--laptop device-frame--laptop-image w-full">
-                    <div className="device-screen">
-                      <img
-                        src={selectedImage}
-                        alt="Gallery view"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.error("Image failed to load:", selectedImage);
-                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                {frameType === 'mac' && (
-                  <div className="device-frame device-frame--mac device-frame--mac-image w-full">
-                    <div className="device-screen">
-                      <img
-                        src={selectedImage}
-                        alt="Gallery view"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.error("Image failed to load:", selectedImage);
-                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='20' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EImage not found%3C/text%3E%3C/svg%3E";
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Controls */}
-              <div className="mt-4 flex items-center justify-between text-white w-full px-2">
-                <div className="text-sm font-medium">{currentImageIndex + 1} / {allImages.length}</div>
-                <div className="flex gap-2 items-center">
-                  <button 
-                    onClick={goToPrev} 
-                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg disabled:opacity-30 transition text-sm font-medium"
-                    disabled={currentImageIndex <= 0}
-                  >
-                    ← Prev
-                  </button>
-                  <button 
-                    onClick={goToNext} 
-                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg disabled:opacity-30 transition text-sm font-medium"
-                    disabled={currentImageIndex >= allImages.length - 1}
-                  >
-                    Next →
-                  </button>
-                </div>
-              </div>
-
-              {/* Keyboard hint */}
-              <div className="mt-3 text-xs text-white/40 text-center">
-                Use arrow keys to navigate • ESC to close
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
     }
